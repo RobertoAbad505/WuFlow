@@ -12,10 +12,12 @@ import SwiftData
 struct WuFlowApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Activity.self,
+            ProgressRecord.self
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false)
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
@@ -25,7 +27,7 @@ struct WuFlowApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ActivityListView()                
         }
         .modelContainer(sharedModelContainer)
     }

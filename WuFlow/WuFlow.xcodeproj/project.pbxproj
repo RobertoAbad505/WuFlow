@@ -29,9 +29,25 @@
 		6F7121232F75BBA3001CEF33 /* WuFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WuFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6FED74BE2F7C365D008C5A58 /* Exceptions for "WuFlow" folder in "WuFlowTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Domain/Models/Activity.swift,
+				Domain/Models/ProgressRecord.swift,
+				Domain/Models/TrackingType.swift,
+				Domain/Models/UnitType.swift,
+			);
+			target = 6F7121182F75BBA3001CEF33 /* WuFlowTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6F71210C2F75BBA1001CEF33 /* WuFlow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6FED74BE2F7C365D008C5A58 /* Exceptions for "WuFlow" folder in "WuFlowTests" target */,
+			);
 			path = WuFlow;
 			sourceTree = "<group>";
 		};
