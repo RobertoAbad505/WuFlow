@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Charts
 
 struct ActivityDetailView: View {
     
@@ -151,6 +152,13 @@ struct ActivityDetailView: View {
             Divider()
             Text("Progress records")
                 .font(.headline)
+            filterSelection
+            chartProgressView
+            progressRecordsView
+        }
+    }
+    var filterSelection: some View {
+        VStack {
             Text("Quick filters:")
                 .font(.subheadline)
             Picker("Filter", selection: $selectedFilter) {
@@ -159,13 +167,17 @@ struct ActivityDetailView: View {
                 }
             }
             .pickerStyle(.segmented)
+        }
+    }
+    var progressRecordsView: some View {
+        VStack{
             Text("Filtered count: \(filteredRecords.count)")
             LazyVStack(alignment: .leading, spacing: 10) {
                 ForEach(filteredRecords) { record in
                     HStack {
-                        Text("+\(record.value, specifier: "%.0f")")
+                        Text("+\(record.value, specifier: "%.0f") \(self.activity.unitType.rawValue)")
                         Spacer()
-                        Text(record.date, format: .dateTime.day().month())
+                        Text(record.date, format: .dateTime.day().month().year())
                     }
                     .padding()
                     .background(Color.gray.opacity(0.1))
@@ -174,7 +186,29 @@ struct ActivityDetailView: View {
             }
         }
     }
-
+    var chartProgressView: some View {
+        VStack {
+            Divider()
+            Text("Progress Chart")
+                .font(.headline)
+            Chart(chartData) { item in
+                BarMark(
+                    x: .value("Day", item.date, unit: .day),
+                    y: .value("Progress", item.total)
+                )
+                .foregroundStyle(.blue)
+                .annotation(position: .top) {
+                    Text("\(item.total, specifier: "%.0f")")
+                        .font(.caption)
+                }
+            }
+            .chartYAxis {
+                AxisMarks(position: .leading)
+            }
+            .animation(.easeInOut, value: chartData)
+            .frame(height: 300)
+        }
+    }
     func title(for filter: TimeFilter) -> String {
         switch filter {
         case .all: return "All"

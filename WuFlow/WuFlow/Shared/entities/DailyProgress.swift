@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct DailyProgress: Identifiable {
-    let id = UUID()
+struct DailyProgress: Identifiable, Equatable {
+    var id: Date { date }
     let date: Date
     let total: Double
 }
