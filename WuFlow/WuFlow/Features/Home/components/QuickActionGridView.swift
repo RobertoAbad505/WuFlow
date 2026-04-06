@@ -10,6 +10,7 @@ import SwiftUI
 struct QuickActionGridView: View {
     
     let actions: [QuickAction]
+    let onActionTap: (AppRoute) -> Void
     
     private let columns = [
         GridItem(.flexible()),
@@ -22,7 +23,13 @@ struct QuickActionGridView: View {
                 .font(.headline)
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(actions) { action in
-                    QuickActionCardView(action: action)
+                    Button {
+                        onActionTap(action.route)
+                    } label: {
+                        QuickActionCardView(action: action)
+                    }
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 16))
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
         }
@@ -31,9 +38,11 @@ struct QuickActionGridView: View {
 
 #Preview {
     QuickActionGridView(actions: [
-        .init(title: "Test", systemImage: "star", action: {} ),
-        .init(title: "Test", systemImage: "star", action: {} ),
-        .init(title: "Test", systemImage: "star", action: {} ),
-        .init(title: "Test", systemImage: "star", action: {} )
-    ])
+        .init(title: "Test", systemImage: "star", route: AppRoute.addActivity),
+        .init(title: "Test", systemImage: "star", route: AppRoute.addActivity),
+        .init(title: "Test", systemImage: "star", route: AppRoute.addActivity),
+        .init(title: "Test", systemImage: "star", route: AppRoute.addActivity)
+    ], onActionTap: { _ in
+        
+    })
 }

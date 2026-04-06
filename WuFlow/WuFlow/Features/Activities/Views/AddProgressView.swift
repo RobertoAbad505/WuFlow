@@ -9,16 +9,14 @@ import SwiftUI
 import SwiftData
 
 struct AddActivityProgressView: View {
-    
+    @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var context
     
     let activity: Activity
     @State var newProgresValue: Double = 0
-    var onDismiss: (() -> Void)
     
-    init(activity: Activity, onDismiss: @escaping (() -> Void)) {
+    init(activity: Activity) {
         self.activity = activity
-        self.onDismiss = onDismiss
     }
     
     var body: some View {
@@ -58,7 +56,7 @@ struct AddActivityProgressView: View {
             print("❌❌❌ Error at saving progress!")
             print(error.localizedDescription)
         }
-        onDismiss()
+        dismiss()
     }
     
     func getLabel() -> String {
@@ -83,8 +81,7 @@ struct AddActivityProgressView: View {
             name: "Meditation",
             unitType: .sessions,
             goalValue: 3,
-            trackingType: .manual),
-        onDismiss: {})
+            trackingType: .manual))
         .modelContainer(for: Activity.self, inMemory: true)
         .modelContainer(for: ProgressRecord.self, inMemory: true)
 }

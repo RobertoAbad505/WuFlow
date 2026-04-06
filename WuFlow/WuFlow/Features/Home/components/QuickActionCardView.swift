@@ -11,30 +11,25 @@ struct QuickActionCardView: View {
     let action: QuickAction
     
     var body: some View {
-        Button(action: action.action) {
-            VStack(spacing: 10) {
-                
-                Image(systemName: action.systemImage)
-                    .font(.title2)
-                    .padding(10)
-                    .background(Color.blue.opacity(0.1))
-                    .clipShape(Circle())
-                
-                Text(action.title)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.primary)
-            }
-            .frame(maxWidth: .infinity, minHeight: 80)
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(14)
+        VStack(spacing: 10) {
+            Image(systemName: action.systemImage)
+                .font(.title3)
+                .foregroundStyle(.primary)
+                .padding(10)
+                .background(Color.white.opacity(0.2))
+                .clipShape(Circle())
+            
+            Text(action.title)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.primary)
         }
-        
+        .frame(maxWidth: .infinity, minHeight: 80)
+        .padding()
     }
 }
 
 #Preview {
-    QuickActionCardView(action: .init(title: "Test", systemImage: "star", action: {} ))
+    QuickActionCardView(action: .init(title: "Test", systemImage: "star", route: .activityList))
 }

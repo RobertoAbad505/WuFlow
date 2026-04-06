@@ -10,7 +10,7 @@ import SwiftUI
 struct PinnedActivitiesView: View {
     
     let activities: [Activity]
-//    let progressMap: [UUID: Double]
+    let onActivityTap: (Activity) -> Void
     
     private let columns = [
         GridItem(.flexible()),
@@ -20,9 +20,6 @@ struct PinnedActivitiesView: View {
         Dictionary(uniqueKeysWithValues: activities.map {
             ($0.id, todayProgress(for: $0))
         })
-    }
-    init(activities: [Activity]) {
-        self.activities = activities
     }
     
     var body: some View {
@@ -35,7 +32,8 @@ struct PinnedActivitiesView: View {
                 ForEach(getFeaturedActivities(activities)) { activity in
                     ActivityProgressCardView(
                         activity: activity,
-                        progress: progressMap[activity.id] ?? 0
+                        progress: progressMap[activity.id] ?? 0,
+                        onTap: onActivityTap
                     )
                 }
             }

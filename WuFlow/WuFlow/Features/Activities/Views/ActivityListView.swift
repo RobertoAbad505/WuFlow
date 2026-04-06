@@ -14,21 +14,22 @@ struct ActivityListView: View {
 
     @State var toggleCreateActivity: Bool = false
     var body: some View {
-        NavigationSplitView {
+        VStack {
             List {
+                Text("All my activities")
+                    .font(Font.title.weight(.bold))
                 ForEach(items) { item in
                     NavigationLink(value: item) {
+                        Image(systemName: item.iconName)
+                            .font(.system(size: 32))
                         Text(item.name)
+                            .font(.system(size: 14))
                     }
                 }
                 .onDelete(perform: deleteItems)
             }
             .sheet(isPresented: $toggleCreateActivity, content: {
-                CreateActivityView(onDismiss: {
-                    withAnimation {
-                        self.toggleCreateActivity = false
-                    }
-                })
+                CreateActivityView()
             })
             .navigationDestination(for: Activity.self) { selectedItem in
                 ActivityDetailView(activity: selectedItem)
@@ -63,13 +64,11 @@ struct ActivityListView: View {
                 }
                 
             }
-        } detail: {
-            Text("Select an item")
         }
         .onAppear {
-            
+            print("Navigated to ActivityListView")
+            print("\(items.count) actividades encontradas")
         }
-        
     }
     
 
@@ -91,7 +90,7 @@ struct ActivityListView: View {
 
 #Preview {
     ActivityListView()
-        .modelContainer(for: Activity.self, inMemory: true)
+        .modelContainer(for: Activity.self, inMemory: false)
 }
 
 

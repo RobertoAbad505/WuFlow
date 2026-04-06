@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct CreateActivityView: View {
-    
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
     
@@ -18,7 +18,7 @@ struct CreateActivityView: View {
     @State private var newUnitType: UnitType = .count
     @State private var newGoalValue: Double = 0
     @State private var newTrackingType: TrackingType = .manual
-    var onDismiss: (() -> Void)
+    
     
     var body: some View {
         VStack(alignment: .center, spacing: 25) {
@@ -54,7 +54,7 @@ struct CreateActivityView: View {
             
             Button("Create") {
                 addItem()
-                onDismiss()
+                dismiss()
             }
             .padding(.top, 50)
         }
@@ -73,6 +73,6 @@ struct CreateActivityView: View {
 }
 
 #Preview {
-    CreateActivityView(onDismiss: {})
+    CreateActivityView()
         .modelContainer(for: Activity.self, inMemory: true)
 }

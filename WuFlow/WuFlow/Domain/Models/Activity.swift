@@ -25,6 +25,7 @@ final class Activity {
     var createdAt: Date
     
     var isPinned: Bool = false
+    var iconName: String = "circle.dotted"
     
     // Relationship
     @Relationship(deleteRule: .cascade)

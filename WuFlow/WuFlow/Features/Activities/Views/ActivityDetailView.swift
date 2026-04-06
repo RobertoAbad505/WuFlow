@@ -84,21 +84,10 @@ struct ActivityDetailView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 30){
-            Text(activity.name + " \nDetails")
-                .font(.title)
             scrollView
         }
-        .padding()
-        .padding(.horizontal, 25)
         .sheet(isPresented: $presentAddProgress, content: {
-            AddActivityProgressView(
-                activity: self.activity,
-                onDismiss: {
-                    print("Records count:After save", records.count)
-                    withAnimation {
-                        presentAddProgress = false
-                    }
-            })
+            AddActivityProgressView(activity: self.activity)
         })
         .onAppear {
             print("Records count: OnAppear", records.count)
@@ -106,55 +95,67 @@ struct ActivityDetailView: View {
     }
     var scrollView: some View {
         ScrollView(.vertical) {
-            HStack {
-                Text("Unit type: \n\(activity.unitType.rawValue)")
-                    .font(.title)
-                Spacer()
-                Text("Goal:\n\(numberFormat.string(from: NSNumber(value: activity.goalValue))!)")
-                    .font(.title)
-            }
-            VStack(alignment: .center, spacing: 10) {
-                Text("Today: \(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
-                Text(goalMessage)
-                    .font(.headline)
-                    .foregroundColor(.green)
-            }
-            HStack {
-                Text("Tracking type:\n\(activity.trackingType.rawValue)")
-                    .font(.title)
-                Spacer()
-                Text("Created at \n\n\(activity.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    .font(.title)
-            }
-            HStack {
-                Spacer()
-                Text("Records:\n\(activity.progressRecords.count)")
-                    .font(.title)
-                Spacer()
-            }
-            Button(action: {
-                presentAddProgress.toggle()
-            }, label: {
-                VStack {
-                    Text("➕")
-                    Text("Add progress!")
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Image(systemName: activity.iconName)
+                        .font(.system(size: 32))
+                    Text(activity.name + " details")
+                        .font(.title)
+                        .multilineTextAlignment(.leading)
+                    Spacer()
                 }
-                .padding(10)
-                .background(.green)
-                .buttonBorderShape(.roundedRectangle)
-            })
-            Divider()
-            Text("Today's activity")
-            HStack {
-                Text("\(activity.goalValue, specifier: "%.0f")")
-                Text("\(activity.unitType.rawValue)")
+                .padding(.bottom)
+                HStack {
+                    Text("Unit type: \n\(activity.unitType.rawValue)")
+                    Spacer()
+                    Text("Goal:\n\(numberFormat.string(from: NSNumber(value: activity.goalValue))!)")
+                }
+                
+                VStack(alignment: .center, spacing: 10) {
+                    Text("Today: \(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
+                    Text(goalMessage)
+                        .font(.headline)
+                        .foregroundColor(.green)
+                }
+                HStack {
+                    Text("Tracking type:\n\(activity.trackingType.rawValue)")
+                        .font(.title)
+                    Spacer()
+                    Text("Created at \n\n\(activity.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))")
+                        .font(.title)
+                }
+                HStack {
+                    Spacer()
+                    Text("Records:\n\(activity.progressRecords.count)")
+                        .font(.title)
+                    Spacer()
+                }
+                Button(action: {
+                    presentAddProgress.toggle()
+                }, label: {
+                    VStack {
+                        Text("➕")
+                        Text("Add progress!")
+                    }
+                    .padding(10)
+                    .background(.green)
+                    .buttonBorderShape(.roundedRectangle)
+                })
+                Divider()
+                Text("Today's activity")
+                HStack {
+                    Text("\(activity.goalValue, specifier: "%.0f")")
+                    Text("\(activity.unitType.rawValue)")
+                }
+                Divider()
+                Text("Progress records")
+                    .font(.headline)
+                filterSelection
+                chartProgressView
+                progressRecordsView
             }
-            Divider()
-            Text("Progress records")
-                .font(.headline)
-            filterSelection
-            chartProgressView
-            progressRecordsView
+            .padding()
+            .padding(.horizontal, 25)
         }
     }
     var filterSelection: some View {

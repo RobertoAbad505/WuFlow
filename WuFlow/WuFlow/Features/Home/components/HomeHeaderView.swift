@@ -18,14 +18,15 @@ struct HomeHeaderView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(HomeHeaderView.currentGreeting()),")
-                    .font(.headline)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
                 
                 Text(userName)
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                Text("Let’s keep your flow today")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
             }
             
             Spacer()
@@ -57,11 +58,11 @@ private extension HomeHeaderView {
         
         switch hour {
         case 5..<12:
-            return "Good morning"
+            return "Good morning🌅"
         case 12..<18:
-            return "Good afternoon"
+            return "Good afternoon☀️"
         default:
-            return "Good evening"
+            return "Good evening🌃"
         }
     }
 }

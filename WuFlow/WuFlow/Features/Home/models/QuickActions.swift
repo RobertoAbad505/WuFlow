@@ -10,5 +10,5 @@ struct QuickAction: Identifiable {
     let id = UUID()
     let title: String
     let systemImage: String
-    let action: () -> Void
+    let route: AppRoute
 }
