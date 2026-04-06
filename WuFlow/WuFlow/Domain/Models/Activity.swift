@@ -24,6 +24,8 @@ final class Activity {
     
     var createdAt: Date
     
+    var isPinned: Bool = false
+    
     // Relationship
     @Relationship(deleteRule: .cascade)
     var progressRecords: [ProgressRecord] = []

@@ -27,7 +27,7 @@ struct WuFlowApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ActivityListView()                
+            HomeView()                
         }
         .modelContainer(sharedModelContainer)
     }
