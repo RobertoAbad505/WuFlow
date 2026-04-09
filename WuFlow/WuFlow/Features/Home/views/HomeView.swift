@@ -11,6 +11,7 @@ import SwiftData
 struct HomeView: View {
     @Query private var activities: [Activity]
     
+    @State private var isPresentedAddProgress: Bool = false
     @State private var path = NavigationPath()
     
     var body: some View {
@@ -18,7 +19,9 @@ struct HomeView: View {
             ZStack {
                 Image("plantBackground")
                     .resizable()
-                    .ignoresSafeArea() // 🔥 fills entire screen
+                    .ignoresSafeArea()
+                    .blur(radius: 1)
+                // 🔥 fills entire screen
                 
                 // Content layer
                 content
@@ -27,30 +30,26 @@ struct HomeView: View {
                 switch route {
                 case .activityList:
                     ActivityListView()
-                    
                 case .activityDetail(let activity):
                     ActivityDetailView(activity: activity)
-                    
                 case .addActivity:
                     CreateActivityView()
-                    
                 case .addProgress(let activity):
                     AddActivityProgressView(activity: activity)
-                    
                 case .insights:
                     ActivityListView()
                 }
+            }
+            .sheet(isPresented: $isPresentedAddProgress) {
+                AddActivityProgressView()
             }
         }
     }
     var content: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
-                
                 HomeHeaderView()
-                
                 quickGridView
-                
                 PinnedActivitiesView(activities: activities) {
                     path.append(AppRoute.activityDetail($0))
                 }
@@ -71,14 +70,12 @@ struct HomeView: View {
     }
     func getActions() -> [QuickAction] {
         var actionsList = [QuickAction]()
-        if let first = activities.first {
-            actionsList.append(QuickAction(
+        actionsList.append(contentsOf: [
+            QuickAction(
                 title: "Add Progress",
                 systemImage: "plus.circle",
-                route: .addProgress(first)
-            ))
-        }
-        actionsList.append(contentsOf: [
+                route: .addProgress(nil)
+            ),
             QuickAction(
                 title: "New Activity",
                 systemImage: "square.and.pencil",

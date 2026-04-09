@@ -74,5 +74,5 @@ struct CreateActivityView: View {
 
 #Preview {
     CreateActivityView()
-        .modelContainer(for: Activity.self, inMemory: true)
+        .modelContainer(for: Activity.self, inMemory: false)
 }

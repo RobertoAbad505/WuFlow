@@ -11,7 +11,7 @@ struct HomeHeaderView: View {
     
     let userName: String = "Roberto"
     let greeting: String = "Good morning"
-    let imageName: String? = nil // optional for flexibility
+    let imageName: String? = "selfie" // optional for flexibility
     
     var body: some View {
         HStack(alignment: .center) {
@@ -44,12 +44,12 @@ private extension HomeHeaderView {
             Image(imageName)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 50, height: 50)
+                .frame(width: 100, height: 100)
                 .clipShape(Circle())
         } else {
             Image(systemName: "person.crop.circle.fill")
                 .resizable()
-                .frame(width: 50, height: 50)
+                .frame(width: 100, height: 100)
                 .foregroundStyle(.gray)
         }
     }

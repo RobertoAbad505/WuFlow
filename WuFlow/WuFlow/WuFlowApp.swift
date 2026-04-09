@@ -13,7 +13,7 @@ struct WuFlowApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Activity.self,
-            ProgressRecord.self
+            ProgressRecord.self 
         ])
         let modelConfiguration = ModelConfiguration(
             schema: schema,
@@ -27,7 +27,8 @@ struct WuFlowApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()                
+            HomeView()
+                .preferredColorScheme(.light)
         }
         .modelContainer(sharedModelContainer)
     }
