@@ -13,6 +13,8 @@ struct QuickActionCardView: View {
     var body: some View {
         VStack(spacing: 10) {
             Image(systemName: action.systemImage)
+                .symbolEffect(.bounce)
+                .symbolColorRenderingMode(.gradient)                
                 .font(.title3)
                 .foregroundStyle(.primary)
                 .padding(10)
@@ -31,5 +33,5 @@ struct QuickActionCardView: View {
 }
 
 #Preview {
-    QuickActionCardView(action: .init(title: "Test", systemImage: "star", route: .activityList))
+    QuickActionCardView(action: .init(title: "Test", systemImage: "circle.dotted.circle.fill", route: .activityList))
 }

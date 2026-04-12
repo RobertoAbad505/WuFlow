@@ -24,7 +24,8 @@ struct ActivityProgressCardView: View {
                 HStack {
                     VStack {
                         Image(systemName: activity.iconName)
-                            .font(.title3)
+                            .symbolEffect(.rotate)
+                            .font(.system(size: 30))
                             .foregroundStyle(.primary)
                             .padding(10)
                             .background(Color.white.opacity(0.2))

@@ -19,6 +19,8 @@ struct AddActivityProgressView: View {
     @State private var value: Double = 0
     @State private var providedActivity: Bool = false
     
+    private let entryFromSelectedActivity: Bool
+    
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
@@ -40,15 +42,17 @@ struct AddActivityProgressView: View {
         if let activity {
             _step = State(initialValue: .inputValue)
             _selectedActivity = State(initialValue: activity)
+            entryFromSelectedActivity = true
         } else {
             _step = State(initialValue: .selectActivity)
+            entryFromSelectedActivity = false
         }
     }
     
     var body: some View {
         VStack {
             ZStack {
-                AnimatedBackgroundView()
+                AnimatedBackgroundView(style: .wuFlow)
                     .ignoresSafeArea()
                 VStack {
                     switch step {
@@ -109,11 +113,13 @@ struct AddActivityProgressView: View {
                             
             HStack {
                 //RETURN ACTIVITY PICK
-                Button("Select activity") {
-                    self.step = .selectActivity
+                if !entryFromSelectedActivity {
+                    Button("Select activity") {
+                        self.step = .selectActivity
+                    }
+                    .padding(15)
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 26))
                 }
-                .padding(15)
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 26))
                 
                 // Save
                 Button("Save") {
@@ -204,12 +210,12 @@ struct FloatingBlob: View {
 }
 #Preview {
     AddActivityProgressView(
-//        activity: Activity(
-//            name: "Meditation",
-//            unitType: .sessions,
-//            goalValue: 3,
-//            trackingType: .manual)
-        activity: nil
+        activity: Activity(
+            name: "Meditation",
+            unitType: .sessions,
+            goalValue: 3,
+            trackingType: .manual)
+//        activity: nil
     )
     .modelContainer(for: Activity.self, inMemory: false)
     .modelContainer(for: ProgressRecord.self, inMemory: false)

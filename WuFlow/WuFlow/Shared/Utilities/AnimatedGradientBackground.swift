@@ -9,49 +9,28 @@ import SwiftUI
 
 struct AnimatedBackgroundView: View {
     
-    let gradientA: [Color] = [
-        Color.blue.opacity(0.35),
-        Color.green.opacity(0.31),
-        Color.white
-    ]
-    let gradientB: [Color] = [
-        Color.green.opacity(0.35),
-        Color.blue.opacity(0.31),
-        Color.white
-    ]
-    let blobs: [BlobConfig] = [
-        BlobConfig(
-            color: Color.white.opacity(1),
-            size: 250,
-            initialOffset: CGSize(width: -120, height: 150),
-            finalOffset: CGSize(width: 120, height: -150),
-            animationDuration: 12
-        ),
-        BlobConfig(
-            color: Color.purple.opacity(0.5),
-            size: 300,
-            initialOffset: CGSize(width: 150, height: -200),
-            finalOffset: CGSize(width: -100, height: 200),
-            animationDuration: 14
-        )
-    ]
+    let style: BackgroundStyle
+    
+    private var config: BackgroundConfig {
+        BackgroundConfig.config(for: style)
+    }
     
     var body: some View {
-        ZStack {
-            
-            // Gradient layer
+        ZStack {            
             AnimatedGradientView(
-                colorsA: gradientA,
-                colorsB: gradientB
+                colorsA: config.gradientA,
+                colorsB: config.gradientB
             )
             
-            // Blob layers
-            ForEach(blobs) { blob in
+            ForEach(config.blobs) { blob in
                 FloatingBlobView(config: blob)
             }
         }
+        .animation(.easeInOut(duration: 0.8), value: style) // 🔥 transition
     }
+    
 }
+
 struct AnimatedGradientView: View {
     
     let colorsA: [Color]
@@ -102,6 +81,6 @@ struct FloatingBlobView: View {
 
 #Preview {
     VStack {
-        
+        AnimatedBackgroundView(style: .wuFlow)
     }
 }

@@ -23,7 +23,7 @@ struct ActivityDetailView: View {
         formatter.numberStyle = .decimal
         return formatter
     }
-    var goalMessage: String {
+    var goalFeedback: String {
         switch goalStatus {
         case .inProgress:
             return "Keep going — you're making progress."
@@ -67,6 +67,9 @@ struct ActivityDetailView: View {
     var chartData: [DailyProgress] {
         ProgressAnalytics.makeChartData(from: groupedData)
     }
+    var progressRatio: Double {
+        min(todayProgress / activity.goalValue, 1.0)
+    }
     
     init(activity: Activity) {
         self.activity = activity
@@ -81,10 +84,13 @@ struct ActivityDetailView: View {
             order: .reverse
         )
     }
-    
     var body: some View {
         VStack(alignment: .center, spacing: 30){
-            scrollView
+            ZStack {
+                AnimatedBackgroundView(style: .focus)
+                    .ignoresSafeArea()
+                scrollView
+            }
         }
         .sheet(isPresented: $presentAddProgress, content: {
             AddActivityProgressView(activity: self.activity)
@@ -93,60 +99,14 @@ struct ActivityDetailView: View {
             print("Records count: OnAppear", records.count)
         }
     }
+    
+    
     var scrollView: some View {
         ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Image(systemName: activity.iconName)
-                        .font(.system(size: 32))
-                    Text(activity.name + " details")
-                        .font(.title)
-                        .multilineTextAlignment(.leading)
-                    Spacer()
-                }
-                .padding(.bottom)
-                HStack {
-                    Text("Unit type: \n\(activity.unitType.rawValue)")
-                    Spacer()
-                    Text("Goal:\n\(numberFormat.string(from: NSNumber(value: activity.goalValue))!)")
-                }
-                
-                VStack(alignment: .center, spacing: 10) {
-                    Text("Today: \(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
-                    Text(goalMessage)
-                        .font(.headline)
-                        .foregroundColor(.green)
-                }
-                HStack {
-                    Text("Tracking type:\n\(activity.trackingType.rawValue)")
-                        .font(.title)
-                    Spacer()
-                    Text("Created at \n\n\(activity.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                        .font(.title)
-                }
-                HStack {
-                    Spacer()
-                    Text("Records:\n\(activity.progressRecords.count)")
-                        .font(.title)
-                    Spacer()
-                }
-                Button(action: {
-                    presentAddProgress.toggle()
-                }, label: {
-                    VStack {
-                        Text("➕")
-                        Text("Add progress!")
-                    }
-                    .padding(10)
-                    .background(.green)
-                    .buttonBorderShape(.roundedRectangle)
-                })
-                Divider()
-                Text("Today's activity")
-                HStack {
-                    Text("\(activity.goalValue, specifier: "%.0f")")
-                    Text("\(activity.unitType.rawValue)")
-                }
+            VStack(alignment: .leading, spacing: 15) {
+                headerSection
+                infoData
+                addProgressSection
                 Divider()
                 Text("Progress records")
                     .font(.headline)
@@ -155,43 +115,90 @@ struct ActivityDetailView: View {
                 progressRecordsView
             }
             .padding()
-            .padding(.horizontal, 25)
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
+            .padding()
+        }
+    }
+    var headerSection: some View {
+        VStack(spacing: 12) {
+            HStack(alignment: .center, spacing: 25) {
+                Image(systemName: activity.iconName)
+                    .symbolEffect(.rotate)
+                    .font(.system(size: 70).bold())
+                VStack {
+                    Text(activity.name + " details")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                    Text("\(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
+                        .font(.headline)
+                }
+            }
+            Text(goalFeedback)
+                .font(.subheadline)
+                .foregroundColor(.green)
+            ProgressView(value: progressRatio)
+                .tint(colorForActivity())
+        }
+        .padding()
+        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
+    }
+    var infoData: some View {
+        HStack {
+            VStack(alignment: .center, spacing: 10) {
+                Text("Unit: \(activity.unitType.rawValue)")
+                Divider()
+                Text("Tracking : \(activity.trackingType.rawValue)")
+            }
+            .padding()
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
+            Spacer()
+            VStack {
+                Text("Goal: \(numberFormat.string(from: NSNumber(value: activity.goalValue))!)")
+                Divider()
+                Text("Created: \(activity.createdAt, format: .dateTime.month().year())")
+            }
+            .padding()
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
+        }
+        .font(.system(size: 14))
+    }
+    var addProgressSection: some View {
+        VStack(alignment: .center) {
+            HStack {
+                Spacer()
+                Button(action: {
+                    presentAddProgress.toggle()
+                }, label: {
+                    HStack {
+                        Image(systemName: "plus.circle")
+                            .font(Font.system(size: 20))
+                        Text("Add new progress!")
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 20)
+                    .background(Color.green)
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color.white)
+                })
+                .clipShape(RoundedRectangle(cornerRadius: 25))
+                Spacer()
+            }
         }
     }
     var filterSelection: some View {
         VStack {
-            Text("Quick filters:")
-                .font(.subheadline)
-            Picker("Filter", selection: $selectedFilter) {
-                ForEach(TimeFilter.allCases, id: \.self) { filter in
-                    Text(title(for: filter)).tag(filter)
-                }
-            }
-            .pickerStyle(.segmented)
-        }
-    }
-    var progressRecordsView: some View {
-        VStack{
-            Text("Filtered count: \(filteredRecords.count)")
-            LazyVStack(alignment: .leading, spacing: 10) {
-                ForEach(filteredRecords) { record in
-                    HStack {
-                        Text("+\(record.value, specifier: "%.0f") \(self.activity.unitType.rawValue)")
-                        Spacer()
-                        Text(record.date, format: .dateTime.day().month().year())
+            HStack {
+                Picker("Filter", selection: $selectedFilter) {
+                    ForEach(TimeFilter.allCases, id: \.self) { filter in
+                        Text(title(for: filter)).tag(filter)
                     }
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(8)
                 }
+                .pickerStyle(.segmented)
             }
         }
     }
     var chartProgressView: some View {
         VStack {
-            Divider()
-            Text("Progress Chart")
-                .font(.headline)
             Chart(chartData) { item in
                 BarMark(
                     x: .value("Day", item.date, unit: .day),
@@ -210,6 +217,25 @@ struct ActivityDetailView: View {
             .frame(height: 300)
         }
     }
+    var progressRecordsView: some View {
+        VStack{
+            LazyVStack(alignment: .leading, spacing: 10) {
+                ForEach(filteredRecords) { record in
+                    HStack {
+                        Text("+\(record.value, specifier: "%.0f") \(self.activity.unitType.rawValue)")
+                        Spacer()
+                        Text(record.date, format: .dateTime.day().month().year())
+                    }
+                    .padding()
+                    .glassEffect()
+                }
+            }
+            if filteredRecords.count > 0 {
+                Text("Filtered count: \(filteredRecords.count)")
+                    .font(Font.body.bold())
+            }
+        }
+    }
     func title(for filter: TimeFilter) -> String {
         switch filter {
         case .all: return "All"
@@ -221,6 +247,11 @@ struct ActivityDetailView: View {
         case .lastMonth: return "Last Month"
         }
     }
+    func colorForActivity() -> Color {
+        // simple variation
+        let colors: [Color] = [.blue, .green, .orange, .purple, .pink]
+        return colors[abs(activity.name.hashValue) % colors.count]
+    }
 }
 
 #Preview {
@@ -228,4 +259,6 @@ struct ActivityDetailView: View {
                                           unitType: .sessions,
                                           goalValue: 3,
                                           trackingType: .manual))
+    .modelContainer(for: Activity.self, inMemory: false)
+    .modelContainer(for: ProgressRecord.self, inMemory: false)
 }
