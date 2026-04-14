@@ -14,7 +14,7 @@ struct QuickActionCardView: View {
         VStack(spacing: 10) {
             Image(systemName: action.systemImage)
                 .symbolEffect(.bounce)
-                .symbolColorRenderingMode(.gradient)                
+                .symbolColorRenderingMode(.gradient)
                 .font(.title3)
                 .foregroundStyle(.primary)
                 .padding(10)

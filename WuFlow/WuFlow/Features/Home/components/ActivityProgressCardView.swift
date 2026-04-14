@@ -26,10 +26,7 @@ struct ActivityProgressCardView: View {
                         Image(systemName: activity.iconName)
                             .symbolEffect(.rotate)
                             .font(.system(size: 30))
-                            .foregroundStyle(.primary)
-                            .padding(10)
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(Circle())
+                            .foregroundStyle(.primary)                            
                     }
                     VStack{
                         Text(activity.name)

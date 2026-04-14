@@ -103,7 +103,7 @@ struct ActivityDetailView: View {
     
     var scrollView: some View {
         ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 15) {
+            VStack(alignment: .leading, spacing: 20) {
                 headerSection
                 infoData
                 addProgressSection

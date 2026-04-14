@@ -13,20 +13,16 @@ struct ActivityListView: View {
     @Query private var items: [Activity]
 
     @State var toggleCreateActivity: Bool = false
+    private let columns = [
+        GridItem(.flexible())
+//        GridItem(.flexible())
+    ]
     var body: some View {
         VStack {
-            List {
-                Text("All my activities")
-                    .font(Font.title.weight(.bold))
-                ForEach(items) { item in
-                    NavigationLink(value: item) {
-                        Image(systemName: item.iconName)
-                            .font(.system(size: 32))
-                        Text(item.name)
-                            .font(.system(size: 14))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+            ZStack {
+                AnimatedBackgroundView(style: .wuFlow)
+                    .ignoresSafeArea()
+                content
             }
             .sheet(isPresented: $toggleCreateActivity, content: {
                 CreateActivityView()
@@ -39,38 +35,50 @@ struct ActivityListView: View {
 #endif
             .toolbar {
 #if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    EditButton()
+//                }
 #endif
                 ToolbarItem {
                     Button(action: addItem) {
                         Label("Add Item", systemImage: "plus")
                     }
                 }
-                ToolbarItem {
-                    Button(action: {
-                        DebugDataSeeder.seedSampleData(context: self.modelContext)
-                    }) {
-                        Label("Add Item", systemImage: "person.crop.circle.badge.plus")
-                    }
-                }
-                ToolbarItem {
-                    Button(action: {
-                        DebugDataSeeder().deleteAllData()
-                    }) {
-                        Label("Add Item", systemImage: "trash")
-                    }
-                }
-                
             }
         }
-        .onAppear {
-            print("Navigated to ActivityListView")
-            print("\(items.count) actividades encontradas")
+    }
+    private var content: some View {
+        ScrollView {
+            VStack {
+                HStack {
+                    Text("All my activities")
+                        .font(Font.title.weight(.bold))
+                    Spacer()
+                    Button(action: addItem) {
+                        Image(systemName: "plus")
+                    }
+                }
+                LazyVGrid(columns: columns, spacing: 36) {
+                    ForEach(items) { item in
+                        NavigationLink(value: item) {
+                            VStack(alignment: .center) {
+                                Image(systemName: item.iconName)
+                                    .font(.system(size: 32))
+                                Text(item.name)
+                                    .font(.system(size: 14))
+                            }
+                            .frame(minWidth: 150, minHeight: 40)
+                            .padding(50)
+                            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 20))
+                            .shadow(color: .black.opacity(0.5), radius: 15, x: 8, y: 15)
+                        }
+                    }
+                    .onDelete(perform: deleteItems)
+                }
+            }
+            .padding()
         }
     }
-    
 
     private func addItem() {
         withAnimation {
