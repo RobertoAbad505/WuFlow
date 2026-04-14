@@ -21,9 +21,6 @@ struct HomeView: View {
                     .resizable()
                     .ignoresSafeArea()
                     .blur(radius: 1)
-                // 🔥 fills entire screen
-                
-                // Content layer
                 content
             }
             .navigationDestination(for: AppRoute.self) { route in
@@ -96,7 +93,11 @@ struct HomeView: View {
         return actionsList
     }
 }
-
+struct InsightsView: View {
+    var body: some View {
+        Text("Insights coming soon")
+    }
+}
 #Preview {
     HomeView()
         .modelContainer(for: Activity.self, inMemory: false)

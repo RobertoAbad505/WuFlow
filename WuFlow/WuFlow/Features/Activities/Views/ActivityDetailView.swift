@@ -137,7 +137,7 @@ struct ActivityDetailView: View {
                 .font(.subheadline)
                 .foregroundColor(.green)
             ProgressView(value: progressRatio)
-                .tint(colorForActivity())
+                .tint(Color.colorForActivity(self.activity))
         }
         .padding()
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
@@ -247,11 +247,7 @@ struct ActivityDetailView: View {
         case .lastMonth: return "Last Month"
         }
     }
-    func colorForActivity() -> Color {
-        // simple variation
-        let colors: [Color] = [.blue, .green, .orange, .purple, .pink]
-        return colors[abs(activity.name.hashValue) % colors.count]
-    }
+    
 }
 
 #Preview {

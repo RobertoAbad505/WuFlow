@@ -27,7 +27,7 @@ struct WuFlowApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            RootTabView()
                 .preferredColorScheme(.light)
         }
         .modelContainer(sharedModelContainer)

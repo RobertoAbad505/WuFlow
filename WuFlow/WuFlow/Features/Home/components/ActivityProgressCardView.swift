@@ -37,9 +37,9 @@ struct ActivityProgressCardView: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                Spacer()
+//                Spacer()
                 ProgressView(value: progressRatio)
-                    .tint(colorForActivity())
+                    .tint(Color.colorForActivity(activity))
                     .scaleEffect(x: 1, y: 1.2, anchor: .center)
             }
             .padding()
@@ -48,17 +48,14 @@ struct ActivityProgressCardView: View {
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 16))
         .buttonStyle(PlainButtonStyle())
     }
-    
-    func colorForActivity() -> Color {
-        // simple variation
-        let colors: [Color] = [.blue, .green, .orange, .purple, .pink]
-        return colors[abs(activity.name.hashValue) % colors.count]
-    }
 }
 
 #Preview {
-    ActivityProgressCardView(activity: Activity(name: "Correr",
-                                                unitType: .minutes,
-                                                goalValue: 50,
-                                                trackingType: .healthSteps), progress: 10, onTap: { _ in })
+    ZStack {
+        Color.pink.opacity(0.3).ignoresSafeArea()
+        ActivityProgressCardView(activity: Activity(name: "Correr",
+                                                    unitType: .minutes,
+                                                    goalValue: 50,
+                                                    trackingType: .healthSteps), progress: 10, onTap: { _ in })
+    }
 }

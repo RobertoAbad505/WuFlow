@@ -47,3 +47,32 @@ final class Activity {
         self.createdAt = createdAt
     }
 }
+extension Activity {
+    var todayProgress: Double {
+        let calendar = Calendar.current
+        
+        return progressRecords
+            .filter {
+                calendar.isDateInToday($0.date)
+            }
+            .reduce(0) { $0 + $1.value }
+    }
+    var progressRatio: Double {
+        guard goalValue > 0 else { return 0 }
+        return min(todayProgress / goalValue, 1.0)
+    }
+    var progressPercentage: Int {
+        Int(progressRatio * 100)
+    }
+    var status: ActivityStatus {
+        if todayProgress == 0 {
+            return .notStarted
+        } else if todayProgress < goalValue {
+            return .inProgress
+        } else if todayProgress == goalValue {
+            return .completed
+        } else {
+            return .exceeded
+        }
+    }
+}
