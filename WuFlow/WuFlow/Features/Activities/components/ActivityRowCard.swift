@@ -30,7 +30,7 @@ struct ActivityRowCard: View {
                         }
                         Spacer()
                         VStack {
-                            if activity.currentStreak > 0 {
+                            if activity.currentStreak > 1 {
                                 StreakBadge(streak: activity.currentStreak)
                             }
                             ActivityStatusBadge(status: activity.status)
@@ -71,7 +71,7 @@ struct StreakBadge: View {
                     .foregroundStyle(.white)
             }
             .padding(.vertical, 5)
-            .padding(.horizontal, 15)
+            .padding(.horizontal, 13)
             .background(.gray)
             .clipShape(Capsule())
             .overlay {

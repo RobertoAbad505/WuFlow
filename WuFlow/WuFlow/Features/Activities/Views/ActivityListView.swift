@@ -78,35 +78,34 @@ struct ActivityListView: View {
     private var highlights: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                getHighlight()
-                getHighlight()
-                getHighlight()
-//                getHighlight()
+                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
+                                        count: items.count.description,
+                                        description: "Activities",
+                                        footnote: "Total",
+                                        tint: .blue
+                )
+                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
+                                        count: items.count.description,
+                                        description: "Activities",
+                                        footnote: "Total",
+                                        tint: .green
+                )
+                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
+                                        count: items.count.description,
+                                        description: "Activities",
+                                        footnote: "Total",
+                                        tint: .purple
+                )
+                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
+                                        count: items.count.description,
+                                        description: "Activities",
+                                        footnote: "Total",
+                                        tint: .orange
+                )
             }
+            Divider()
         }
-    }
-    func getHighlight() -> some View {
-        return VStack(alignment: .center) {
-            HStack {
-                Image(systemName: "figure.run.square.stack")
-                    .font(.system(size: 20))
-                VStack(alignment: .leading) {
-                    Text(items.count.description)
-                        .font(.system(size: 18, weight: .bold))
-                    Text("activities")
-                        .font(.system(size: 12, weight: .semibold))
-                }
-            }
-            .padding(.bottom, 5)
-            HStack {
-                Text("Total")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .font(.system(size: 8, weight: .regular))
-            }
-        }
-        .padding(10)
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
+        .padding(.vertical)
     }
     private func addItem() {
         withAnimation {

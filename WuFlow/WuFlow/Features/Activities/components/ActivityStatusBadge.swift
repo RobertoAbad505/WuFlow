@@ -21,6 +21,9 @@ struct ActivityStatusBadge: View {
         .background(color.opacity(0.15))
         .foregroundColor(color)
         .clipShape(Capsule())
+        .overlay {
+            Capsule().stroke(strokeColor, lineWidth: 2)
+        }
     }
     
     private var label: String {
@@ -47,6 +50,14 @@ struct ActivityStatusBadge: View {
         case .inProgress: return .blue
         case .completed: return .green
         case .exceeded: return .orange
+        }
+    }
+    private var strokeColor: Color {
+        switch status {
+        case .notStarted: return .gray
+        case .inProgress: return .blue
+        case .completed: return .green
+        case .exceeded: return .green
         }
     }
 }
