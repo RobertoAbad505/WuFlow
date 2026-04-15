@@ -29,7 +29,12 @@ struct ActivityRowCard: View {
                             unitTypeView
                         }
                         Spacer()
-                        ActivityStatusBadge(status: activity.status)
+                        VStack {
+                            if activity.currentStreak > 0 {
+                                StreakBadge(streak: activity.currentStreak)
+                            }
+                            ActivityStatusBadge(status: activity.status)
+                        }
                     }
                 }
                 Spacer()
@@ -54,6 +59,25 @@ struct ActivityRowCard: View {
                 .font(.caption)
         }
         .foregroundStyle(.gray)
+    }
+}
+struct StreakBadge: View {
+    let streak: Int
+    var body: some View {
+        VStack(alignment: .center) {
+            HStack {
+                Text("🔥 \(streak) day" + (streak > 1 ? "s":""))
+                    .font(.system(size: 12).bold())
+                    .foregroundStyle(.white)
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 15)
+            .background(.gray)
+            .clipShape(Capsule())
+            .overlay {
+                Capsule().stroke(.white, lineWidth: 1)
+            }
+        }
     }
 }
 

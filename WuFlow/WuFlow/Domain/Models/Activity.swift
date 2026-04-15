@@ -75,4 +75,28 @@ extension Activity {
             return .exceeded
         }
     }
+    var currentStreak: Int {
+        let calendar = Calendar.current
+        
+        let grouped = Dictionary(grouping: progressRecords) {
+            calendar.startOfDay(for: $0.date)
+        }
+        
+        var streak = 0
+        var date = Date()
+        
+        while true {
+            let day = calendar.startOfDay(for: date)
+            let total = grouped[day]?.reduce(0) { $0 + $1.value } ?? 0
+            
+            if total >= goalValue {
+                streak += 1
+                date = calendar.date(byAdding: .day, value: -1, to: date)!
+            } else {
+                break
+            }
+        }
+        
+        return streak
+    }
 }

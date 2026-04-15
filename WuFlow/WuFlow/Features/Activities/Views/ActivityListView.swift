@@ -45,32 +45,69 @@ struct ActivityListView: View {
                 }
             }
         }
+        .navigationTitle("All my activities")
     }
     private var content: some View {
         ScrollView {
             VStack {
-                HStack {
-                    Text("All my activities")
-                        .font(Font.title.weight(.bold))
-                    Spacer()
-                    Button(action: addItem) {
-                        Image(systemName: "plus")
-                    }
-                }
-                LazyVGrid(columns: columns, spacing: 36) {
-                    ForEach(items) { item in
-                        NavigationLink(value: item) {
-                            ActivityRowCard(activity: item)
-                                .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
-                        }
-                    }
-                    .onDelete(perform: deleteItems)
-                }
+                headerSection
+                highlights
+                activityList
+                addActivityBtn
             }
             .padding()
         }
     }
-
+    var activityList: some View {
+        LazyVGrid(columns: columns, spacing: 36) {
+            ForEach(items) { item in
+                NavigationLink(value: item) {
+                    ActivityRowCard(activity: item)
+                        .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
+                }
+            }
+            .onDelete(perform: deleteItems)
+        }
+    }
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Track what matters. Every step counts!")
+                .font(.caption)
+        }
+    }
+    private var highlights: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                getHighlight()
+                getHighlight()
+                getHighlight()
+//                getHighlight()
+            }
+        }
+    }
+    func getHighlight() -> some View {
+        return VStack(alignment: .center) {
+            HStack {
+                Image(systemName: "figure.run.square.stack")
+                    .font(.system(size: 20))
+                VStack(alignment: .leading) {
+                    Text(items.count.description)
+                        .font(.system(size: 18, weight: .bold))
+                    Text("activities")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+            }
+            .padding(.bottom, 5)
+            HStack {
+                Text("Total")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .font(.system(size: 8, weight: .regular))
+            }
+        }
+        .padding(10)
+        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
+    }
     private func addItem() {
         withAnimation {
             toggleCreateActivity.toggle()
@@ -84,6 +121,67 @@ struct ActivityListView: View {
             }
         }
     }
+    var addActivityBtn: some View {
+        HStack {
+            Text("🌱")
+                .font(.system(size: 30))
+            VStack(alignment: .leading) {
+                Text("New goal, new you!")
+                    .font(.system(size: 14, weight: .bold))
+                Text("Create a new activity, to keep growing")
+                    .font(.system(size: 12, weight: .none))
+            }
+            Spacer()
+            Button(action: addItem) {
+                HStack {
+                    Text("Create")
+                    Image(systemName: "plus")
+                }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 25)
+                .padding(.vertical, 10)
+                .background(Color.green)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(.white, lineWidth: 2)
+            }
+        }
+        .padding()
+        .background(Color.green.opacity(0.3))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(.white, lineWidth: 2)
+        }
+        .padding(.vertical)
+        .padding(.bottom, 50)
+    }
+    func calculateGlobalStreak(activities: [Activity]) -> Int {
+        let calendar = Calendar.current
+        
+        var streak = 0
+        var date = Date()
+        
+        while true {
+            let hasProgress = activities.contains { activity in
+                activity.progressRecords.contains {
+                    calendar.isDate($0.date, inSameDayAs: date)
+                }
+            }
+            
+            if hasProgress {
+                streak += 1
+                date = calendar.date(byAdding: .day, value: -1, to: date)!
+            } else {
+                break
+            }
+        }
+        
+        return streak
+    }
 }
 
 
@@ -93,73 +191,4 @@ struct ActivityListView: View {
 }
 
 
-struct DebugDataSeeder {
-    @Environment(\.modelContext) private var modelContext
-    
-    func deleteAllData() {
-        let activities = try? modelContext.fetch(FetchDescriptor<Activity>())
-        let records = try? modelContext.fetch(FetchDescriptor<ProgressRecord>())
-        
-        activities?.forEach { modelContext.delete($0) }
-        records?.forEach { modelContext.delete($0) }
-    }
-    
-    static func seedSampleData(context: ModelContext) {
-        let activities = try? context.fetch(FetchDescriptor<Activity>())
-        activities?.forEach { context.delete($0) }
-        
-        let calendar = Calendar.current
-        let now = Date()
-        
-        // Create Activity
-        let activity = Activity(
-            name: "Test Activity",
-            unitType: .minutes,
-            goalValue: 30,
-            trackingType: .manual
-        )
-        
-        context.insert(activity)
-        
-        // Helper to create dates
-        func daysAgo(_ days: Int) -> Date {
-            calendar.date(byAdding: .day, value: -days, to: now)!
-        }
-        
-        // Sample records
-        let sampleData: [(Int, Double)] = [
-            (0, 10),  // today
-            (0, 5),   // today
-            (1, 20),  // yesterday
-            (2, 15),  // 2 days ago
-            (3, 25),
-            (5, 30),
-            (7, 18),  // last week
-            (8, 22),
-            (10, 12),
-            (20, 40), // last month-ish
-            (25, 35)
-        ]
-        
-        for (daysAgoValue, value) in sampleData {
-            let date = daysAgo(daysAgoValue)
-            
-            let record = ProgressRecord(
-                value: value,
-                date: date,
-                source: .manual,
-                activity: activity
-            )
-            
-            activity.progressRecords.append(record)
-            context.insert(record)
-        }
-        
-        do {
-            try context.save()
-            print("✅ Seed data created")
-        } catch {
-            print("❌ Error seeding data:", error)
-        }
-    }
-}
+
