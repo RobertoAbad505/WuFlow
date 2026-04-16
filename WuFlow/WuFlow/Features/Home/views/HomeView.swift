@@ -50,6 +50,7 @@ struct HomeView: View {
                 PinnedActivitiesView(activities: activities) {
                     path.append(AppRoute.activityDetail($0))
                 }
+                Spacer()
             }
             .padding()
         }

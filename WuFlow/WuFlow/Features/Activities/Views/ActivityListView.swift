@@ -76,7 +76,7 @@ struct ActivityListView: View {
         }
     }
     private var highlights: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .center, spacing: 10) {
             HStack {
                 ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
                                         count: items.count.description,
@@ -95,12 +95,6 @@ struct ActivityListView: View {
                                         description: "Activities",
                                         footnote: "Total",
                                         tint: .purple
-                )
-                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
-                                        count: items.count.description,
-                                        description: "Activities",
-                                        footnote: "Total",
-                                        tint: .orange
                 )
             }
             Divider()

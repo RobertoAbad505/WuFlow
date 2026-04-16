@@ -26,27 +26,27 @@ struct ActivityProgressCardView: View {
                         Image(systemName: activity.iconName)
                             .symbolEffect(.rotate)
                             .font(.system(size: 30))
-                            .foregroundStyle(.primary)                            
+                            .foregroundStyle(.black)
                     }
-                    VStack{
+                    VStack (alignment: .leading, spacing: 5) {
                         Text(activity.name)
-                            .font(.subheadline)
+                            .font(.headline)
                             .fontWeight(.semibold)
+                            .foregroundStyle(.green)
                         Text("\(progress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
-//                Spacer()
+                .padding()
                 ProgressView(value: progressRatio)
                     .tint(Color.colorForActivity(activity))
                     .scaleEffect(x: 1, y: 1.2, anchor: .center)
             }
-            .padding()
-            .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 6)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
         })
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 16))
-        .buttonStyle(PlainButtonStyle())
+        .shadow(color: .black.opacity(0.18), radius: 5, x: 14, y: 12)
     }
 }
 

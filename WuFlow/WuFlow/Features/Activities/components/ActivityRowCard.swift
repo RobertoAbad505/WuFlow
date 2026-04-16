@@ -8,43 +8,66 @@ import SwiftUI
 
 struct ActivityRowCard: View {
     
+    private var color: Color {
+        switch self.activity.status {
+        case .notStarted: return .gray
+        case .inProgress: return .blue
+        case .completed: return .green
+        case .exceeded: return .orange
+        }
+    }
+    private var strokeColor: Color {
+        switch self.activity.status {
+        case .notStarted: return .gray
+        case .inProgress: return .blue
+        case .completed: return .green
+        case .exceeded: return .green
+        }
+    }
     let activity: Activity
     
     var body: some View {
         VStack {
-            HStack(spacing: 12) {
-                Image(systemName: activity.iconName)
-                    .font(.title2)
-                    .padding(10)
-                    .background(Color.white.opacity(0.2))
-                    .clipShape(Circle())
-                    .symbolEffect(.rotate)
-                
-                VStack(alignment: .center, spacing: 6) {
-                    HStack {
+            VStack {
+                HStack(spacing: 12) {
+                    Image(systemName: activity.iconName)
+                        .font(.title)
+                        .clipShape(Circle())
+                        .symbolEffect(.rotate)
+                    HStack(alignment: .bottom, spacing: 0) {
                         VStack(alignment: .leading){
                             Text(activity.name)
                                 .font(.subheadline.bold())
                                 .foregroundStyle(.black)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             unitTypeView
                         }
-                        Spacer()
-                        VStack {
+                        .frame(maxWidth: .infinity)
+                        VStack(alignment: .trailing, spacing: 5) {
                             if activity.currentStreak > 1 {
                                 StreakBadge(streak: activity.currentStreak)
                             }
                             ActivityStatusBadge(status: activity.status)
                         }
+                        .frame(maxWidth: 100, alignment: .leading)
                     }
+                    Image(systemName: "chevron.right")
+                        .font(Font.system(size: 18))
+                        .padding(.bottom, 5)
                 }
-                Spacer()
+                .padding(EdgeInsets(top: 15, leading: 10, bottom: 0, trailing: 10))
             }
-            ProgressView(value: activity.progressRatio)
-            Text("\(activity.progressPercentage)%")
-                .font(.caption2)
-                .foregroundColor(.secondary)
+            VStack(alignment: .center, spacing: 5) {
+                ProgressView(value: activity.progressRatio)
+                Text("\(activity.progressPercentage)%")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.bottom, 5)
+            .background(strokeColor.opacity(0.20))
         }
-        .padding()
         .cornerRadius(16)
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
     }
@@ -61,30 +84,12 @@ struct ActivityRowCard: View {
         .foregroundStyle(.gray)
     }
 }
-struct StreakBadge: View {
-    let streak: Int
-    var body: some View {
-        VStack(alignment: .center) {
-            HStack {
-                Text("🔥 \(streak) day" + (streak > 1 ? "s":""))
-                    .font(.system(size: 12).bold())
-                    .foregroundStyle(.white)
-            }
-            .padding(.vertical, 5)
-            .padding(.horizontal, 13)
-            .background(.gray)
-            .clipShape(Capsule())
-            .overlay {
-                Capsule().stroke(.white, lineWidth: 1)
-            }
-        }
-    }
-}
+
 
 #Preview {
     ZStack {
         Color.black.opacity(0.4).ignoresSafeArea()
-        ActivityRowCard(activity: Activity(name: "Meditation",
+        ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
                                            unitType: .pages,
                                            goalValue: 3,
                                            trackingType: .manual))

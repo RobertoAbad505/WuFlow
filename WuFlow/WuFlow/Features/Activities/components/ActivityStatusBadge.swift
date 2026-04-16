@@ -14,6 +14,7 @@ struct ActivityStatusBadge: View {
         HStack(spacing: 4) {
             Image(systemName: icon)
             Text(label)
+                .frame(maxWidth: 100, alignment: .center)
         }
         .font(.caption2)
         .padding(.horizontal, 8)
