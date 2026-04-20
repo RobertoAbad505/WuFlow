@@ -27,13 +27,12 @@ struct ActivityRowCard: View {
     let activity: Activity
     
     var body: some View {
-        VStack {
-            VStack {
-                HStack(spacing: 12) {
-                    Image(systemName: activity.iconName)
-                        .font(.title)
-                        .clipShape(Circle())
-                        .symbolEffect(.rotate)
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading) {
+                HStack(alignment: .center ,spacing: 12) {
+                    Image("activityImg")
+                        .resizable()
+                        .frame(width: 100, height: 120)
                     HStack(alignment: .bottom, spacing: 0) {
                         VStack(alignment: .leading){
                             Text(activity.name)
@@ -57,7 +56,8 @@ struct ActivityRowCard: View {
                         .font(Font.system(size: 18))
                         .padding(.bottom, 5)
                 }
-                .padding(EdgeInsets(top: 15, leading: 10, bottom: 0, trailing: 10))
+                .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+//                .border(.red, width: 2)
             }
             VStack(alignment: .center, spacing: 5) {
                 ProgressView(value: activity.progressRatio)

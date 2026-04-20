@@ -120,27 +120,32 @@ struct ActivityDetailView: View {
         }
     }
     var headerSection: some View {
-        VStack(spacing: 12) {
-            HStack(alignment: .center, spacing: 25) {
-                Image(systemName: activity.iconName)
-                    .symbolEffect(.rotate)
-                    .font(.system(size: 70).bold())
-                VStack {
-                    Text(activity.name + " details")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                    Text("\(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
-                        .font(.headline)
+        HStack {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .center, spacing: 25) {
+                    Image("activityImg")
+                    .resizable()
+                    .frame(maxWidth: 120, maxHeight: 150)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(activity.name + " details")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                        Text("\(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
+                            .font(.headline)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                VStack {
+                    Text(goalFeedback)
+                        .font(.subheadline)
+                        .foregroundColor(.green)
+                    ProgressView(value: progressRatio)
+                        .tint(Color.colorForActivity(self.activity))
+                }
+                .padding(.bottom)
             }
-            Text(goalFeedback)
-                .font(.subheadline)
-                .foregroundColor(.green)
-            ProgressView(value: progressRatio)
-                .tint(Color.colorForActivity(self.activity))
         }
-        .padding()
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
+        .containerShape(RoundedRectangle(cornerRadius: 30))
     }
     var infoData: some View {
         HStack {
