@@ -148,24 +148,45 @@ struct ActivityDetailView: View {
         .containerShape(RoundedRectangle(cornerRadius: 30))
     }
     var infoData: some View {
-        HStack {
-            VStack(alignment: .center, spacing: 10) {
-                Text("Unit: \(activity.unitType.rawValue)")
-                Divider()
-                Text("Tracking : \(activity.trackingType.rawValue)")
+        VStack {
+            HStack(alignment: .top, spacing: 0) {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(alignment: .top, spacing: 0) {
+                        Image(systemName: "pin")
+                        Text("Tracking \(activity.trackingType.rawValue)")
+                    }
+                    Divider()
+                    HStack(alignment: .top, spacing: 0) {
+                        Image(systemName: "pin")
+                        Text("Goal \(numberFormat.string(from: NSNumber(value: activity.goalValue))!) \(activity.unitType.rawValue)")
+                    }
+                }
+                .padding()
+                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
+                Spacer()
+                VStack {
+                    HStack(alignment: .top, spacing: 5) {
+                        Image(systemName: "flame")
+                        Text("Current streak: \(activity.currentStreak, specifier: "%.0f")")
+                    }
+                    Divider()
+                    HStack(alignment: .top, spacing: 5) {
+                        Image(systemName: "flame")
+                        Text("Longest streak: \(activity.longestStreak, specifier: "%.0f")")
+                    }
+                }
+                .padding()
+                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
             }
-            .padding()
-            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
-            Spacer()
-            VStack {
-                Text("Goal: \(numberFormat.string(from: NSNumber(value: activity.goalValue))!)")
-                Divider()
-                Text("Created: \(activity.createdAt, format: .dateTime.month().year())")
+            .font(.system(size: 14))
+            .padding(.bottom, 20)
+            HStack(alignment: .top, spacing: 0) {
+                Image(systemName: "calendar")
+                Text("Created by \(activity.createdAt, format: .dateTime.month().year())")
+                    .font(.system(size: 12))
+                Spacer()
             }
-            .padding()
-            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
         }
-        .font(.system(size: 14))
     }
     var addProgressSection: some View {
         VStack(alignment: .center) {

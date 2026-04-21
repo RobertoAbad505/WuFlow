@@ -77,7 +77,6 @@ extension Activity {
     }
     var currentStreak: Int {
         let calendar = Calendar.current
-        
         let grouped = Dictionary(grouping: progressRecords) {
             calendar.startOfDay(for: $0.date)
         }
@@ -85,11 +84,19 @@ extension Activity {
         var streak = 0
         var date = Date()
         
+        // 🔥 If today is not completed, start from yesterday
+        let todayTotal = grouped[calendar.startOfDay(for: date)]?
+            .reduce(0) { $0 + $1.value } ?? 0
+        
+        if !isDayCompleted(total: todayTotal) {
+            date = calendar.date(byAdding: .day, value: -1, to: date)!
+        }
+        
         while true {
             let day = calendar.startOfDay(for: date)
             let total = grouped[day]?.reduce(0) { $0 + $1.value } ?? 0
             
-            if total >= goalValue {
+            if isDayCompleted(total: total) {
                 streak += 1
                 date = calendar.date(byAdding: .day, value: -1, to: date)!
             } else {
@@ -98,5 +105,57 @@ extension Activity {
         }
         
         return streak
+    }
+    var longestStreak: Int {
+        let calendar = Calendar.current
+        
+        let days = dailyTotals
+        
+        var longest = 0
+        var current = 0
+        var previousDay: Date?
+        
+        for day in days {
+            
+            if isDayCompleted(total: day.total) {
+                
+                if let prev = previousDay,
+                   calendar.isDate(
+                       day.date,
+                       inSameDayAs: calendar.date(byAdding: .day, value: 1, to: prev)!
+                   ) {
+                    
+                    current += 1
+                } else {
+                    current = 1
+                }
+                
+                longest = max(longest, current)
+                previousDay = day.date
+                
+            } else {
+                current = 0
+                previousDay = nil
+            }
+        }
+        
+        return longest
+    }
+    func isDayCompleted(total: Double) -> Bool {
+        total >= goalValue
+    }
+    func isDayCompleted(for date: Date, total: Double) -> Bool {
+        total >= goalValue
+    }
+    var dailyTotals: [(date: Date, total: Double)] {
+        let calendar = Calendar.current
+        
+        let grouped = Dictionary(grouping: progressRecords) {
+            calendar.startOfDay(for: $0.date)
+        }
+        
+        return grouped
+            .map { (date: $0.key, total: $0.value.reduce(0) { $0 + $1.value }) }
+            .sorted { $0.date < $1.date }
     }
 }

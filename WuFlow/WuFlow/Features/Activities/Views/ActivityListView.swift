@@ -84,10 +84,10 @@ struct ActivityListView: View {
                                         footnote: "Total",
                                         tint: .blue
                 )
-                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
-                                        count: items.count.description,
-                                        description: "Activities",
-                                        footnote: "Total",
+                ActivitiesHighlightView(systemNameImage: "flame",
+                                        count: calculateGlobalStreak().description,
+                                        description: getStreakMessage(),
+                                        footnote: "Strike",
                                         tint: .green
                 )
                 ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
@@ -152,14 +152,14 @@ struct ActivityListView: View {
         .padding(.vertical)
         .padding(.bottom, 50)
     }
-    func calculateGlobalStreak(activities: [Activity]) -> Int {
+    func calculateGlobalStreak() -> Int {
         let calendar = Calendar.current
         
         var streak = 0
         var date = Date()
         
         while true {
-            let hasProgress = activities.contains { activity in
+            let hasProgress = self.items.contains { activity in
                 activity.progressRecords.contains {
                     calendar.isDate($0.date, inSameDayAs: date)
                 }
@@ -174,6 +174,16 @@ struct ActivityListView: View {
         }
         
         return streak
+    }
+    func getStreakMessage() -> String {
+        switch calculateGlobalStreak() {
+        case 0:
+            return "streaks yet"
+        case 1:
+            return "day streak!"
+        default:
+            return "streak days!"
+        }
     }
 }
 
