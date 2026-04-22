@@ -105,6 +105,7 @@ struct ActivityDetailView: View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 20) {
                 headerSection
+                inspoSection
                 infoData
                 addProgressSection
                 Divider()
@@ -145,6 +146,26 @@ struct ActivityDetailView: View {
         }
         .containerShape(RoundedRectangle(cornerRadius: 30))
     }
+    var inspoSection: some View {
+        VStack {
+            VStack(alignment: .leading, spacing: 10) {
+                if let motivationDescription = activity.motivationDescription {
+                    Text("Here's some motivation from your self")
+                        .font(.headline)
+                    Text(motivationDescription )
+                        .font(.body)
+                }
+                if let expectedOutcome = activity.expectedOutcome {
+                    Text("Remember what you are expecting")
+                        .font(.headline)
+                    Text(expectedOutcome )
+                        .font(.body)
+                }
+            }
+            .padding()
+        }
+        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
+    }
     var infoData: some View {
         VStack {
             HStack(alignment: .top, spacing: 0) {
@@ -165,11 +186,15 @@ struct ActivityDetailView: View {
                 VStack {
                     HStack(alignment: .top, spacing: 5) {
                         Image(systemName: "flame")
+                            .symbolEffect(.breathe)
+                            .foregroundStyle(Color.red)
                         Text("Current streak: \(activity.currentStreak, specifier: "%.0f")")
                     }
                     Divider()
                     HStack(alignment: .top, spacing: 5) {
                         Image(systemName: "flame")
+                            .symbolEffect(.breathe)
+                            .foregroundStyle(Color.red)
                         Text("Longest streak: \(activity.longestStreak, specifier: "%.0f")")
                     }
                 }
@@ -290,7 +315,11 @@ struct ActivityDetailView: View {
     ActivityDetailView(activity: Activity(name: "Meditation",
                                           unitType: .sessions,
                                           goalValue: 3,
-                                          trackingType: .manual))
+                                          trackingType: .manual,
+                                          iconName: "circle.dotted",
+                                          motivationDescription: "Remember always is a great time to meditate",
+                                          expectedOutcome: "We want to relax at the beach without mental noise, just be there and be present"
+                                         ))
     .modelContainer(for: Activity.self, inMemory: false)
-    .modelContainer(for: ProgressRecord.self, inMemory: false)
+    .modelContainer(for: ProgressRecord.self, inMemory: true)
 }

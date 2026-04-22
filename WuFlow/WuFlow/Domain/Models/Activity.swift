@@ -35,6 +35,12 @@ final class Activity {
     
     var imageData: Data?
     
+    var type: ActivityTypes
+    
+    var lifeArea: LifeArea
+    
+    var secondaryNote: String?
+    
     // Relationship
     @Relationship(deleteRule: .cascade)
     var progressRecords: [ProgressRecord] = []
@@ -49,7 +55,10 @@ final class Activity {
         iconName: String = "circle",
         motivationDescription: String? = nil,
         expectedOutcome: String? = nil,
-        imageData: Data? = nil
+        imageData: Data? = nil,
+        type: ActivityTypes = .maintain,
+        lifeArea: LifeArea = .leisure,
+        secondaryNote: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -61,6 +70,9 @@ final class Activity {
         self.expectedOutcome = expectedOutcome
         self.iconName = iconName
         self.imageData = imageData
+        self.type = type
+        self.lifeArea = lifeArea
+        self.secondaryNote = secondaryNote
     }
 }
 extension Activity {
@@ -177,5 +189,19 @@ extension Activity {
     var uiImage: UIImage? {
         guard let data = imageData else { return nil }
         return UIImage(data: data)
+    }
+
+}
+enum ActivityTypes: String, Codable, CaseIterable {
+    case increase// build / do more
+    case maintain// stay consistent (Wu Wei)
+    case decrease// reduce / avoid
+    
+    var name: String {
+        switch self {
+            case .increase: return "🌱 Build"
+            case .decrease: return "🔥 Reduce"
+            case .maintain: return "🌊 Flow"
+        }
     }
 }
