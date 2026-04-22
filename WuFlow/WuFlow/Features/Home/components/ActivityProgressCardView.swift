@@ -23,7 +23,7 @@ struct ActivityProgressCardView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     VStack {
-                        Image(systemName: activity.iconName)
+                        Image(systemName: "circle.dotted")
                             .symbolEffect(.rotate)
                             .font(.system(size: 30))
                             .foregroundStyle(.black)

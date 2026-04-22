@@ -43,7 +43,7 @@ struct ActivityCircleView: View {
     
     var body: some View {
         VStack(spacing: 5) {
-            Image(systemName: activity.iconName)
+            Image(systemName: "circle.dotted")
                 .font(.system(size: 40))
                 .foregroundStyle(.primary)
             

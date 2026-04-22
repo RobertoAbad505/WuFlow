@@ -76,7 +76,7 @@ struct AddActivityProgressView: View {
                 .fontWeight(.medium)
             // Header
             HStack {
-                Image(systemName: selectedActivity?.iconName ?? "circle")
+                Image(systemName: "circle.dotted")
                     .font(.system(size: 25))
                 Text(selectedActivity?.name ?? "")
                     .font(.headline)

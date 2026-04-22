@@ -25,7 +25,12 @@ final class Activity {
     var createdAt: Date
     
     var isPinned: Bool = false
-    var iconName: String = "circle.dotted"
+//    var iconName: String = "circle.dotted"
+    // NEW
+    var motivation: String?        // “Why”
+    var expectedOutcome: String?  // optional
+    
+    var imageData: Data?          // for future photos
     
     // Relationship
     @Relationship(deleteRule: .cascade)

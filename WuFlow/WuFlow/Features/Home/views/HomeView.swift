@@ -88,10 +88,38 @@ struct HomeView: View {
                 title: "Insights",
                 systemImage: "chart.bar",
                 route: .insights
+            ),
+            QuickAction(
+                title: "\(calculateGlobalStreak().description)\n Streak days",
+                systemImage: "flame",
+                route: .insights
             )
         ])
         
         return actionsList
+    }
+    func calculateGlobalStreak() -> Int {
+        let calendar = Calendar.current
+        
+        var streak = 0
+        var date = Date()
+        
+        while true {
+            let hasProgress = self.activities.contains { activity in
+                activity.progressRecords.contains {
+                    calendar.isDate($0.date, inSameDayAs: date)
+                }
+            }
+            
+            if hasProgress {
+                streak += 1
+                date = calendar.date(byAdding: .day, value: -1, to: date)!
+            } else {
+                break
+            }
+        }
+        
+        return streak
     }
 }
 struct InsightsView: View {
