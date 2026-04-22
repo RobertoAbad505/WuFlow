@@ -12,15 +12,22 @@ struct CreateActivityView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    @StateObject private var cameraManager: CameraManager = CameraManager()
     
     //new activity properties
     @State private var name: String = ""
+    @State private var motivationDescription: String = ""
     @State private var newUnitType: UnitType = .count
     @State private var newGoalValue: Double = 0
     @State private var newTrackingType: TrackingType = .manual
     
+    var body: some View  {
+        ScrollView {
+            content
+        }
+    }
     
-    var body: some View {
+    var content: some View {
         VStack(alignment: .center, spacing: 25) {
             Text("Create activity")
                 .font(Font.largeTitle.bold())
@@ -52,6 +59,39 @@ struct CreateActivityView: View {
             }
             .pickerStyle(.palette)
             
+            Button(action: {
+                //TAKE A PICTURe
+                cameraManager.checkCameraPermission(completion: { cameraPermisison in
+                    if cameraPermisison {
+                        cameraManager.openCamera()
+                    }
+                })
+                
+            }, label: {
+                HStack {
+                    Image(systemName: "camera.fill")
+//                        .resizable()
+                        .frame(width: 20, height: 20)
+                    Text(cameraManager.image == nil ? "Take a picture!":"Retake picture!")
+                }
+                .foregroundStyle(Color.white)
+            })
+            .padding()
+            .background(Color.blue)
+            .cornerRadius(15)
+            
+            TextField(text: $motivationDescription, label: {
+                Text("What motivates you for this?")
+            })
+            
+            if let image = cameraManager.image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 200, height: 200)
+                    .clipShape(Circle())
+            }
+            
             Button("Create") {
                 addItem()
                 dismiss()
@@ -59,14 +99,25 @@ struct CreateActivityView: View {
             .padding(.top, 50)
         }
         .padding()
+        .sheet(isPresented: $cameraManager.showImagePicker) {
+            ImagePicker(image: $cameraManager.image, isPresented: $cameraManager.showImagePicker)
+        }
     }
     
     private func addItem() {
         withAnimation {
-            let newItem = Activity(name: $name.wrappedValue,
-                                   unitType: $newUnitType.wrappedValue,
-                                   goalValue: $newGoalValue.wrappedValue,
-                                   trackingType: $newTrackingType.wrappedValue)
+            
+            let imageData = cameraManager.image?.jpegData(compressionQuality: 0.8)
+            let newItem = Activity(
+                name: name,
+                unitType: newUnitType,
+                goalValue: newGoalValue,
+                trackingType: newTrackingType,
+                iconName: "circle.dotted",
+                motivationDescription: motivationDescription,
+                expectedOutcome: "",                
+                imageData: imageData
+            )
             modelContext.insert(newItem)
         }
     }

@@ -87,7 +87,7 @@ struct ActivityDetailView: View {
     var body: some View {
         VStack(alignment: .center, spacing: 30){
             ZStack {
-                AnimatedBackgroundView(style: .focus)
+                AnimatedBackgroundView(style: .calm)
                     .ignoresSafeArea()
                 scrollView
             }
@@ -123,9 +123,7 @@ struct ActivityDetailView: View {
         HStack {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .center, spacing: 25) {
-                    Image("activityImg")
-                    .resizable()
-                    .frame(maxWidth: 120, maxHeight: 150)
+                    activityImage
                     VStack(alignment: .leading, spacing: 5) {
                         Text(activity.name + " details")
                             .font(.title3)
@@ -259,6 +257,18 @@ struct ActivityDetailView: View {
             if filteredRecords.count > 0 {
                 Text("Filtered count: \(filteredRecords.count)")
                     .font(Font.body.bold())
+            }
+        }
+    }
+    var activityImage: some View {
+        VStack {
+            if let data = activity.imageData, let img = UIImage(data: data) {
+                Image(uiImage: img)
+                    .resizable()
+                    .frame(width: 120, height: 150)
+            } else {
+                Image(systemName: activity.iconName ?? "circle.dotted")
+                    .font(.system(size: 35))
             }
         }
     }

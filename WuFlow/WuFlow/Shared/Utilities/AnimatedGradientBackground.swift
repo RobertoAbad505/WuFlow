@@ -81,6 +81,6 @@ struct FloatingBlobView: View {
 
 #Preview {
     VStack {
-        AnimatedBackgroundView(style: .wuFlow)
+        AnimatedBackgroundView(style: .calm)
     }
 }

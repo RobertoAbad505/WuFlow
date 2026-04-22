@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Model
 final class Activity {
@@ -25,12 +26,14 @@ final class Activity {
     var createdAt: Date
     
     var isPinned: Bool = false
-//    var iconName: String = "circle.dotted"
-    // NEW
-    var motivation: String?        // “Why”
-    var expectedOutcome: String?  // optional
     
-    var imageData: Data?          // for future photos
+    var motivationDescription: String?
+    
+    var expectedOutcome: String?
+    
+    var iconName: String?
+    
+    var imageData: Data?
     
     // Relationship
     @Relationship(deleteRule: .cascade)
@@ -42,7 +45,11 @@ final class Activity {
         unitType: UnitType,
         goalValue: Double,
         trackingType: TrackingType,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        iconName: String = "circle",
+        motivationDescription: String? = nil,
+        expectedOutcome: String? = nil,
+        imageData: Data? = nil
     ) {
         self.id = id
         self.name = name
@@ -50,6 +57,10 @@ final class Activity {
         self.goalValue = goalValue
         self.trackingType = trackingType
         self.createdAt = createdAt
+        self.motivationDescription = motivationDescription
+        self.expectedOutcome = expectedOutcome
+        self.iconName = iconName
+        self.imageData = imageData
     }
 }
 extension Activity {
@@ -162,5 +173,9 @@ extension Activity {
         return grouped
             .map { (date: $0.key, total: $0.value.reduce(0) { $0 + $1.value }) }
             .sorted { $0.date < $1.date }
+    }
+    var uiImage: UIImage? {
+        guard let data = imageData else { return nil }
+        return UIImage(data: data)
     }
 }

@@ -83,22 +83,22 @@ extension BackgroundConfig {
         case .calm:
             return BackgroundConfig(
                 gradientA: [
-                    Color.gray.opacity(0.2),
-                    Color.blue.opacity(0.1),
+                    Color.gray.opacity(0.4),
+                    Color.blue.opacity(0.5),
                     Color.white
                 ],
                 gradientB: [
-                    Color.blue.opacity(0.2),
-                    Color.gray.opacity(0.1),
+                    Color.blue.opacity(0.5),
+                    Color.gray.opacity(0.4),
                     Color.white
                 ],
                 blobs: [
                     BlobConfig(
-                        color: Color.gray.opacity(0.15),
-                        size: 260,
+                        color: Color.gray.opacity(0.25),
+                        size: 160,
                         initialOffset: CGSize(width: -120, height: 120),
                         finalOffset: CGSize(width: 120, height: -120),
-                        animationDuration: 16
+                        animationDuration: 10
                     )
                 ]
             )
