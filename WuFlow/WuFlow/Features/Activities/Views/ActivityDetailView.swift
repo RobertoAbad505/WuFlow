@@ -155,7 +155,7 @@ struct ActivityDetailView: View {
                     Text(motivationDescription )
                         .font(.body)
                 }
-                if let expectedOutcome = activity.expectedOutcome {
+                if let expectedOutcome = activity.expectedOutcomeDescription {
                     Text("Remember what you are expecting")
                         .font(.headline)
                     Text(expectedOutcome )
@@ -318,7 +318,7 @@ struct ActivityDetailView: View {
                                           trackingType: .manual,
                                           iconName: "circle.dotted",
                                           motivationDescription: "Remember always is a great time to meditate",
-                                          expectedOutcome: "We want to relax at the beach without mental noise, just be there and be present"
+                                          expectedOutcomeDescription: "We want to relax at the beach without mental noise, just be there and be present"
                                          ))
     .modelContainer(for: Activity.self, inMemory: false)
     .modelContainer(for: ProgressRecord.self, inMemory: true)

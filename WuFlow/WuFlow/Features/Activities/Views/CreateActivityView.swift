@@ -12,142 +12,136 @@ struct CreateActivityView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
-    @StateObject private var cameraManager: CameraManager = CameraManager()
-    
-    //new activity properties
-    @State private var name: String = ""
-    @State private var motivationDescription: String = ""
-    @State private var expectedOutcomeDescription: String = ""
-    @State private var newUnitType: UnitType = .count
-    @State private var newGoalValue: Double = 0
-    @State private var newTrackingType: TrackingType = .manual
-    @State private var newActivityType: ActivityTypes = .maintain
-    @State private var newActivityLifeArea: LifeArea = .leisure
-    @State private var newActivitySecondaryNote: String = "I want to meet people and make new friends"
-    
-    var body: some View  {
-        ScrollView {
-            content
-        }
-    }
-    
-    var content: some View {
-        VStack(alignment: .center, spacing: 25) {
-            Text("Create activity")
-                .font(Font.largeTitle.bold())
-                .padding(.bottom, 20)
-            
-            //Name input
-            TextField("Name", text: $name, prompt: Text("Activity name?"))
-                .textContentType(UITextContentType.name)
-                .font(Font.body.bold())
-            
-            //Unit type input
-            Picker("Unit type", selection: $newUnitType) {
-                ForEach(UnitType.allCases, id: \.self) {
-                    Text($0.rawValue.capitalized)
-                }
-            }
-            .pickerStyle(.palette)
-            
-            //Goal input
-            TextField("Goal value", value: $newGoalValue, formatter: NumberFormatter(), prompt: Text("Goal value?"))
-                .textContentType(UITextContentType.name)
-                .font(Font.body.bold())
-            
-            //Tracking type input
-            Picker("Tracking type", selection: $newTrackingType) {
-                ForEach(TrackingType.allCases, id: \.self) {
-                    Text($0.rawValue.capitalized)
-                }
-            }
-            .pickerStyle(.palette)
-            //Tracking type input
-            Picker("Activity Type", selection: $newActivityType) {
-                ForEach(ActivityTypes.allCases, id: \.self) {
-                    Text($0.name)
-                }
-            }
-            .pickerStyle(.palette)
-            //Tracking LifeArea
-            Picker("Which area of your life does this belong to?", selection: $newActivityLifeArea) {
-                ForEach(LifeArea.allCases, id: \.self) { area in
-                    HStack {
-                        Image(systemName: area.iconName)
-                            .font(.system(size: 5))
-                        Text(area.iconName)
-                    }
-                }
-            }
-            .pickerStyle(.palette)
-            
-            Button(action: {
-                //TAKE A PICTURe
-                cameraManager.checkCameraPermission(completion: { cameraPermisison in
-                    if cameraPermisison {
-                        cameraManager.openCamera()
-                    }
-                })
-                
-            }, label: {
-                HStack {
-                    Image(systemName: "camera.fill")
-//                        .resizable()
-                        .frame(width: 20, height: 20)
-                    Text(cameraManager.image == nil ? "Take a picture!":"Retake picture!")
-                }
-                .foregroundStyle(Color.white)
-            })
-            .padding()
-            .background(Color.blue)
-            .cornerRadius(15)
-            
-            TextField(text: $motivationDescription, label: {
-                Text("What motivates you for this?")
-            })
-            TextField(text: $expectedOutcomeDescription, label: {
-                Text("How you visualize yourself doing this?")
-            })
-            
-            if let image = cameraManager.image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 200, height: 200)
-                    .clipShape(Circle())
-            }
-            
-            Button("Create") {
-                addItem()
-                dismiss()
-            }
-            .padding(.top, 50)
-        }
+    @State private var step: CreateActivityStep = .identity
+    @State private var draft = ActivityDraft()
+     
+    @StateObject private var cameraManager = CameraManager()
+    let allSteps: [CreateActivityStep] = [
+        .identity,
+        .intention,
+        .lifeArea,
+        .goal,
+        .meaning,
+        .visual,
+        .review
+    ]
+       
+    var body: some View {
+        VStack {
+            stepView
+            navigationControls
+        }        
         .padding()
-        .sheet(isPresented: $cameraManager.showImagePicker) {
-            ImagePicker(image: $cameraManager.image, isPresented: $cameraManager.showImagePicker)
+    }
+    var stepView: some View {
+        VStack{
+            switch step {
+            case .identity:
+                IdentityStepView(draft: $draft)
+            case .intention:
+                IntentionStepView(draft: $draft)                
+            case .lifeArea:
+                LifeAreaStepView(draft: $draft)
+            case .goal:
+                GoalStepView(draft: $draft)
+            case .meaning:
+                MeaningStepView(draft: $draft)
+            case .visual:
+                VisualStepView(draft: $draft, cameraManager: cameraManager)
+            case .review:
+                ReviewStepView(draft: draft)
+            }
         }
     }
     
-    private func addItem() {
+    private func saveActivity() {
         withAnimation {
-            
             let imageData = cameraManager.image?.jpegData(compressionQuality: 0.8)
-            let newItem = Activity(
-                name: name,
-                unitType: newUnitType,
-                goalValue: newGoalValue,
-                trackingType: newTrackingType,
-                iconName: "circle.dotted",
-                motivationDescription: motivationDescription,
-                expectedOutcome: expectedOutcomeDescription,
+            let newActivity = Activity(
+                name: draft.name,
+                unitType: draft.unitType,
+                goalValue: draft.goalValue,
+                trackingType: draft.trackingType,
+                iconName: draft.iconName,
+                motivationDescription: draft.motivationDescription,
+                expectedOutcomeDescription: draft.expectedOutcomeDescription,
                 imageData: imageData,
-                lifeArea: .health,
-                secondaryNote: ""
+                type: draft.type,
+                lifeArea: draft.lifeArea,
+                secondaryNote: draft.secondaryNote
             )
-            modelContext.insert(newItem)
+            
+            modelContext.insert(newActivity)
         }
     }
+    func nextStep() -> CreateActivityStep {
+        guard let index = allSteps.firstIndex(of: step),
+              index < allSteps.count - 1 else {
+            return step
+        }
+        return allSteps[index + 1]
+    }
+
+    func previousStep() -> CreateActivityStep {
+        guard let index = allSteps.firstIndex(of: step),
+              index > 0 else {
+            return step
+        }
+        return allSteps[index - 1]
+    }
+    func handleNext() {
+        if step == .review {
+            saveActivity()
+            dismiss()
+        } else {
+            withAnimation {
+                step = nextStep()
+            }
+        }
+    }
+    var navigationControls: some View {
+        HStack(alignment: .top, spacing: 0) {
+            
+            if step != .identity {
+                Button("Back") {
+                    withAnimation {
+                        step = previousStep()
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            Button(step == .review ? "Create" : "Next") {
+                handleNext()
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+}
+
+enum CreateActivityStep {
+    case identity
+    case intention
+    case lifeArea
+    case goal
+    case meaning
+    case visual
+    case review
+}
+struct ActivityDraft {
+    var name: String = ""
+    var unitType: UnitType = .count
+    var goalValue: Double = 0
+    var trackingType: TrackingType = .manual
+    var iconName: String = "circle.dotted"
+    var motivationDescription: String = ""
+    var expectedOutcomeDescription: String = ""
+    var imageData: Data?
+    var lifeArea: LifeArea = .health
+    var type: ActivityTypes = .increase
+    var secondaryNote: String?
 }
 
 #Preview {

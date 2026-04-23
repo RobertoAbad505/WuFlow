@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum LifeArea: String, CaseIterable, Codable {
     case health        // body, nutrition, sleep
@@ -37,6 +38,16 @@ extension LifeArea {
         case .work: return "briefcase.fill"
         case .social: return "person.2.fill"
         case .leisure: return "leaf.fill"
+        }
+    }
+    var color: Color {
+        switch self {
+        case .health: return .red
+        case .mind: return .purple
+        case .growth: return .blue
+        case .work: return .orange
+        case .social: return .green
+        case .leisure: return .teal
         }
     }
 }

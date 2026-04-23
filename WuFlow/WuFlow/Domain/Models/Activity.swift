@@ -29,7 +29,7 @@ final class Activity {
     
     var motivationDescription: String?
     
-    var expectedOutcome: String?
+    var expectedOutcomeDescription: String?
     
     var iconName: String?
     
@@ -54,7 +54,7 @@ final class Activity {
         createdAt: Date = Date(),
         iconName: String = "circle",
         motivationDescription: String? = nil,
-        expectedOutcome: String? = nil,
+        expectedOutcomeDescription: String? = nil,
         imageData: Data? = nil,
         type: ActivityTypes = .maintain,
         lifeArea: LifeArea = .leisure,
@@ -67,7 +67,7 @@ final class Activity {
         self.trackingType = trackingType
         self.createdAt = createdAt
         self.motivationDescription = motivationDescription
-        self.expectedOutcome = expectedOutcome
+        self.expectedOutcomeDescription = expectedOutcomeDescription
         self.iconName = iconName
         self.imageData = imageData
         self.type = type
