@@ -8,68 +8,98 @@
 import SwiftUI
 import SwiftData
 import Charts
+import SwiftUI
+import SwiftData
 
 struct ActivityDetailView: View {
     
     @Query var records: [ProgressRecord] = []
     
     @State var presentAddProgress: Bool = false
-    @State var selectedFilter: TimeFilter = .today
     
     let activity: Activity
+    @State private var selectedFilter: TimeFilter = .last7Days
     
-    var numberFormat: NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return formatter
-    }
-    var goalFeedback: String {
-        switch goalStatus {
-        case .inProgress:
-            return "Keep going — you're making progress."
-        case .completed:
-            return "Goal reached 🎉"
-        case .exceeded:
-            return "Amazing — you went beyond your goal 🚀"
-        }
-    }
-    var goalStatus: GoalStatus {
-        if todayProgress >= activity.goalValue {
-            if todayProgress > activity.goalValue {
-                return .exceeded
-            } else {
-                return .completed
-            }
-        } else {
-            return .inProgress
-        }
-    }
-    //todayProgress value
-    var todayProgress: Double {
-        let calendar = Calendar.current
-        
-        let todayRecords = records.filter { record in
-            calendar.isDateInToday(record.date)
-        }
-        
-        return todayRecords.reduce(0) { partial, record in
-            partial + record.value
-        }
-    }
+    // MARK: - Computed
     var filteredRecords: [ProgressRecord] {
-        ProgressAnalytics.filterRecords(records, by: selectedFilter)
+        guard let range = selectedFilter.dateRange() else {
+            return records
+        }
+        
+        return records.filter {
+            $0.date >= range.start && $0.date <= range.end
+        }
     }
 
     var groupedData: [Date: Double] {
         ProgressAnalytics.groupByDay(filteredRecords)
     }
-
     var chartData: [DailyProgress] {
         ProgressAnalytics.makeChartData(from: groupedData)
     }
-    var progressRatio: Double {
-        min(todayProgress / activity.goalValue, 1.0)
+    
+    var todayProgress: Double {
+        let calendar = Calendar.current
+        
+        let todayRecords = records.filter {
+            calendar.isDateInToday($0.date)
+        }
+        
+        return todayRecords.reduce(0) { $0 + $1.value }
     }
+    
+    var progressRatio: Double {
+        guard activity.goalValue > 0 else { return 0 }
+        return min(todayProgress / activity.goalValue, 1.0)
+    }
+    
+    var progressPercentage: Int {
+        Int(progressRatio * 100)
+    }
+    
+    var goalStatus: GoalStatus {
+        if todayProgress >= activity.goalValue {
+            return todayProgress > activity.goalValue ? .exceeded : .completed
+        } else {
+            return .inProgress
+        }
+    }
+    
+    var activeDaysLast7: Int {
+        ActivityInsights.activeDaysLast7(records: records)
+    }
+    
+    var feedbackMessage: String {
+        switch goalStatus {
+        case .inProgress:
+            if progressRatio == 0 {
+                return "Start small today 🌱"
+            } else if progressRatio < 0.5 {
+                return "You're building momentum"
+            } else {
+                return "You're almost there"
+            }
+        case .completed:
+            return "Goal reached 🎉"
+        case .exceeded:
+            return "You exceeded your goal 🚀"
+        }
+    }
+    var streakMessage: String {
+        switch activity.currentStreak {
+        case 0:
+            return "Start your streak today"
+        case 1...2:
+            return "You're getting started"
+        case 3...6:
+            return "You're building consistency"
+        default:
+            return "You're on fire 🔥"
+        }
+    }
+    
+    
+    // MARK: - Init
     
     init(activity: Activity) {
         self.activity = activity
@@ -84,231 +114,476 @@ struct ActivityDetailView: View {
             order: .reverse
         )
     }
+    
+    // MARK: - Body
+    
     var body: some View {
-        VStack(alignment: .center, spacing: 30){
-            ZStack {
-                AnimatedBackgroundView(style: .calm)
-                    .ignoresSafeArea()
-                scrollView
-            }
-        }
-        .sheet(isPresented: $presentAddProgress, content: {
-            AddActivityProgressView(activity: self.activity)
-        })
-        .onAppear {
-            print("Records count: OnAppear", records.count)
-        }
-    }
-    
-    
-    var scrollView: some View {
-        ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 20) {
-                headerSection
-                inspoSection
-                infoData
-                addProgressSection
-                Divider()
-                Text("Progress records")
-                    .font(.headline)
-                filterSelection
-                chartProgressView
-                progressRecordsView
-            }
-            .padding()
-            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
-            .padding()
-        }
-    }
-    var headerSection: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .center, spacing: 25) {
-                    activityImage
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(activity.name + " details")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                        Text("\(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
-                            .font(.headline)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        ZStack {
+            AnimatedBackgroundView(style: .calm)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: 24) {
+                    heroSection
+                    meaningSection
+                    insightsSection
+                    chartSection
+                    recordsSection
                 }
-                VStack {
-                    Text(goalFeedback)
+                .padding()
+            }
+        }
+        .sheet(isPresented: $presentAddProgress) {
+            AddActivityProgressView(activity: activity)
+        }
+    }
+}
+extension ActivityDetailView {
+    
+    var heroSection: some View {
+        VStack(spacing: 20) {
+            
+            // Identity
+            HStack(spacing: 16) {
+                activityImage
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(activity.name)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    Text("\(progressPercentage)% complete today")
                         .font(.subheadline)
-                        .foregroundColor(.green)
-                    ProgressView(value: progressRatio)
-                        .tint(Color.colorForActivity(self.activity))
+                        .foregroundColor(.secondary)
                 }
-                .padding(.bottom)
-            }
-        }
-        .containerShape(RoundedRectangle(cornerRadius: 30))
-    }
-    var inspoSection: some View {
-        VStack {
-            VStack(alignment: .leading, spacing: 10) {
-                if let motivationDescription = activity.motivationDescription {
-                    Text("Here's some motivation from your self")
-                        .font(.headline)
-                    Text(motivationDescription )
-                        .font(.body)
-                }
-                if let expectedOutcome = activity.expectedOutcomeDescription {
-                    Text("Remember what you are expecting")
-                        .font(.headline)
-                    Text(expectedOutcome )
-                        .font(.body)
-                }
-            }
-            .padding()
-        }
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
-    }
-    var infoData: some View {
-        VStack {
-            HStack(alignment: .top, spacing: 0) {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack(alignment: .top, spacing: 0) {
-                        Image(systemName: "pin")
-                        Text("Tracking \(activity.trackingType.rawValue)")
-                    }
-                    Divider()
-                    HStack(alignment: .top, spacing: 0) {
-                        Image(systemName: "pin")
-                        Text("Goal \(numberFormat.string(from: NSNumber(value: activity.goalValue))!) \(activity.unitType.rawValue)")
-                    }
-                }
-                .padding()
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
-                Spacer()
-                VStack {
-                    HStack(alignment: .top, spacing: 5) {
-                        Image(systemName: "flame")
-                            .symbolEffect(.breathe)
-                            .foregroundStyle(Color.red)
-                        Text("Current streak: \(activity.currentStreak, specifier: "%.0f")")
-                    }
-                    Divider()
-                    HStack(alignment: .top, spacing: 5) {
-                        Image(systemName: "flame")
-                            .symbolEffect(.breathe)
-                            .foregroundStyle(Color.red)
-                        Text("Longest streak: \(activity.longestStreak, specifier: "%.0f")")
-                    }
-                }
-                .padding()
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 30))
-            }
-            .font(.system(size: 14))
-            .padding(.bottom, 20)
-            HStack(alignment: .top, spacing: 0) {
-                Image(systemName: "calendar")
-                Text("Created by \(activity.createdAt, format: .dateTime.month().year())")
-                    .font(.system(size: 12))
+                
                 Spacer()
             }
-        }
-    }
-    var addProgressSection: some View {
-        VStack(alignment: .center) {
-            HStack {
-                Spacer()
-                Button(action: {
-                    presentAddProgress.toggle()
-                }, label: {
-                    HStack {
-                        Image(systemName: "plus.circle")
-                            .font(Font.system(size: 20))
-                        Text("Add new progress!")
-                    }
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 20)
+            
+            // Progress value
+            VStack(spacing: 8) {
+                Text("\(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
+                    .font(.headline)
+                
+                ProgressView(value: progressRatio)
+                    .tint(Color.colorForActivity(activity))
+                    .animation(.easeInOut, value: progressRatio)
+            }
+            
+            // Feedback (THIS is the key)
+            Text(feedbackMessage)
+                .font(.subheadline)
+                .foregroundColor(colorForStatus)
+                .multilineTextAlignment(.center)
+                .padding(.top, 4)
+            
+            // CTA (important positioning)
+            Button {
+                presentAddProgress.toggle()
+            } label: {
+                Label("Add progress", systemImage: "plus.circle.fill")
+                    .font(.headline)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
                     .background(Color.green)
-                    .font(.system(size: 15))
-                    .foregroundStyle(Color.white)
-                })
-                .clipShape(RoundedRectangle(cornerRadius: 25))
-                Spacer()
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
             }
         }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.ultraThinMaterial)
+        )
     }
-    var filterSelection: some View {
-        VStack {
-            HStack {
-                Picker("Filter", selection: $selectedFilter) {
-                    ForEach(TimeFilter.allCases, id: \.self) { filter in
-                        Text(title(for: filter)).tag(filter)
+}
+extension ActivityDetailView {
+    
+    var activityImage: some View {
+        Group {
+            if let data = activity.imageData,
+               let img = UIImage(data: data) {
+                
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFill()
+                
+            } else {
+                Image(systemName: activity.iconName ?? "circle.dotted")
+                    .font(.system(size: 40))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(width: 70, height: 70)
+        .background(.ultraThinMaterial)
+        .clipShape(Circle())
+        .symbolEffect(.pulse, value: activity.iconName)
+    }
+    
+    var colorForStatus: Color {
+        switch goalStatus {
+        case .inProgress: return .green
+        case .completed: return .blue
+        case .exceeded: return .purple
+        }
+    }
+}
+extension ActivityDetailView {
+    
+    var meaningSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            
+            if hasMeaningContent {
+                
+                Text("Why this matters")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    
+                    if let motivation = activity.motivationDescription,
+                       !motivation.isEmpty {
+                        
+                        MeaningBlock(
+                            icon: "leaf.fill",
+                            title: "Your reason",
+                            text: motivation,
+                            color: .green
+                        )
+                    }
+                    
+                    if let outcome = activity.expectedOutcomeDescription,
+                       !outcome.isEmpty {
+                        
+                        MeaningBlock(
+                            icon: "target",
+                            title: "What you're aiming for",
+                            text: outcome,
+                            color: .blue
+                        )
                     }
                 }
-                .pickerStyle(.segmented)
             }
         }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.ultraThinMaterial)
+        )
     }
-    var chartProgressView: some View {
-        VStack {
+}
+extension ActivityDetailView {
+    
+    var hasMeaningContent: Bool {
+        let hasMotivation = !(activity.motivationDescription?.isEmpty ?? true)
+        let hasOutcome = !(activity.expectedOutcomeDescription?.isEmpty ?? true)
+        return hasMotivation || hasOutcome
+    }
+    var insightsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            
+            Text("Your patterns")
+                .font(.headline)
+            
+            VStack(spacing: 12) {
+                
+                InsightRow(
+                    icon: "flame.fill",
+                    color: .red,
+                    title: "\(activity.currentStreak) day streak",
+                    subtitle: streakMessage
+                )
+                
+                InsightRow(
+                    icon: "calendar",
+                    color: .blue,
+                    title: "\(activeDaysLast7) active days",
+                    subtitle: "In the last 7 days"
+                )
+                
+                InsightRow(
+                    icon: "chart.bar.fill",
+                    color: .green,
+                    title: averageText,
+                    subtitle: "Your daily average"
+                )
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.ultraThinMaterial)
+        )
+    }
+    var averageText: String {
+        let totals = groupedData.values
+        guard !totals.isEmpty else { return "No data yet" }
+        
+        let avg = totals.reduce(0, +) / Double(totals.count)
+        
+        return "\(Int(avg)) \(activity.unitType.rawValue)"
+    }
+    //chart sections
+    var chartSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            
+            // Header
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Progress over time")
+                    .font(.headline)
+                
+                Text(chartInsight)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            // Filter
+            Picker("", selection: $selectedFilter) {
+                Text("7D").tag(TimeFilter.last7Days)
+                Text("30D").tag(TimeFilter.last30Days)
+                Text("All").tag(TimeFilter.all)
+            }
+            .pickerStyle(.segmented)
+            
+            // Chart
             Chart(chartData) { item in
+                
                 BarMark(
                     x: .value("Day", item.date, unit: .day),
                     y: .value("Progress", item.total)
                 )
-                .foregroundStyle(.blue)
+                .foregroundStyle(barColor(for: item))
+                
+                // Optional value label
                 .annotation(position: .top) {
-                    Text("\(item.total, specifier: "%.0f")")
+                    Text("\(Int(item.total))")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                RuleMark(y: .value("Goal", activity.goalValue))
+                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                .foregroundStyle(Color.gray.opacity(0.6))
+                .annotation(position: .topTrailing) {
+                    Text("Goal")
                         .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
             .chartYAxis {
                 AxisMarks(position: .leading)
             }
+            .frame(minHeight: 300)
             .animation(.easeInOut, value: chartData)
-            .frame(height: 300)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.ultraThinMaterial)
+        )
+    }
+    var chartInsight: String {
+        guard chartData.count > 1 else {
+            return "Start tracking to see your progress"
+        }
+        
+        let first = chartData.first?.total ?? 0
+        let last = chartData.last?.total ?? 0
+        
+        if last > first {
+            return "You're improving over time 📈"
+        } else if last == first {
+            return "You're staying consistent"
+        } else {
+            return "Your activity has slowed down"
         }
     }
-    var progressRecordsView: some View {
-        VStack{
-            LazyVStack(alignment: .leading, spacing: 10) {
-                ForEach(filteredRecords) { record in
-                    HStack {
-                        Text("+\(record.value, specifier: "%.0f") \(self.activity.unitType.rawValue)")
-                        Spacer()
-                        Text(record.date, format: .dateTime.day().month().year())
-                    }
-                    .padding()
-                    .glassEffect()
-                }
-            }
-            if filteredRecords.count > 0 {
-                Text("Filtered count: \(filteredRecords.count)")
-                    .font(Font.body.bold())
-            }
+    var groupedRecordsByDay: [(date: Date, records: [ProgressRecord])] {
+        let calendar = Calendar.current
+        
+        let grouped = Dictionary(grouping: filteredRecords) {
+            calendar.startOfDay(for: $0.date)
         }
+        
+        return grouped
+            .map { ($0.key, $0.value) }
+            .sorted { $0.date > $1.date }
     }
-    var activityImage: some View {
-        VStack {
-            if let data = activity.imageData, let img = UIImage(data: data) {
-                Image(uiImage: img)
-                    .resizable()
-                    .frame(width: 120, height: 150)
-            } else {
-                Image(systemName: activity.iconName ?? "circle.dotted")
-                    .font(.system(size: 35))
-            }
+    func barColor(for item: DailyProgress) -> Color {
+        guard let index = chartData.firstIndex(where: { $0.date == item.date }),
+              index > 0 else {
+            return Color.colorForActivity(activity)
         }
-    }
-    func title(for filter: TimeFilter) -> String {
-        switch filter {
-        case .all: return "All"
-        case .today: return "Today"
-        case .yesterday: return "Yesterday"
-        case .currentWeek: return "Week"
-        case .lastWeek: return "Last Week"
-        case .currentMonth: return "Month"
-        case .lastMonth: return "Last Month"
+        
+        let previous = chartData[index - 1].total
+        
+        if item.total > previous {
+            return .green
+        } else if item.total < previous {
+            return .red.opacity(0.7)
+        } else {
+            return .gray
         }
     }
     
+    //Records section
+    var recordsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            
+            Text("Your activity timeline")
+                .font(.headline)
+            
+            if groupedRecordsByDay.isEmpty {
+                emptyState
+            } else {
+                VStack(spacing: 16) {
+                    ForEach(groupedRecordsByDay, id: \.date) { group in
+                        DayGroupView(
+                            date: group.date,
+                            records: group.records,
+                            unit: activity.unitType.rawValue
+                        )
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.ultraThinMaterial)
+        )
+    }
+    var emptyState: some View {
+        VStack(spacing: 12) {
+            
+            Image(systemName: "sparkles")
+                .font(.system(size: 30))
+                .foregroundColor(.secondary)
+                .symbolEffect(.pulse)
+            
+            Text("No activity yet")
+                .font(.headline)
+            
+            Text("Start tracking to see your progress")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+    }
+}
+struct MeaningBlock: View {
+    
+    let icon: String
+    let title: String
+    let text: String
+    let color: Color
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .symbolEffect(.pulse, value: text)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Text(text)
+                    .font(.body)
+            }
+            
+            Spacer()
+        }
+    }
+}
+struct InsightRow: View {
+    
+    let icon: String
+    let color: Color
+    let title: String
+    let subtitle: String
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .symbolEffect(.pulse)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.headline)
+                
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+struct DayGroupView: View {
+    
+    let date: Date
+    let records: [ProgressRecord]
+    let unit: String
+    
+    var total: Double {
+        records.reduce(0) { $0 + $1.value }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            
+            // Header (date + total)
+            HStack {
+                Text(formattedDate)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                Text("\(Int(total)) \(unit)")
+                    .font(.headline)
+            }
+            
+            // Entries
+            VStack(spacing: 6) {
+                ForEach(records) { record in
+                    HStack {
+                        Text("+\(Int(record.value))")
+                            .font(.body)
+                        
+                        Spacer()
+                        
+                        Text(record.date, style: .time)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(8)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+            }
+        }
+    }
+    
+    var formattedDate: String {
+        if Calendar.current.isDateInToday(date) {
+            return "Today"
+        } else if Calendar.current.isDateInYesterday(date) {
+            return "Yesterday"
+        } else {
+            return date.formatted(date: .abbreviated, time: .omitted)
+        }
+    }
 }
 
 #Preview {

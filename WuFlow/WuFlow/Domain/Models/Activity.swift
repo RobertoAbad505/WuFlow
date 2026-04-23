@@ -58,7 +58,8 @@ final class Activity {
         imageData: Data? = nil,
         type: ActivityTypes = .maintain,
         lifeArea: LifeArea = .leisure,
-        secondaryNote: String? = nil
+        secondaryNote: String? = nil,
+        progressRecords: [ProgressRecord] = []
     ) {
         self.id = id
         self.name = name
@@ -73,6 +74,7 @@ final class Activity {
         self.type = type
         self.lifeArea = lifeArea
         self.secondaryNote = secondaryNote
+        self.progressRecords = progressRecords
     }
 }
 extension Activity {

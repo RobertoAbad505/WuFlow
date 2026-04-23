@@ -33,7 +33,7 @@ struct ActivityRowCard: View {
                 HStack(alignment: .center ,spacing: 12) {
                     activityImage
                     HStack(alignment: .bottom, spacing: 0) {
-                        VStack(alignment: .leading){
+                        VStack(alignment: .leading, spacing: 0){
                             Text(activity.name)
                                 .font(.subheadline.bold())
                                 .foregroundStyle(.black)
@@ -55,7 +55,7 @@ struct ActivityRowCard: View {
                         .font(Font.system(size: 18))
                         .padding(.bottom, 5)
                 }
-                .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+                .padding(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 10))
             }
             VStack(alignment: .center, spacing: 5) {
                 ProgressView(value: activity.progressRatio)
@@ -87,14 +87,15 @@ struct ActivityRowCard: View {
         .padding(.top, 3)
     }
     var activityImage: some View {
-        VStack {
+        VStack (alignment: .center){
             if let data = activity.imageData, let img = UIImage(data: data) {
                 Image(uiImage: img)
                     .resizable()
                     .frame(width: 100, height: 120)
             } else {
                 Image(systemName: activity.iconName ?? "circle.dotted")
-                    .font(.system(size: 25))
+                    .font(.system(size: 60))
+                    .frame(width: 100, height: 120)
             }
         }
     }
