@@ -30,7 +30,7 @@ struct ActivitySelectionGridView: View {
                         ActivityCircleView(activity: activity)
                     }
                     .buttonStyle(.plain)
-                    .glassEffect()
+                    .glassEffect(.clear, in: Circle())
                 }
             }
         }

@@ -133,7 +133,9 @@ struct CreateActivityView: View {
     func handleNext() {
         if step == .review {
             saveActivity()
-            dismiss()
+            withAnimation {
+                dismiss()
+            }
         } else {
             withAnimation {
                 step = nextStep()

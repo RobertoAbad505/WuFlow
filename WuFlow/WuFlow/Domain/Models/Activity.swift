@@ -192,6 +192,9 @@ extension Activity {
         guard let data = imageData else { return nil }
         return UIImage(data: data)
     }
+    var isCompletedToday: Bool {
+        todayProgress >= goalValue
+    }
 
 }
 enum ActivityTypes: String, Codable, CaseIterable {
