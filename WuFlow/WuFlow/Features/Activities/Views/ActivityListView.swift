@@ -24,7 +24,7 @@ struct ActivityListView: View {
                 content
             }
             .sheet(isPresented: $toggleCreateActivity, content: {
-                CreateActivityView()
+                CreateActivityView(mode: .create)
             })
             .navigationDestination(for: Activity.self) { selectedItem in
                 ActivityDetailView(activity: selectedItem)

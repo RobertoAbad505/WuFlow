@@ -12,9 +12,9 @@ struct CreateActivityView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    @State private var mode: ActivityFlowMode
     @State private var step: CreateActivityStep = .identity
     @State private var draft = ActivityDraft()
-     
     @StateObject private var cameraManager = CameraManager()
     let allSteps: [CreateActivityStep] = [
         .identity,
@@ -25,6 +25,19 @@ struct CreateActivityView: View {
         .visual,
         .review
     ]
+    
+    init(mode: ActivityFlowMode) {
+        self.mode = mode
+        
+        switch mode {
+        case .create:
+            _draft = State(initialValue: ActivityDraft())
+            
+        case .edit(let activity):
+            _draft = State(initialValue: ActivityDraft(from: activity))
+        }
+    }
+    
        
     var body: some View {
         VStack {
@@ -56,22 +69,50 @@ struct CreateActivityView: View {
     
     private func saveActivity() {
         withAnimation {
-            let imageData = cameraManager.image?.jpegData(compressionQuality: 0.8)
-            let newActivity = Activity(
-                name: draft.name,
-                unitType: draft.unitType,
-                goalValue: draft.goalValue,
-                trackingType: draft.trackingType,
-                iconName: draft.iconName,
-                motivationDescription: draft.motivationDescription,
-                expectedOutcomeDescription: draft.expectedOutcomeDescription,
-                imageData: imageData,
-                type: draft.type,
-                lifeArea: draft.lifeArea,
-                secondaryNote: draft.secondaryNote
-            )
             
-            modelContext.insert(newActivity)
+            // Prefer draft.imageData (source of truth)
+            let imageData = draft.imageData
+            
+            switch mode {
+                
+            case .create:
+                let newActivity = Activity(
+                    name: draft.name,
+                    unitType: draft.unitType,
+                    goalValue: draft.goalValue,
+                    trackingType: draft.trackingType,
+                    iconName: draft.iconName,
+                    motivationDescription: draft.motivationDescription,
+                    expectedOutcomeDescription: draft.expectedOutcomeDescription,
+                    imageData: imageData,
+                    type: draft.type,
+                    lifeArea: draft.lifeArea,
+                    secondaryNote: draft.secondaryNote
+                )
+                
+                modelContext.insert(newActivity)
+                
+                
+            case .edit(let activity):
+                activity.name = draft.name
+                activity.unitType = draft.unitType
+                activity.goalValue = draft.goalValue
+                activity.trackingType = draft.trackingType
+                activity.iconName = draft.iconName
+                activity.motivationDescription = draft.motivationDescription
+                activity.expectedOutcomeDescription = draft.expectedOutcomeDescription
+                activity.imageData = imageData
+                activity.type = draft.type
+                activity.lifeArea = draft.lifeArea
+                activity.secondaryNote = draft.secondaryNote
+            }
+            
+            // Save context explicitly (important for edit)
+            do {
+                try modelContext.save()
+            } catch {
+                print("❌ Error saving activity: \(error.localizedDescription)")
+            }
         }
     }
     func nextStep() -> CreateActivityStep {
@@ -109,18 +150,28 @@ struct CreateActivityView: View {
                     }
                 }
             }
-            
             Spacer()
-            
-            Button(step == .review ? "Create" : "Next") {
+            Button(step == .review ? modeTitle : "Next") {
                 handleNext()
             }
         }
         .padding(.horizontal)
+        .font(.body)
+    }
+    var modeTitle: String {
+        switch mode {
+        case .create:
+            return "Create"
+        case .edit:
+            return "Save"
+        }
     }
     
 }
-
+enum ActivityFlowMode {
+    case create
+    case edit(Activity)
+}
 enum CreateActivityStep {
     case identity
     case intention
@@ -142,9 +193,27 @@ struct ActivityDraft {
     var lifeArea: LifeArea = .health
     var type: ActivityTypes = .increase
     var secondaryNote: String?
+    
+    init() {
+        
+    }
+    
+    init(from activity: Activity) {
+        self.name = activity.name
+        self.unitType = activity.unitType
+        self.goalValue = activity.goalValue
+        self.trackingType = activity.trackingType
+        self.iconName = activity.iconName ?? "circle.dotted"
+        self.motivationDescription = activity.motivationDescription ?? ""
+        self.expectedOutcomeDescription = activity.expectedOutcomeDescription ?? ""
+        self.imageData = activity.imageData
+        self.lifeArea = activity.lifeArea
+        self.type = activity.type
+        self.secondaryNote = activity.secondaryNote
+    }
 }
 
 #Preview {
-    CreateActivityView()
+    CreateActivityView(mode: .create)
         .modelContainer(for: Activity.self, inMemory: false)
 }

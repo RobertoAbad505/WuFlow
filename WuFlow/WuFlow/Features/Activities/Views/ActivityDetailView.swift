@@ -16,6 +16,7 @@ struct ActivityDetailView: View {
     @Query var records: [ProgressRecord] = []
     
     @State var presentAddProgress: Bool = false
+    @State var presentEditProcess: Bool = false
     
     let activity: Activity
     @State private var selectedFilter: TimeFilter = .last7Days
@@ -136,6 +137,9 @@ struct ActivityDetailView: View {
         .sheet(isPresented: $presentAddProgress) {
             AddActivityProgressView(activity: activity)
         }
+        .sheet(isPresented: $presentEditProcess) {
+            CreateActivityView(mode: .edit(self.activity))
+        }
     }
 }
 extension ActivityDetailView {
@@ -158,6 +162,17 @@ extension ActivityDetailView {
                 }
                 
                 Spacer()
+                VStack {
+                    Button(action: {
+                        presentEditProcess = true
+                    }, label: {
+                        Image(systemName: "pencil")
+                            .foregroundStyle(.white)
+                            .font(.system(size: 20, weight: .bold))
+                    })
+                    .buttonStyle(.bordered)
+                    Spacer()
+                }
             }
             
             // Progress value

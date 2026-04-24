@@ -80,5 +80,5 @@ struct LifeAreaCard: View {
     }
 }
 #Preview {
-    LifeAreaStepView(draft: .constant(ActivityDraft(lifeArea: .health)))
+    LifeAreaStepView(draft: .constant(ActivityDraft()))
 }

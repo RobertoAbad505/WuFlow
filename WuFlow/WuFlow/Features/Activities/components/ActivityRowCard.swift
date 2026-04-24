@@ -50,12 +50,13 @@ struct ActivityRowCard: View {
                             ActivityStatusBadge(status: activity.status)
                         }
                         .frame(maxWidth: 100, alignment: .leading)
+                        .padding(.bottom, 30)
                     }
                     Image(systemName: "chevron.right")
                         .font(Font.system(size: 18))
                         .padding(.bottom, 5)
                 }
-                .padding(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 10))
+                .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
             }
             VStack(alignment: .center, spacing: 5) {
                 ProgressView(value: activity.progressRatio)
@@ -66,7 +67,7 @@ struct ActivityRowCard: View {
             .padding(.bottom, 5)
             .background(strokeColor.opacity(0.20))
         }
-        .cornerRadius(16)
+        .cornerRadius(20)
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
     }
     var unitTypeView: some View {

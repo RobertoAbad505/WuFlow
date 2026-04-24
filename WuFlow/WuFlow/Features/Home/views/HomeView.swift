@@ -10,7 +10,6 @@ import SwiftData
 
 struct HomeView: View {
     @Query private var activities: [Activity]
-    
     @State private var isPresentedAddProgress: Bool = false
     @State private var path = NavigationPath()
     
@@ -30,11 +29,11 @@ struct HomeView: View {
                 case .activityDetail(let activity):
                     ActivityDetailView(activity: activity)
                 case .addActivity:
-                    CreateActivityView()
+                    CreateActivityView(mode: .create)
                 case .addProgress(let activity):
                     AddActivityProgressView(activity: activity)
                 case .insights:
-                    ActivityListView()
+                    InsightsView()
                 }
             }
             .sheet(isPresented: $isPresentedAddProgress) {
@@ -46,11 +45,7 @@ struct HomeView: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
                 HomeHeaderView()
-                quickGridView
-                PinnedActivitiesView(activities: activities) {
-                    path.append(AppRoute.activityDetail($0))
-                }
-                Spacer()
+//                dailySummarySection
             }
             .padding()
         }
