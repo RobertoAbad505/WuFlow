@@ -186,7 +186,9 @@ struct HomeView: View {
                     systemImage: "square.and.pencil",
                     tint: .blue
                 ) {
+                    print("Navigate to add activity view!!🚀 ")
                     path.append(AppRoute.addActivity)
+                    print("Navigation complete!")
                 }
                 
                 QuickActionButton(
@@ -201,29 +203,6 @@ struct HomeView: View {
         .padding()
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24))
     }
-//    func calculateGlobalStreak() -> Int {
-//        let calendar = Calendar.current
-//        
-//        var streak = 0
-//        var date = Date()
-//        
-//        while true {
-//            let hasProgress = self.activities.contains { activity in
-//                activity.progressRecords.contains {
-//                    calendar.isDate($0.date, inSameDayAs: date)
-//                }
-//            }
-//            
-//            if hasProgress {
-//                streak += 1
-//                date = calendar.date(byAdding: .day, value: -1, to: date)!
-//            } else {
-//                break
-//            }
-//        }
-//        
-//        return streak
-//    }
 }
 struct QuickActionButton: View {
     

@@ -16,7 +16,8 @@ struct FocusCardView: View {
     }
     
     var progressRatio: Double {
-        min(progress / activity.goalValue, 1)
+        if progress == 0 && activity.goalValue == 0 { return 0 }
+        return min(progress / activity.goalValue, 1)
     }
     
     var body: some View {

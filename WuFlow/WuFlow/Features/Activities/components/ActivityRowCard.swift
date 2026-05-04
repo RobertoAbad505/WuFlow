@@ -69,6 +69,10 @@ struct ActivityRowCard: View {
         }
         .cornerRadius(20)
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(.white, lineWidth: 3)
+        }
     }
     var unitTypeView: some View {
         VStack {

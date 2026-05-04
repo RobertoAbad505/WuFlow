@@ -15,23 +15,22 @@ struct RootTabView: View {
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
-            
-            ActivityListView()
-                .tabItem {
-                    Label("Activities", systemImage: "square.grid.2x2.fill")
-                }
-            
+            NavigationStack {   // 👈 ADD THIS
+                ActivityListView()
+            }
+            .tabItem {
+                Label("Activities", systemImage: "list.bullet")
+            }
             InsightsView()
                 .tabItem {
                     Label("Insights", systemImage: "chart.bar.fill")
                 }
-            
             Text("Settings")
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
         }
-        .tint(.green)
+        .tint(.green.opacity(0.7))
     }
 }
 

@@ -11,11 +11,12 @@ import SwiftData
 struct ActivityListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Activity]
-
     @State var toggleCreateActivity: Bool = false
+    @State var showDeleteAlert = false
     private let columns = [
         GridItem(.flexible())
     ]
+
     var body: some View {
         VStack {
             ZStack {
@@ -23,7 +24,7 @@ struct ActivityListView: View {
                     .ignoresSafeArea()
                 content
             }
-            .sheet(isPresented: $toggleCreateActivity, content: {
+            .fullScreenCover(isPresented: $toggleCreateActivity, content: {
                 CreateActivityView(mode: .create)
             })
             .navigationDestination(for: Activity.self) { selectedItem in
@@ -32,20 +33,7 @@ struct ActivityListView: View {
 #if os(macOS)
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
 #endif
-            .toolbar {
-#if os(iOS)
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    EditButton()
-//                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus.circle.dashed")
-                    }
-                }
-            }
         }
-        .navigationTitle("All my activities")
     }
     private var content: some View {
         ScrollView {
@@ -55,7 +43,7 @@ struct ActivityListView: View {
                 activityList
                 addActivityBtn
             }
-            .padding()
+            .padding(EdgeInsets(top: 0, leading: 20, bottom: 30, trailing: 20))
         }
     }
     var activityList: some View {
@@ -78,6 +66,22 @@ struct ActivityListView: View {
     private var highlights: some View {
         VStack(alignment: .center, spacing: 10) {
             HStack {
+                Button(action: addItem) {
+                    VStack {
+                        Image(systemName: "plus.square.dashed")
+                            .font(.system(size: 32))
+                        Text("Add new activity")
+                            .font(.system(size: 10, weight: .regular))
+                    }
+                    .padding(.horizontal, 20)
+                    .frame(maxHeight: .infinity)
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(.white, lineWidth: 2)
+                    }
+                }
+                .tint(.green)
                 ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
                                         count: items.count.description,
                                         description: "Activities",
@@ -90,13 +94,14 @@ struct ActivityListView: View {
                                         footnote: "Strike",
                                         tint: .green
                 )
-                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
-                                        count: items.count.description,
-                                        description: "Activities",
-                                        footnote: "Total",
-                                        tint: .purple
-                )
+//                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
+//                                        count: items.count.description,
+//                                        description: "Activities",
+//                                        footnote: "Total",
+//                                        tint: .purple
+//                )
             }
+            .frame(maxHeight: .infinity)
             Divider()
         }
         .padding(.vertical)
@@ -188,10 +193,19 @@ struct ActivityListView: View {
 }
 
 
-#Preview {
-    ActivityListView()
-        .modelContainer(for: Activity.self, inMemory: false)
+#Preview("Activity List") {
+    // Seed initial data into an in-memory model container so @Query works in previews
+    let previewItems = [
+        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual),
+        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual),
+        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual)
+    ]
+    ActivityListView(toggleCreateActivity: false)
+        .modelContainer(for: Activity.self, inMemory: true) { result in
+            if case let .success(container) = result {
+                let context = container.mainContext
+                previewItems.forEach { context.insert($0) }
+                try? context.save()
+            }
+        }
 }
-
-
-

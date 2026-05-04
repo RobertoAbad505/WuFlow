@@ -45,9 +45,12 @@ struct CreateActivityView: View {
             navigationControls
         }        
         .padding()
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
     }
     var stepView: some View {
-        VStack{
+        VStack(alignment: .center, spacing: 0) {
+            closeHeader
             switch step {
             case .identity:
                 IdentityStepView(draft: $draft)
@@ -66,7 +69,19 @@ struct CreateActivityView: View {
             }
         }
     }
-    
+
+    private var closeHeader: some View {
+        HStack {
+            Button(action: { dismiss() }, label: {
+                HStack {Image(systemName: "chevron.left")}
+                .font(.system(size: 15, weight: .regular))
+            })
+            .buttonStyle(.glass)
+            Spacer()
+        }
+        .padding()
+        .foregroundStyle(Color(.label))
+    }
     private func saveActivity() {
         withAnimation {
             
@@ -110,9 +125,12 @@ struct CreateActivityView: View {
             // Save context explicitly (important for edit)
             do {
                 try modelContext.save()
-            } catch {
-                print("❌ Error saving activity: \(error.localizedDescription)")
+                print("✅ Save success")
+            } catch let error {
+                print("❌ Save failed:", error.localizedDescription)
             }
+            // 🔥 IMPORTANT: clean camera state
+            cameraManager.image = nil
         }
     }
     func nextStep() -> CreateActivityStep {

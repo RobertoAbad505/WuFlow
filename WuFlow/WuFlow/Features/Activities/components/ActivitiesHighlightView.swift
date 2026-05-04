@@ -27,12 +27,11 @@ struct ActivitiesHighlightView: View {
                     .symbolEffect(.pulse.byLayer)
                 VStack(alignment: .leading) {
                     Text(count)
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                     Text(description)
                         .font(.system(size: 9, weight: .regular))
                 }
             }
-            .padding(.bottom, 5)
             HStack {
                 Text(footnote)
                     .font(.footnote)
@@ -41,6 +40,7 @@ struct ActivitiesHighlightView: View {
             }
         }
         .padding(10)
+        .frame(maxHeight: .infinity)
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
     }
 }
@@ -48,7 +48,7 @@ struct ActivitiesHighlightView: View {
 #Preview {
     ActivitiesHighlightView(systemNameImage: "flame",
                             count: "2",
-                            description: "Streak days",
-                            footnote: "Strike",
+                            description: "activities",
+                            footnote: "Total",
                             tint: .green)
 }

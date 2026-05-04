@@ -34,7 +34,7 @@ struct IdentityStepView: View {
     ]
     
     var body: some View {
-        VStack(spacing: 30) {
+        VStack(spacing: 25) {
             
             Text("What do you want to grow?")
                 .font(.title2)
@@ -42,7 +42,7 @@ struct IdentityStepView: View {
             // Preview
             Image(systemName: draft.iconName)
                 .symbolEffect(.bounce)
-                .font(.system(size: 50))
+                .font(.system(size: 40))
                 .padding()
                 .background(.ultraThinMaterial)
                 .clipShape(Circle())

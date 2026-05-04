@@ -14,8 +14,7 @@ struct HomeHeaderView: View {
     let imageName: String? = "selfie" // optional for flexibility
     
     var body: some View {
-        HStack(alignment: .center) {
-            
+        HStack(alignment: .center) {            
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(HomeHeaderView.currentGreeting()),")
                     .font(.subheadline)
