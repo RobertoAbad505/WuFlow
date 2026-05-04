@@ -12,7 +12,8 @@ import SwiftUI
 import SwiftData
 
 struct ActivityDetailView: View {
-    
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Query var records: [ProgressRecord] = []
     
     @State var presentAddProgress: Bool = false
@@ -20,6 +21,7 @@ struct ActivityDetailView: View {
     
     let activity: Activity
     @State private var selectedFilter: TimeFilter = .last7Days
+    @State private var showDeleteDialog = false
     
     // MARK: - Computed
     var filteredRecords: [ProgressRecord] {
@@ -130,6 +132,7 @@ struct ActivityDetailView: View {
                     insightsSection
                     chartSection
                     recordsSection
+                    deleteButton
                 }
                 .padding()
             }
@@ -137,13 +140,12 @@ struct ActivityDetailView: View {
         .sheet(isPresented: $presentAddProgress) {
             AddActivityProgressView(activity: activity)
         }
-        .sheet(isPresented: $presentEditProcess) {
+        .fullScreenCover(isPresented: $presentEditProcess) {
             CreateActivityView(mode: .edit(self.activity))
         }
     }
 }
 extension ActivityDetailView {
-    
     var heroSection: some View {
         VStack(spacing: 20) {
             
@@ -211,8 +213,6 @@ extension ActivityDetailView {
                 .fill(.ultraThinMaterial)
         )
     }
-}
-extension ActivityDetailView {
     
     var activityImage: some View {
         Group {
@@ -242,9 +242,6 @@ extension ActivityDetailView {
         case .exceeded: return .purple
         }
     }
-}
-extension ActivityDetailView {
-    
     var meaningSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             
@@ -485,131 +482,87 @@ extension ActivityDetailView {
         .frame(maxWidth: .infinity)
         .padding()
     }
-}
-struct MeaningBlock: View {
-    
-    let icon: String
-    let title: String
-    let text: String
-    let color: Color
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            
-            Image(systemName: icon)
-                .foregroundColor(color)
-                .symbolEffect(.pulse, value: text)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text(text)
-                    .font(.body)
+    var deleteButton: some View {
+        HStack {
+            Image(systemName: "trash")
+                .font(.system(size: 30))
+                .foregroundStyle(.white)
+            VStack(alignment: .leading) {
+                Text("Delete this activity")
+                    .font(.system(size: 14, weight: .bold))
+                Text("Stop tracking this efforts, this action is irreversible")
+                    .font(.system(size: 12, weight: .none))
             }
-            
             Spacer()
-        }
-    }
-}
-struct InsightRow: View {
-    
-    let icon: String
-    let color: Color
-    let title: String
-    let subtitle: String
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            
-            Image(systemName: icon)
-                .foregroundColor(color)
-                .symbolEffect(.pulse)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.headline)
-                
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            Button(action: {
+                showDeleteDialog = true
+            }) {
+                HStack {
+                    Text("Delete")
+                    Image(systemName: "trash")
+                }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 25)
+                .padding(.vertical, 10)
+                .background(Color.red)
             }
-            
-            Spacer()
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(.white, lineWidth: 2)
+            }
         }
         .padding()
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-}
-struct DayGroupView: View {
-    
-    let date: Date
-    let records: [ProgressRecord]
-    let unit: String
-    
-    var total: Double {
-        records.reduce(0) { $0 + $1.value }
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            
-            // Header (date + total)
-            HStack {
-                Text(formattedDate)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                Text("\(Int(total)) \(unit)")
-                    .font(.headline)
+        .background(Color.red.opacity(0.3))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(.white, lineWidth: 2)
+        }
+        .padding(.vertical)
+        .padding(.bottom, 50)
+        .confirmationDialog(
+            "Delete Activity?",
+            isPresented: $showDeleteDialog,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                delete()
             }
-            
-            // Entries
-            VStack(spacing: 6) {
-                ForEach(records) { record in
-                    HStack {
-                        Text("+\(Int(record.value))")
-                            .font(.body)
-                        
-                        Spacer()
-                        
-                        Text(record.date, style: .time)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(8)
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
+            Button("Cancel", role: .cancel) {
+                showDeleteDialog = false
             }
+        } message: {
+            Text("This action cannot be undone.")
         }
     }
-    
-    var formattedDate: String {
-        if Calendar.current.isDateInToday(date) {
-            return "Today"
-        } else if Calendar.current.isDateInYesterday(date) {
-            return "Yesterday"
-        } else {
-            return date.formatted(date: .abbreviated, time: .omitted)
+    private func delete() {
+        withAnimation {
+            modelContext.delete(self.activity)
+            
+            do {
+                try modelContext.save()
+            } catch {
+                print("❌ Delete failed:", error)
+            }
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
+        dismiss()
     }
 }
 
 #Preview {
-    ActivityDetailView(activity: Activity(name: "Meditation",
-                                          unitType: .sessions,
-                                          goalValue: 3,
-                                          trackingType: .manual,
-                                          iconName: "circle.dotted",
-                                          motivationDescription: "Remember always is a great time to meditate",
-                                          expectedOutcomeDescription: "We want to relax at the beach without mental noise, just be there and be present"
-                                         ))
-    .modelContainer(for: Activity.self, inMemory: false)
-    .modelContainer(for: ProgressRecord.self, inMemory: true)
+    NavigationStack {
+        ActivityDetailView(activity: Activity(name: "Meditation",
+                                              unitType: .sessions,
+                                              goalValue: 3,
+                                              trackingType: .manual,
+                                              iconName: "circle.dotted",
+                                              motivationDescription: "Remember always is a great time to meditate",
+                                              expectedOutcomeDescription: "We want to relax at the beach without mental noise, just be there and be present"
+                                             ))
+        .modelContainer(for: Activity.self, inMemory: false)
+        .modelContainer(for: ProgressRecord.self, inMemory: true)
+    }
 }

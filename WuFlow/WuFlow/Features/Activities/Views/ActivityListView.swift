@@ -1,5 +1,4 @@
-//
-//  ActivityListView.swift
+////  ActivityListView.swift
 //  WuFlow
 //
 //  Created by Roberto Ramirez on 4/3/26.
@@ -12,11 +11,16 @@ struct ActivityListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Activity]
     @State var toggleCreateActivity: Bool = false
+    
+    //ON DELETE
     @State var showDeleteAlert = false
+    @State private var selectedToDelete: Activity?
+    @State private var showDeleteDialog = false
+    
     private let columns = [
         GridItem(.flexible())
     ]
-
+    
     var body: some View {
         VStack {
             ZStack {
@@ -50,11 +54,35 @@ struct ActivityListView: View {
         LazyVGrid(columns: columns, spacing: 36) {
             ForEach(items) { item in
                 NavigationLink(value: item) {
-                    ActivityRowCard(activity: item)
-                        .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
+                        ActivityRowCard(activity: item)
+                            .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
+                    }
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            selectedToDelete = item
+                            showDeleteDialog = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+            }
+        }
+        .confirmationDialog(
+            "Delete Activity?",
+            isPresented: $showDeleteDialog,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let activity = selectedToDelete {
+                    delete(activity)
                 }
             }
-            .onDelete(perform: deleteItems)
+            
+            Button("Cancel", role: .cancel) {
+                selectedToDelete = nil
+            }
+        } message: {
+            Text("This action cannot be undone.")
         }
     }
     private var headerSection: some View {
@@ -190,6 +218,20 @@ struct ActivityListView: View {
             return "streak days!"
         }
     }
+
+    private func delete(_ activity: Activity) {
+        withAnimation {
+            modelContext.delete(activity)
+            
+            do {
+                try modelContext.save()
+            } catch {
+                print("❌ Delete failed:", error)
+            }
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
+        selectedToDelete = nil
+    }
 }
 
 
@@ -197,15 +239,17 @@ struct ActivityListView: View {
     // Seed initial data into an in-memory model container so @Query works in previews
     let previewItems = [
         Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual),
-        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual),
-        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual)
+        Activity(name: "Meditation", unitType: .count, goalValue: 20, trackingType: .manual),
+        Activity(name: "Push-ups", unitType: .count, goalValue: 20, trackingType: .manual)
     ]
-    ActivityListView(toggleCreateActivity: false)
-        .modelContainer(for: Activity.self, inMemory: true) { result in
-            if case let .success(container) = result {
-                let context = container.mainContext
-                previewItems.forEach { context.insert($0) }
-                try? context.save()
+    NavigationStack {
+        ActivityListView(toggleCreateActivity: false)
+            .modelContainer(for: Activity.self, inMemory: true) { result in
+                if case let .success(container) = result {
+                    let context = container.mainContext
+                    previewItems.forEach { context.insert($0) }
+                    try? context.save()
+                }
             }
-        }
+    }
 }
