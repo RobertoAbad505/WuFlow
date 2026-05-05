@@ -35,27 +35,30 @@ struct VisualStepView: View {
             )
         }
         .onChange(of: cameraManager.image) { newImage in
-            if let image = newImage {
-                draft.imageData = image.jpegData(compressionQuality: 0.8)
-            }
+            guard let newImage else { return }
+            let path = try? ImageStore.shared.save(
+                newImage,
+                category: .activity,
+                maxDimension: 1024,
+                compression: 0.6
+            )
+
+            draft.imagePath = path
         }
     }
     private var preview: some View {
         ZStack {
             
-            if let data = draft.imageData,
-               let uiImage = UIImage(data: data) {
-                
+            if let uiImage = cameraManager.image {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 180, height: 180)
+                    .frame(width: 200, height: 200)
                     .clipShape(Circle())
                 
             } else {
-                
                 Image(systemName: draft.iconName)
-                    .font(.system(size: 60))
+                    .font(.system(size: 70))
                     .foregroundColor(.secondary)
                     .frame(width: 180, height: 180)
                     .background(.ultraThinMaterial)
@@ -75,15 +78,15 @@ struct VisualStepView: View {
                 }
             } label: {
                 Label(
-                    draft.imageData == nil ? "Take a picture" : "Retake picture",
+                    draft.imagePath == nil ? "Take a picture" : "Retake picture",
                     systemImage: "camera.fill"
                 )
             }
             .buttonStyle(.borderedProminent)
             
-            if draft.imageData != nil {
+            if draft.imagePath != nil {
                 Button("Remove image") {
-                    draft.imageData = nil
+                    draft.imagePath = nil
                     cameraManager.image = nil
                 }
                 .foregroundColor(.red)

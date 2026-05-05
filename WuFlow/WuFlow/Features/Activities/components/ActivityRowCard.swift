@@ -93,9 +93,8 @@ struct ActivityRowCard: View {
     }
     var activityImage: some View {
         VStack (alignment: .center){
-            if let data = activity.imageData, let img = UIImage(data: data) {
-                Image(uiImage: img)
-                    .resizable()
+            if let img = activity.imagePath {
+                ActivityImageView(path: img)
                     .frame(width: 100, height: 120)
             } else {
                 Image(systemName: activity.iconName ?? "circle.dotted")

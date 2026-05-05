@@ -66,10 +66,8 @@ struct ReviewStepView: View {
         VStack(spacing: 12) {
             
             ZStack {
-                if let data = draft.imageData,
-                   let uiImage = UIImage(data: data) {
-                    
-                    Image(uiImage: uiImage)
+                if let previewImg = ImageStore.shared.load(from: draft.imagePath) {
+                    Image(uiImage: previewImg)
                         .resizable()
                         .scaledToFill()
                         .frame(width: 100, height: 100)

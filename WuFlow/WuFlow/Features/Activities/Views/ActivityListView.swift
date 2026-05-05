@@ -54,17 +54,17 @@ struct ActivityListView: View {
         LazyVGrid(columns: columns, spacing: 36) {
             ForEach(items) { item in
                 NavigationLink(value: item) {
-                        ActivityRowCard(activity: item)
-                            .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
+                    ActivityRowCard(activity: item)
+                        .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
+                }
+                .contextMenu {
+                    Button(role: .destructive) {
+                        selectedToDelete = item
+                        showDeleteDialog = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
                     }
-                    .contextMenu {
-                        Button(role: .destructive) {
-                            selectedToDelete = item
-                            showDeleteDialog = true
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
+                }
             }
         }
         .confirmationDialog(

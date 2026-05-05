@@ -216,18 +216,19 @@ extension ActivityDetailView {
     
     var activityImage: some View {
         Group {
-            if let data = activity.imageData,
-               let img = UIImage(data: data) {
-                
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFill()
-                
-            } else {
-                Image(systemName: activity.iconName ?? "circle.dotted")
-                    .font(.system(size: 40))
-                    .foregroundColor(.secondary)
-            }
+//            if let data = activity.imageData,
+//               let img = UIImage(data: data) {
+//                
+//                Image(uiImage: img)
+//                    .resizable()
+//                    .scaledToFill()
+//                
+//            } else {
+//                Image(systemName: activity.iconName ?? "circle.dotted")
+//                    .font(.system(size: 40))
+//                    .foregroundColor(.secondary)
+//            }
+            ActivityImageView(path: activity.imagePath)
         }
         .frame(width: 70, height: 70)
         .background(.ultraThinMaterial)

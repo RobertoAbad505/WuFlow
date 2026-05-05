@@ -33,7 +33,7 @@ final class Activity {
     
     var iconName: String?
     
-    var imageData: Data?
+    var imagePath: String?
     
     var type: ActivityTypes
     
@@ -55,7 +55,7 @@ final class Activity {
         iconName: String = "circle",
         motivationDescription: String? = nil,
         expectedOutcomeDescription: String? = nil,
-        imageData: Data? = nil,
+        imagePath: String? = nil,
         type: ActivityTypes = .maintain,
         lifeArea: LifeArea = .leisure,
         secondaryNote: String? = nil,
@@ -70,7 +70,7 @@ final class Activity {
         self.motivationDescription = motivationDescription
         self.expectedOutcomeDescription = expectedOutcomeDescription
         self.iconName = iconName
-        self.imageData = imageData
+        self.imagePath = imagePath
         self.type = type
         self.lifeArea = lifeArea
         self.secondaryNote = secondaryNote
@@ -189,8 +189,7 @@ extension Activity {
             .sorted { $0.date < $1.date }
     }
     var uiImage: UIImage? {
-        guard let data = imageData else { return nil }
-        return UIImage(data: data)
+        ImageStore.shared.load(from: imagePath)
     }
     var isCompletedToday: Bool {
         todayProgress >= goalValue

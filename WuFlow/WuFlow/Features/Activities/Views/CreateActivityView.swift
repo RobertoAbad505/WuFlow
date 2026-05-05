@@ -86,8 +86,6 @@ struct CreateActivityView: View {
         withAnimation {
             
             // Prefer draft.imageData (source of truth)
-            let imageData = draft.imageData
-            
             switch mode {
                 
             case .create:
@@ -99,7 +97,7 @@ struct CreateActivityView: View {
                     iconName: draft.iconName,
                     motivationDescription: draft.motivationDescription,
                     expectedOutcomeDescription: draft.expectedOutcomeDescription,
-                    imageData: imageData,
+                    imagePath: draft.imagePath,
                     type: draft.type,
                     lifeArea: draft.lifeArea,
                     secondaryNote: draft.secondaryNote
@@ -116,7 +114,7 @@ struct CreateActivityView: View {
                 activity.iconName = draft.iconName
                 activity.motivationDescription = draft.motivationDescription
                 activity.expectedOutcomeDescription = draft.expectedOutcomeDescription
-                activity.imageData = imageData
+                activity.imagePath = draft.imagePath
                 activity.type = draft.type
                 activity.lifeArea = draft.lifeArea
                 activity.secondaryNote = draft.secondaryNote
@@ -209,7 +207,7 @@ struct ActivityDraft {
     var iconName: String = "circle.dotted"
     var motivationDescription: String = ""
     var expectedOutcomeDescription: String = ""
-    var imageData: Data?
+    var imagePath: String?
     var lifeArea: LifeArea = .health
     var type: ActivityTypes = .increase
     var secondaryNote: String?
@@ -226,7 +224,7 @@ struct ActivityDraft {
         self.iconName = activity.iconName ?? "circle.dotted"
         self.motivationDescription = activity.motivationDescription ?? ""
         self.expectedOutcomeDescription = activity.expectedOutcomeDescription ?? ""
-        self.imageData = activity.imageData
+        self.imagePath = activity.imagePath
         self.lifeArea = activity.lifeArea
         self.type = activity.type
         self.secondaryNote = activity.secondaryNote

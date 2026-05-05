@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
+    
+    @Environment(\.modelContext) var modelContext
     @Query private var activities: [Activity]
     @State private var isPresentedAddProgress: Bool = false
     @State private var path = NavigationPath()
@@ -61,6 +63,14 @@ struct HomeView: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
                 HomeHeaderView()
+                Button("Delete Broken Item") {
+                    let badItems = activities.filter { $0.name == "Test" }
+                    for item in badItems {
+                        modelContext.delete(item)
+                    }
+                    
+                    try? modelContext.save()
+                }
                 dailySummarySection
                 focusSection
                 quickActionsSection
@@ -133,18 +143,15 @@ struct HomeView: View {
     }
     var focusSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            
             HStack {
                 Text("Your Focus")
                     .font(.headline)
-                
                 Spacer()
-                
                 Button {
                     path.append(AppRoute.activityList)
                 } label: {
                     Text("See all")
-                        .font(.caption)
+                        .font(.callout)
                         .foregroundColor(.secondary)
                 }
             }
@@ -154,6 +161,12 @@ struct HomeView: View {
                     ForEach(focusActivities) { activity in
                         FocusCardView(activity: activity) {
                             path.append(AppRoute.activityDetail(activity))
+                        }
+                        .onAppear {
+                            print("DEBUG ITEM:")
+                            print("name:", activity.name)
+                            print("icon:", activity.iconName ?? "nil")
+                            print("has image:", activity.imagePath ?? "N/A")
                         }
                     }
                 }
