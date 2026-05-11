@@ -52,6 +52,10 @@ struct HomeView: View {
                     AddActivityProgressView(activity: activity)
                 case .insights:
                     InsightsView()
+                case .settings:
+                    Text("Settings??")
+                case .home:
+                    Text("Home???")
                 }
             }
             .sheet(isPresented: $isPresentedAddProgress) {

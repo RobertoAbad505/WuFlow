@@ -12,5 +12,7 @@ enum AppRoute: Hashable {
     case activityDetail(Activity)
     case addActivity
     case addProgress(Activity?)
-    case insights    
+    case insights
+    case settings
+    case home
 }

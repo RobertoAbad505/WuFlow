@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct WuFlowApp: App {
+    @StateObject private var router = Router()
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Activity.self,
@@ -30,9 +32,9 @@ struct WuFlowApp: App {
             RootTabView()
                 .preferredColorScheme(.light)
                 .onOpenURL { url in
-                    print("OPENED URL: \(url)")
-                    print("Host: \(url.host())")
+                    router.handleDeepLink(url)
                 }
+                .environmentObject(router)
         }
         .modelContainer(sharedModelContainer)
     }
