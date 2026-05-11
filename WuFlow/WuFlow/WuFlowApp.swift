@@ -29,6 +29,10 @@ struct WuFlowApp: App {
         WindowGroup {
             RootTabView()
                 .preferredColorScheme(.light)
+                .onOpenURL { url in
+                    print("OPENED URL: \(url)")
+                    print("Host: \(url.host())")
+                }
         }
         .modelContainer(sharedModelContainer)
     }

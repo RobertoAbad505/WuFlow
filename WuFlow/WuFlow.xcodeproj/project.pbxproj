@@ -30,6 +30,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6F04CA982FB276A4000B57CE /* Exceptions for "WuFlow" folder in "WuFlow" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6F7121092F75BBA1001CEF33 /* WuFlow */;
+		};
 		6FED74BE2F7C365D008C5A58 /* Exceptions for "WuFlow" folder in "WuFlowTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -47,6 +54,7 @@
 		6F71210C2F75BBA1001CEF33 /* WuFlow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				6F04CA982FB276A4000B57CE /* Exceptions for "WuFlow" folder in "WuFlow" target */,
 				6FED74BE2F7C365D008C5A58 /* Exceptions for "WuFlow" folder in "WuFlowTests" target */,
 			);
 			path = WuFlow;
@@ -426,7 +434,8 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "$(PRODUCT_NAME) necesita tu permiso para capturar fotos";
+				INFOPLIST_FILE = WuFlow/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "WuFlow necesita tu permiso para capturar fotos";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -482,7 +491,8 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "$(PRODUCT_NAME) necesita tu permiso para capturar fotos";
+				INFOPLIST_FILE = WuFlow/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "WuFlow necesita tu permiso para capturar fotos";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

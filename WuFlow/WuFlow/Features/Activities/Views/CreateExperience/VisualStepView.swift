@@ -35,7 +35,10 @@ struct VisualStepView: View {
             )
         }
         .onChange(of: cameraManager.image) { newImage in
-            guard let newImage else { return }
+            guard let newImage else {
+                print("New image is null!!!")
+                return
+            }
             let path = try? ImageStore.shared.save(
                 newImage,
                 category: .activity,

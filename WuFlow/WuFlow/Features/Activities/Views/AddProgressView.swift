@@ -66,22 +66,25 @@ struct AddActivityProgressView: View {
             }
         }
         .animation(.easeInOut, value: step)
-        
     }
     var inputView: some View {
         VStack(alignment: .center, spacing: 10) {
-            //Title
-            Text("Add your progress for")
-                .font(.title)
-                .fontWeight(.medium)
-            // Header
-            HStack {
-                Image(systemName: "circle.dotted")
-                    .font(.system(size: 25))
-                Text(selectedActivity?.name ?? "")
-                    .font(.headline)
+            ZStack {
+                ActivityImageView(path: selectedActivity?.imagePath ?? "")
+                    .edgesIgnoringSafeArea(.horizontal)
+                
+                VStack {
+                    //Title
+                    Text("Add your progress for")
+                        .font(.title)
+                        .fontWeight(.medium)
+                    // Header
+                    Text(selectedActivity?.name ?? "")
+                        .font(.headline)
+                        .padding(.bottom, 60)
+                }
+                .background(.white.opacity(0.2))
             }
-            .padding(.bottom, 60)
             
             //Label
             Text(getLabel())

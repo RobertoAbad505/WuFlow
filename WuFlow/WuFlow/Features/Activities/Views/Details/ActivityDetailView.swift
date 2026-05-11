@@ -150,32 +150,7 @@ extension ActivityDetailView {
         VStack(spacing: 20) {
             
             // Identity
-            HStack(spacing: 16) {
-                activityImage
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(activity.name)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Text("\(progressPercentage)% complete today")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                VStack {
-                    Button(action: {
-                        presentEditProcess = true
-                    }, label: {
-                        Image(systemName: "pencil")
-                            .foregroundStyle(.white)
-                            .font(.system(size: 20, weight: .bold))
-                    })
-                    .buttonStyle(.bordered)
-                    Spacer()
-                }
-            }
+            identity
             
             // Progress value
             VStack(spacing: 8) {
@@ -213,24 +188,37 @@ extension ActivityDetailView {
                 .fill(.ultraThinMaterial)
         )
     }
+    var identity: some View {
+        HStack(spacing: 16) {
+            activityImage
+            VStack(alignment: .leading, spacing: 6) {
+                Text(activity.name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                Text("\(progressPercentage)% complete today")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            VStack {
+                Button(action: {
+                    presentEditProcess = true
+                }, label: {
+                    Image(systemName: "pencil")
+                        .foregroundStyle(.white)
+                        .font(.system(size: 20, weight: .bold))
+                })
+                .buttonStyle(.bordered)
+                Spacer()
+            }
+        }
+    }
     
     var activityImage: some View {
-        Group {
-//            if let data = activity.imageData,
-//               let img = UIImage(data: data) {
-//                
-//                Image(uiImage: img)
-//                    .resizable()
-//                    .scaledToFill()
-//                
-//            } else {
-//                Image(systemName: activity.iconName ?? "circle.dotted")
-//                    .font(.system(size: 40))
-//                    .foregroundColor(.secondary)
-//            }
-            ActivityImageView(path: activity.imagePath)
-        }
-        .frame(width: 70, height: 70)
+        ActivityImageView(path: activity.imagePath)
+        .frame(width: 80, height: 80)
         .background(.ultraThinMaterial)
         .clipShape(Circle())
         .symbolEffect(.pulse, value: activity.iconName)
