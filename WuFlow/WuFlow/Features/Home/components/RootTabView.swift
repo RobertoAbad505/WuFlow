@@ -13,19 +13,17 @@ struct RootTabView: View {
     
     var body: some View {
         TabView(selection: $router.selectedTab) {
-            HomeView()
+            HomeNavigationView()
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
                 .tag(AppTab.home)
             
-            NavigationStack {   // 👈 ADD THIS
-                ActivityListView()
-            }
-            .tabItem {
-                Label("Activities", systemImage: "list.bullet")
-            }
-            .tag(AppTab.activityList)
+            ActivitiesNavigationView()
+                .tabItem {
+                    Label("Activities", systemImage: "list.bullet")
+                }
+                .tag(AppTab.activityList)
             
             InsightsView()
                 .tabItem {
@@ -33,7 +31,7 @@ struct RootTabView: View {
                 }
                 .tag(AppTab.insights)
             
-            Text("Settings")
+            SettingsNavigationView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }

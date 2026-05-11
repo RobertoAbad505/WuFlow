@@ -9,11 +9,10 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
-    
+    @EnvironmentObject var router: Router
     @Environment(\.modelContext) var modelContext
     @Query private var activities: [Activity]
     @State private var isPresentedAddProgress: Bool = false
-    @State private var path = NavigationPath()
     
     var totalActivities: Int {
         activities.count
@@ -32,7 +31,7 @@ struct HomeView: View {
     }
     
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: $router.homePath) {
             ZStack {
                 Image("plantBackground")
                     .resizable()
@@ -152,7 +151,7 @@ struct HomeView: View {
                     .font(.headline)
                 Spacer()
                 Button {
-                    path.append(AppRoute.activityList)
+                    router.homePath.append(AppRoute.activityList)
                 } label: {
                     Text("See all")
                         .font(.callout)
@@ -164,7 +163,7 @@ struct HomeView: View {
                 HStack(spacing: 16) {
                     ForEach(focusActivities) { activity in
                         FocusCardView(activity: activity) {
-                            path.append(AppRoute.activityDetail(activity))
+                            router.homePath.append(AppRoute.activityDetail(activity))
                         }
                         .onAppear {
                             print("DEBUG ITEM:")
@@ -204,7 +203,7 @@ struct HomeView: View {
                     tint: .blue
                 ) {
                     print("Navigate to add activity view!!🚀 ")
-                    path.append(AppRoute.addActivity)
+                    router.homePath.append(AppRoute.addActivity)
                     print("Navigation complete!")
                 }
                 
@@ -213,7 +212,7 @@ struct HomeView: View {
                     systemImage: "chart.bar",
                     tint: .purple
                 ) {
-                    path.append(AppRoute.insights)
+                    router.homePath.append(AppRoute.insights)
                 }
             }
         }

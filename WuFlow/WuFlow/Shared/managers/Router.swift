@@ -13,35 +13,38 @@ import SwiftUI
 final class Router: ObservableObject {
     
     @Published var selectedTab: AppTab = .home
-    @Published var path = NavigationPath()
+    
+    @Published var homePath = NavigationPath()
+    @Published var insightsPath = NavigationPath()
+    @Published var settingsPath = NavigationPath()
+    @Published var activitiesPath = NavigationPath()
     
     func navigate(to route: AppRoute) {
         switch route {
         case .home:
             selectedTab = .home
-            reset()            
+            homePath = NavigationPath()
         case .activityList:
             //first we select the tab of the main container
             selectedTab = .activityList
-            
-            //then we add the destination
-            path.append(route)
-            
+            //activities list is already at tab root, so no need to add a route to activitiesPath
+            //but we can reset this path history
+            activitiesPath = NavigationPath()
         case .activityDetail(_):
             selectedTab = .activityList
-            path.append(route)
+            activitiesPath.append(route)
         case .addActivity:
-            selectedTab = .home
-            path.append(route)
+            selectedTab = .activityList
+            activitiesPath.append(route)
         case .addProgress(_):
-            selectedTab = .home
-            path.append(route)
+            selectedTab = .activityList
+            activitiesPath.append(route)
         case .insights:
             selectedTab = .insights
-            path.append(route)
+            insightsPath.append(route)
         case .settings:
             selectedTab = .settings
-            path.append(route)
+            settingsPath.append(route)
         }
     }
     func handleDeepLink(_ url: URL) {
@@ -62,14 +65,10 @@ final class Router: ObservableObject {
             navigate(to: .insights)
         case "settings":
             navigate(to: .settings)
+        case "addProgress":
+            navigate(to: .addProgress(nil))
         default:
             navigate(to: .home)
         }
-    }
-    func popRoute() {
-        path.removeLast()
-    }
-    func reset() {
-        path = NavigationPath()
     }
 }
