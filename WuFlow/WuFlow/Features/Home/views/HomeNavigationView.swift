@@ -14,14 +14,13 @@ struct HomeNavigationView: View {
     var body: some View {
         NavigationStack(path: $router.homePath) {
             HomeView()
-                .navigationDestination(for: AppRoute.self) { route in
-                    
+                .navigationDestination(for: ActivitiesRoute.self) { route in
                     switch route {
-
-                    case .activityList:
+                        
+                    case .activitiesList:
                         ActivityListView()
 
-                    case .activityDetail(let activity):
+                    case .detail(let activity):
                         ActivityDetailView(activity: activity)
 
                     case .addActivity:
@@ -29,15 +28,8 @@ struct HomeNavigationView: View {
 
                     case .addProgress(let activity):
                         AddActivityProgressView(activity: activity)
-
-                    case .insights:
-                        InsightsView()
-
-                    case .settings:
-                        Text("Settings")
-
-                    case .home:
-                        HomeView()
+                    case .insights(_):
+                        Text("Insights still in development")
                     }
                 }
         }

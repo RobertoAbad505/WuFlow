@@ -12,12 +12,11 @@ struct ActivitiesNavigationView: View {
     @EnvironmentObject private var router: Router
 
     var body: some View {
-
         NavigationStack(path: $router.activitiesPath) {
             ActivityListView()
-                .navigationDestination(for: AppRoute.self) { route in
+                .navigationDestination(for: ActivitiesRoute.self) { route in
                     switch route {
-                    case .activityDetail(let activity):
+                    case .detail(let activity):
                         ActivityDetailView(activity: activity)
                     case .addActivity:
                         CreateActivityView(mode: .create)

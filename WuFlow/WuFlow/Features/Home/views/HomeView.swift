@@ -39,22 +39,18 @@ struct HomeView: View {
                     .blur(radius: 1)
                 content
             }
-            .navigationDestination(for: AppRoute.self) { route in
+            .navigationDestination(for: ActivitiesRoute.self) { route in
                 switch route {
-                case .activityList:
+                case .activitiesList:
                     ActivityListView()
-                case .activityDetail(let activity):
+                case .detail(let activity):
                     ActivityDetailView(activity: activity)
                 case .addActivity:
                     CreateActivityView(mode: .create)
                 case .addProgress(let activity):
                     AddActivityProgressView(activity: activity)
-                case .insights:
-                    InsightsView()
-                case .settings:
-                    Text("Settings??")
-                case .home:
-                    Text("Home???")
+                case .insights(_):
+                    Text("Insights still in development")
                 }
             }
             .sheet(isPresented: $isPresentedAddProgress) {
@@ -66,14 +62,6 @@ struct HomeView: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
                 HomeHeaderView()
-                Button("Delete Broken Item") {
-                    let badItems = activities.filter { $0.name == "Test" }
-                    for item in badItems {
-                        modelContext.delete(item)
-                    }
-                    
-                    try? modelContext.save()
-                }
                 dailySummarySection
                 focusSection
                 quickActionsSection
@@ -151,7 +139,7 @@ struct HomeView: View {
                     .font(.headline)
                 Spacer()
                 Button {
-                    router.homePath.append(AppRoute.activityList)
+                    router.homePath.append(ActivitiesRoute.activitiesList)
                 } label: {
                     Text("See all")
                         .font(.callout)
@@ -163,7 +151,7 @@ struct HomeView: View {
                 HStack(spacing: 16) {
                     ForEach(focusActivities) { activity in
                         FocusCardView(activity: activity) {
-                            router.homePath.append(AppRoute.activityDetail(activity))
+                            router.homePath.append(ActivitiesRoute.detail(activity))
                         }
                         .onAppear {
                             print("DEBUG ITEM:")
@@ -192,27 +180,24 @@ struct HomeView: View {
                 QuickActionButton(
                     title: "Add",
                     systemImage: "plus",
-                    tint: .green
-                ) {
+                    tint: .green) {
                     isPresentedAddProgress = true
                 }
                 
                 QuickActionButton(
                     title: "New",
                     systemImage: "square.and.pencil",
-                    tint: .blue
-                ) {
+                    tint: .blue) {
                     print("Navigate to add activity view!!🚀 ")
-                    router.homePath.append(AppRoute.addActivity)
+                    router.homePath.append(ActivitiesRoute.addActivity)
                     print("Navigation complete!")
                 }
                 
                 QuickActionButton(
                     title: "Insights",
                     systemImage: "chart.bar",
-                    tint: .purple
-                ) {
-                    router.homePath.append(AppRoute.insights)
+                    tint: .purple) {
+                    router.homePath.append(ActivitiesRoute.insights(nil))
                 }
             }
         }

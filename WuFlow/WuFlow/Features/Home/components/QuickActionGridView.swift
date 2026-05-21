@@ -10,7 +10,7 @@ import SwiftUI
 struct QuickActionGridView: View {
     
     let actions: [QuickAction]
-    let onActionTap: (AppRoute) -> Void
+    let onActionTap: (ActivitiesRoute) -> Void
     
     private let columns = [
         GridItem(.flexible()),
@@ -38,10 +38,10 @@ struct QuickActionGridView: View {
 
 #Preview {
     QuickActionGridView(actions: [
-        .init(title: "Test", systemImage: "star", route: AppRoute.addActivity),
-        .init(title: "Test", systemImage: "star", route: AppRoute.addActivity),
-        .init(title: "Test", systemImage: "star", route: AppRoute.addActivity),
-        .init(title: "Test", systemImage: "star", route: AppRoute.addActivity)
+        .init(title: "Test", systemImage: "star", route: ActivitiesRoute.addActivity),
+        .init(title: "Test", systemImage: "star", route: ActivitiesRoute.addActivity),
+        .init(title: "Test", systemImage: "star", route: ActivitiesRoute.addActivity),
+        .init(title: "Test", systemImage: "star", route: ActivitiesRoute.addActivity)
     ], onActionTap: { _ in
         
     })

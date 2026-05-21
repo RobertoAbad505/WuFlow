@@ -1,5 +1,5 @@
 //
-//  AppRouteEnum.swift
+//  AppRoutes.swift
 //  WuFlow
 //
 //  Created by Roberto Ramirez on 4/6/26.
@@ -7,12 +7,20 @@
 
 import Foundation
 
-enum AppRoute: Hashable {
-    case activityList
-    case activityDetail(Activity)
+enum HomeRoute: Hashable {
+    case home
+}
+
+enum ActivitiesRoute: Hashable {
+    case activitiesList
+    case detail(Activity)
     case addActivity
     case addProgress(Activity?)
-    case insights
-    case settings
-    case home
+    case insights(Activity?)
+}
+enum SettingsRoute: Hashable {
+//    case settingsLanding
+    case notifications
+    case account
+    case appearance
 }

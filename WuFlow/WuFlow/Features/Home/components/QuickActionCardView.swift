@@ -33,5 +33,5 @@ struct QuickActionCardView: View {
 }
 
 #Preview {
-    QuickActionCardView(action: .init(title: "Test", systemImage: "circle.dotted.circle.fill", route: .activityList))
+    QuickActionCardView(action: .init(title: "Test", systemImage: "circle.dotted.circle.fill", route: .activitiesList))
 }

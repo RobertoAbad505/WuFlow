@@ -19,18 +19,18 @@ final class Router: ObservableObject {
     @Published var settingsPath = NavigationPath()
     @Published var activitiesPath = NavigationPath()
     
-    func navigate(to route: AppRoute) {
+    func navigate(to route: HomeRoute) {
         switch route {
         case .home:
             selectedTab = .home
-            homePath = NavigationPath()
-        case .activityList:
-            //first we select the tab of the main container
-            selectedTab = .activityList
-            //activities list is already at tab root, so no need to add a route to activitiesPath
-            //but we can reset this path history
+        }
+    }
+    func navigate(to route: ActivitiesRoute) {
+        selectedTab = .activityList
+        switch route {
+        case .activitiesList:
             activitiesPath = NavigationPath()
-        case .activityDetail(_):
+        case .detail(_):
             selectedTab = .activityList
             activitiesPath.append(route)
         case .addActivity:
@@ -42,11 +42,21 @@ final class Router: ObservableObject {
         case .insights:
             selectedTab = .insights
             insightsPath.append(route)
-        case .settings:
-            selectedTab = .settings
+        }
+    }
+    //navigate to settings destinations
+    func navigate(to route: SettingsRoute) {
+        selectedTab = .settings
+        switch route {
+            case .notifications:
+            settingsPath.append(route)
+        case .account:
+            settingsPath.append(route)
+        case .appearance:
             settingsPath.append(route)
         }
     }
+    
     func handleDeepLink(_ url: URL) {
         print("OPEN FROM EXTERNAL URL: \(url)")
         guard url.scheme == "wuflow" else {
@@ -60,11 +70,11 @@ final class Router: ObservableObject {
         }
         switch host {
         case "activities":
-            navigate(to: .activityList)
+            navigate(to: .activitiesList)
         case "insights":
-            navigate(to: .insights)
+            navigate(to: .insights(nil))
         case "settings":
-            navigate(to: .settings)
+            selectedTab = .settings
         case "addProgress":
             navigate(to: .addProgress(nil))
         default:

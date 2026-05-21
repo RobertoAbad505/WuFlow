@@ -8,9 +8,25 @@
 import SwiftUI
 
 struct SettingsNavigationView: View {
+    
+    @EnvironmentObject private var router: Router
+    
     var body: some View {
-        Text("Settings view")
+        NavigationStack(path: $router.settingsPath) {
+            SettingsView()
+                .navigationDestination(for: SettingsRoute.self) { type in
+                    switch type {
+                    case .notifications:
+                        NotificationsView()
+                    case .account:
+                        Text("Account settings view - still in development")
+                    case .appearance:
+                        Text("Appearance view - still in development")
+                    }
+                }
+        }
     }
+    
 }
 
 #Preview {
