@@ -12,6 +12,8 @@ import SwiftData
 struct WuFlowApp: App {
     @StateObject private var router = Router()
     
+    let notificationDelegate = NotificationDelegate.shared
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Activity.self,
@@ -26,6 +28,10 @@ struct WuFlowApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+    init() {
+        UNUserNotificationCenter.current().delegate = notificationDelegate
+    }
 
     var body: some Scene {
         WindowGroup {

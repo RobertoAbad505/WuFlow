@@ -9,6 +9,21 @@ import Foundation
 import UserNotifications
 import UIKit
 
+final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+    
+    static let shared = NotificationDelegate()
+    
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        
+        print("🔥 Foreground notification received")
+        
+        return [.banner, .sound]
+    }
+}
+
 final class NotificationManager {
     
     static let shared = NotificationManager()
@@ -63,11 +78,14 @@ final class NotificationManager {
     
     func sendTestNotification() {
         
+        UNUserNotificationCenter.current()
+            .removeAllPendingNotificationRequests()
+        
         let content = UNMutableNotificationContent()
         
-        content.title = "Te estoy viendoooo👀"
-        content.body = "Clic para poner Rosa Pastel y chingate la rutina completa"
-        content.sound = .defaultCritical
+        content.title = "Hey hey hey!"
+        content.body = "Hello world!"
+        content.sound = .default
         
         // Trigger after 5 seconds
         let trigger = UNTimeIntervalNotificationTrigger(
@@ -90,7 +108,6 @@ final class NotificationManager {
                 }
             }
     }
-    
 }
 
 enum NotificationPermissionStatus {
