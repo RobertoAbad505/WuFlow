@@ -43,14 +43,7 @@ struct ActivityRowCard: View {
                             unitTypeView
                         }
                         .frame(maxWidth: .infinity)
-                        VStack(alignment: .trailing, spacing: 5) {
-                            if activity.currentStreak > 1 {
-                                StreakBadge(streak: activity.currentStreak)
-                            }
-                            ActivityStatusBadge(status: activity.status)
-                        }
-                        .frame(maxWidth: 100, alignment: .leading)
-                        .padding(.bottom, 30)
+                        badgesItems
                     }
                     Image(systemName: "chevron.right")
                         .font(Font.system(size: 18))
@@ -74,6 +67,16 @@ struct ActivityRowCard: View {
                 .stroke(.white, lineWidth: 3)
         }
     }
+    var badgesItems: some View {
+        VStack(alignment: .trailing, spacing: 5) {
+            if activity.currentStreak > 1 {
+                StreakBadge(streak: activity.currentStreak)
+            }
+            ActivityStatusBadge(status: activity.status)
+        }
+        .frame(maxWidth: 100, alignment: .leading)
+        .padding(.bottom, 30)
+    }
     var unitTypeView: some View {
         VStack {
             HStack {
@@ -92,16 +95,8 @@ struct ActivityRowCard: View {
         .padding(.top, 3)
     }
     var activityImage: some View {
-        VStack (alignment: .center){
-            if let img = activity.imagePath {
-                ActivityImageView(path: img)
-                    .frame(width: 100, height: 120)
-            } else {
-                Image(systemName: activity.iconName ?? "circle.dotted")
-                    .font(.system(size: 60))
-                    .frame(width: 100, height: 120)
-            }
-        }
+        ActivityImageView(path: activity.imagePath, category: .activity)
+            .frame(width: 100, height: 120)
     }
 }
 

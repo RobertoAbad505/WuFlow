@@ -19,7 +19,7 @@ struct ActivityDetailView: View {
     @State var presentAddProgress: Bool = false
     @State var presentEditProcess: Bool = false
     
-    let activity: Activity
+    @State var activity: Activity
     @State private var selectedFilter: TimeFilter = .last7Days
     @State private var showDeleteDialog = false
     
@@ -141,7 +141,11 @@ struct ActivityDetailView: View {
             AddActivityProgressView(activity: activity)
         }
         .fullScreenCover(isPresented: $presentEditProcess) {
-            CreateActivityView(mode: .edit(self.activity))
+            CreateActivityView(mode: .edit(self.activity)) { activity in
+                DispatchQueue.main.async {
+                    self.activity = activity
+                }
+            }
         }
     }
 }
@@ -217,11 +221,8 @@ extension ActivityDetailView {
     }
     
     var activityImage: some View {
-        ActivityImageView(path: activity.imagePath)
+        ActivityImageView(path: activity.imagePath, category: .activity)
         .frame(width: 80, height: 80)
-        .background(.ultraThinMaterial)
-        .clipShape(Circle())
-        .symbolEffect(.pulse, value: activity.iconName)
     }
     
     var colorForStatus: Color {
@@ -286,29 +287,29 @@ extension ActivityDetailView {
             Text("Your patterns")
                 .font(.headline)
             
-            VStack(spacing: 12) {
-                
-                InsightRow(
-                    icon: "flame.fill",
-                    color: .red,
-                    title: "\(activity.currentStreak) day streak",
-                    subtitle: streakMessage
-                )
-                
-                InsightRow(
-                    icon: "calendar",
-                    color: .blue,
-                    title: "\(activeDaysLast7) active days",
-                    subtitle: "In the last 7 days"
-                )
-                
-                InsightRow(
-                    icon: "chart.bar.fill",
-                    color: .green,
-                    title: averageText,
-                    subtitle: "Your daily average"
-                )
-            }
+//            VStack(spacing: 12) {
+//                
+//                InsightRow(
+//                    icon: "flame.fill",
+//                    color: .red,
+//                    title: "\(activity.currentStreak) day streak",
+//                    subtitle: streakMessage
+//                )
+//                
+//                InsightRow(
+//                    icon: "calendar",
+//                    color: .blue,
+//                    title: "\(activeDaysLast7) active days",
+//                    subtitle: "In the last 7 days"
+//                )
+//                
+//                InsightRow(
+//                    icon: "chart.bar.fill",
+//                    color: .green,
+//                    title: averageText,
+//                    subtitle: "Your daily average"
+//                )
+//            }
         }
         .padding()
         .background(

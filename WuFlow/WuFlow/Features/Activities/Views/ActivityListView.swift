@@ -29,7 +29,7 @@ struct ActivityListView: View {
                 content
             }
             .fullScreenCover(isPresented: $toggleCreateActivity, content: {
-                CreateActivityView(mode: .create)
+                CreateActivityView(mode: .create, onUpdate: {_ in})
             })
             .navigationDestination(for: Activity.self) { selectedItem in
                 ActivityDetailView(activity: selectedItem)

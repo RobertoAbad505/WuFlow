@@ -46,7 +46,7 @@ struct HomeView: View {
                 case .detail(let activity):
                     ActivityDetailView(activity: activity)
                 case .addActivity:
-                    CreateActivityView(mode: .create)
+                    CreateActivityView(mode: .create, onUpdate: {_ in})
                 case .addProgress(let activity):
                     AddActivityProgressView(activity: activity)
                 case .insights(_):

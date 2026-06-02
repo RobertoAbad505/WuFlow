@@ -9,11 +9,12 @@ import SwiftUI
 struct ActivityImageView: View {
     
     let path: String?
+    let category: ImageCategory
     
     @State private var image: UIImage?
     
     var body: some View {
-        Group {
+        VStack {
             if let image {
                 Image(uiImage: image)
                     .resizable()
@@ -35,10 +36,10 @@ struct ActivityImageView: View {
     
     private func loadImage() {
         DispatchQueue.global(qos: .userInitiated).async {
-            let loaded = ImageStore.shared.load(from: path)
-            
-            DispatchQueue.main.async {
-                self.image = loaded
+            if let loaded = ImageStore.shared.load(from: path, category: self.category) {
+                DispatchQueue.main.async {
+                    self.image = loaded
+                }
             }
         }
     }

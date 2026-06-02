@@ -31,23 +31,35 @@ final class ImageStore {
         let url = try makeURL(category: category)
         try data.write(to: url, options: [.atomic])
         
-        return url.path // store this in your model
+        return url.lastPathComponent// store this in your model
     }
     
     /// Loads image safely (never crashes)
-    func load(from path: String?) -> UIImage? {
-        guard let path else { return nil }
+    func load(
+        from fileName: String?,
+        category: ImageCategory? = .activity
+    ) -> UIImage? {
+        guard let fileName else { return nil }
         
         // 1. Check cache first
-        if let cached = cache.object(forKey: path as NSString) {
+        if let cached = cache.object(forKey: fileName as NSString) {
             return cached
         }
         
         // 2. Load from disk
-        guard let image = UIImage(contentsOfFile: path) else { return nil }
+        guard let url = try? url(
+            for: fileName,
+            category: category ?? .activity
+        ) else {
+            return nil
+        }
+
+        guard let image = UIImage(contentsOfFile: url.path) else {
+            return nil
+        }
         
         // 3. Store in cache
-        cache.setObject(image, forKey: path as NSString)
+        cache.setObject(image, forKey: fileName as NSString)
         
         return image
     }
@@ -63,7 +75,7 @@ final class ImageStore {
         guard let dir = try? directoryURL(category: category) else { return }
         let files = (try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)) ?? []
         
-        for file in files where !unusedPaths.contains(file.path) {
+        for file in files where !unusedPaths.contains(file.lastPathComponent) {
             try? FileManager.default.removeItem(at: file)
         }
     }
@@ -104,6 +116,16 @@ private extension ImageStore {
         return renderer.image { _ in
             image.draw(in: CGRect(origin: .zero, size: newSize))
         }
+    }
+    
+    func url(
+        for fileName: String,
+        category: ImageCategory
+    ) throws -> URL {
+        
+        let dir = try directoryURL(category: category)
+        
+        return dir.appendingPathComponent(fileName)
     }
 }
 

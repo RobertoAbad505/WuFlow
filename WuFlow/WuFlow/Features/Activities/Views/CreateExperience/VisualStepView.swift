@@ -51,8 +51,14 @@ struct VisualStepView: View {
     }
     private var preview: some View {
         ZStack {
-            
-            if let uiImage = cameraManager.image {
+            if let uiImage = ImageStore.shared.load(from: draft.imagePath, category: .activity), cameraManager.image == nil {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 200, height: 200)
+                    .clipShape(Circle())
+                
+            } else if let uiImage = cameraManager.image {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
