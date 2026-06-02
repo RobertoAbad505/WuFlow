@@ -76,15 +76,15 @@ final class NotificationManager {
             }
     }
     
-    func sendTestNotification() {
+    func sendTestNotification(_ title: String, _ body: String) {
         
         UNUserNotificationCenter.current()
             .removeAllPendingNotificationRequests()
         
         let content = UNMutableNotificationContent()
         
-        content.title = "Hey hey hey!"
-        content.body = "Hello world!"
+        content.title = title
+        content.body = body
         content.sound = .default
         
         // Trigger after 5 seconds

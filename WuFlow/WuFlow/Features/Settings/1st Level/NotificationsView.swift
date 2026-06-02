@@ -14,19 +14,26 @@ struct NotificationsView: View {
 
     @State private var permissionStatus: NotificationPermissionStatus = .notDetermined
     
+    
+    @State private var title: String = ""
+    @State private var bodyContent: String = ""
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text("Notifications")
                 .font(Font.title.weight(.bold))
             notificationsEnableToggle
             Button(action: {
-                NotificationManager.shared.sendTestNotification()
+                NotificationManager.shared.sendTestNotification(title, bodyContent)
             }, label: {
                 Text("Send test notification")
                     .padding()
+                    .background(.blue.opacity(0.5))
             })
-            .background(.blue.opacity(0.5))
             .buttonStyle(.glass)
+            
+            TextField("Title", text: $title)
+            TextField("body", text: $bodyContent)
             Spacer()
         }
         .padding()
