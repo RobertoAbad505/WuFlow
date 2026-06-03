@@ -24,7 +24,7 @@ struct HomeNavigationView: View {
                         ActivityDetailView(activity: activity)
 
                     case .addActivity:
-                        CreateActivityView(mode: .create, onUpdate: {_ in })
+                        CreateActivityView(mode: .create)
 
                     case .addProgress(let activity):
                         AddActivityProgressView(activity: activity)

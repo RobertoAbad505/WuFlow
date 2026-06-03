@@ -95,7 +95,7 @@ struct ActivityRowCard: View {
         .padding(.top, 3)
     }
     var activityImage: some View {
-        ActivityImageView(path: activity.imagePath, category: .activity)
+        ActivityImageView(path: activity.imagePath, icon: activity.iconName)
             .frame(width: 100, height: 120)
     }
 }

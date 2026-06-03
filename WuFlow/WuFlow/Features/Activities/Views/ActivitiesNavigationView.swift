@@ -19,7 +19,7 @@ struct ActivitiesNavigationView: View {
                     case .detail(let activity):
                         ActivityDetailView(activity: activity)
                     case .addActivity:
-                        CreateActivityView(mode: .create, onUpdate: {_ in})
+                        CreateActivityView(mode: .create)
                     case .addProgress:
                         AddActivityProgressView()
                     default:

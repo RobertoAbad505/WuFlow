@@ -70,7 +70,7 @@ struct AddActivityProgressView: View {
     var inputView: some View {
         VStack(alignment: .center, spacing: 10) {
             ZStack {
-                ActivityImageView(path: selectedActivity?.imagePath ?? "", category: .activity)
+                ActivityImageView(path: selectedActivity?.imagePath, icon: selectedActivity?.iconName)
                     .edgesIgnoringSafeArea(.horizontal)
                 
                 VStack {

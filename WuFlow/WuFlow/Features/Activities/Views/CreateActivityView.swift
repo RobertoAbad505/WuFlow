@@ -25,9 +25,8 @@ struct CreateActivityView: View {
         .visual,
         .review
     ]
-    let updatedCorrect: (Activity) -> Void
     
-    init(mode: ActivityFlowMode, onUpdate: @escaping (Activity) -> Void) {
+    init(mode: ActivityFlowMode) {
         self.mode = mode
         
         switch mode {
@@ -37,7 +36,6 @@ struct CreateActivityView: View {
         case .edit(let activity):
             _draft = State(initialValue: ActivityDraft(from: activity))
         }
-        self.updatedCorrect = onUpdate
     }
        
     var body: some View {
@@ -119,7 +117,6 @@ struct CreateActivityView: View {
                 activity.type = draft.type
                 activity.lifeArea = draft.lifeArea
                 activity.secondaryNote = draft.secondaryNote
-                updatedCorrect(activity)
             }
             
             // Save context explicitly (important for edit)
@@ -234,6 +231,6 @@ struct ActivityDraft {
 }
 
 #Preview {
-    CreateActivityView(mode: .create, onUpdate: {_ in })
+    CreateActivityView(mode: .create)
         .modelContainer(for: Activity.self, inMemory: false)
 }

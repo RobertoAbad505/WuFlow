@@ -9,9 +9,16 @@ import SwiftUI
 struct ActivityImageView: View {
     
     let path: String?
+    let icon: String?
     let category: ImageCategory
     
     @State private var image: UIImage?
+    
+    init(path: String?, icon: String?, category: ImageCategory = .activity) {
+        self.path = path
+        self.category = category
+        self.icon = icon
+    }
     
     var body: some View {
         VStack {
@@ -29,7 +36,7 @@ struct ActivityImageView: View {
     }
     
     var placeholder: some View {
-        Image(systemName: "circle.dotted")
+        Image(systemName: icon ?? "circle.dotted")
             .font(.system(size: 30))
             .foregroundColor(.secondary)
     }

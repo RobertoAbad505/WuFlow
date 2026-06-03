@@ -19,7 +19,7 @@ struct ActivityDetailView: View {
     @State var presentAddProgress: Bool = false
     @State var presentEditProcess: Bool = false
     
-    @State var activity: Activity
+    let activity: Activity
     @State private var selectedFilter: TimeFilter = .last7Days
     @State private var showDeleteDialog = false
     
@@ -141,11 +141,7 @@ struct ActivityDetailView: View {
             AddActivityProgressView(activity: activity)
         }
         .fullScreenCover(isPresented: $presentEditProcess) {
-            CreateActivityView(mode: .edit(self.activity)) { activity in
-                DispatchQueue.main.async {
-                    self.activity = activity
-                }
-            }
+            CreateActivityView(mode: .edit(self.activity))
         }
     }
 }
@@ -221,8 +217,9 @@ extension ActivityDetailView {
     }
     
     var activityImage: some View {
-        ActivityImageView(path: activity.imagePath, category: .activity)
-        .frame(width: 80, height: 80)
+        ActivityImageView(path: activity.imagePath, icon: activity.iconName)
+            .frame(width: 80, height: 80)
+            .id(activity.imagePath)
     }
     
     var colorForStatus: Color {
