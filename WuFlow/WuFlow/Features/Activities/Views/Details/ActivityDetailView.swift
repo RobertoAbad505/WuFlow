@@ -18,6 +18,7 @@ struct ActivityDetailView: View {
     
     @State var presentAddProgress: Bool = false
     @State var presentEditProcess: Bool = false
+    @State var presentRemindersProcess: Bool = false
     
     let activity: Activity
     @State private var selectedFilter: TimeFilter = .last7Days
@@ -137,8 +138,36 @@ struct ActivityDetailView: View {
                 .padding()
             }
         }
+        .toolbar(content: {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    print("Enable notifications: \(activity.remindersEnabled ? "off":"on")")
+                    enableNotifications()
+                }, label: {
+                    Image(systemName: "bell")
+                        .font(Font.system(size: 20))
+                        .tint(activity.remindersEnabled ? .green: .gray)
+                })
+                .buttonStyle(.glass)
+            }
+            if activity.remindersEnabled {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        presentRemindersProcess.toggle()
+                    }, label: {
+                        Image(systemName: "calendar")
+                            .font(Font.system(size: 20))
+                            .tint(.green)
+                    })
+                    .buttonStyle(.glass)
+                }
+            }
+        })
         .sheet(isPresented: $presentAddProgress) {
             AddActivityProgressView(activity: activity)
+        }
+        .sheet(isPresented: $presentRemindersProcess) {
+            ReminderSettingsView(activity: activity)
         }
         .fullScreenCover(isPresented: $presentEditProcess) {
             CreateActivityView(mode: .edit(self.activity))
@@ -283,30 +312,28 @@ extension ActivityDetailView {
             
             Text("Your patterns")
                 .font(.headline)
-            
-//            VStack(spacing: 12) {
-//                
-//                InsightRow(
-//                    icon: "flame.fill",
-//                    color: .red,
-//                    title: "\(activity.currentStreak) day streak",
-//                    subtitle: streakMessage
-//                )
-//                
-//                InsightRow(
-//                    icon: "calendar",
-//                    color: .blue,
-//                    title: "\(activeDaysLast7) active days",
-//                    subtitle: "In the last 7 days"
-//                )
-//                
-//                InsightRow(
-//                    icon: "chart.bar.fill",
-//                    color: .green,
-//                    title: averageText,
-//                    subtitle: "Your daily average"
-//                )
-//            }
+            VStack(spacing: 12) {                
+                InsightRow(
+                    icon: "flame.fill",
+                    color: .red,
+                    title: "\(activity.currentStreak) day streak",
+                    subtitle: streakMessage
+                )
+                
+                InsightRow(
+                    icon: "calendar",
+                    color: .blue,
+                    title: "\(activeDaysLast7) active days",
+                    subtitle: "In the last 7 days"
+                )
+                
+                InsightRow(
+                    icon: "chart.bar.fill",
+                    color: .green,
+                    title: averageText,
+                    subtitle: "Your daily average"
+                )
+            }
         }
         .padding()
         .background(
@@ -536,6 +563,19 @@ extension ActivityDetailView {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
         dismiss()
+    }
+    private func enableNotifications() {
+        withAnimation {
+            self.activity.remindersEnabled.toggle()
+            self.activity.reminderType = .scheduled
+            self.activity.preferredReminderTime = nil
+            do {
+                try modelContext.save()
+            } catch {
+                print("❌ Enable notifications failed:", error)
+            }
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        }
     }
 }
 

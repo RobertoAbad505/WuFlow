@@ -41,6 +41,18 @@ final class Activity {
     
     var secondaryNote: String?
     
+    var remindersEnabled: Bool = false
+    
+    var reminderTypeRawValue: String?
+    
+    var preferredReminderTime: Date? = nil
+    
+    var reminderPresetRawValue: String?
+    
+    var reminderTime: Date?
+    
+    var reminderToneRawValue: String?
+    
     // Relationship
     @Relationship(deleteRule: .cascade)
     var progressRecords: [ProgressRecord] = []
@@ -59,7 +71,10 @@ final class Activity {
         type: ActivityTypes = .maintain,
         lifeArea: LifeArea = .leisure,
         secondaryNote: String? = nil,
-        progressRecords: [ProgressRecord] = []
+        progressRecords: [ProgressRecord] = [],
+        remindersEnabled: Bool = false,
+        reminderType: ReminderType = .scheduled,
+        preferredReminderTime: Date? = nil
     ) {
         self.id = id
         self.name = name
@@ -75,6 +90,9 @@ final class Activity {
         self.lifeArea = lifeArea
         self.secondaryNote = secondaryNote
         self.progressRecords = progressRecords
+        self.remindersEnabled = remindersEnabled
+        self.reminderType = reminderType
+        self.preferredReminderTime = preferredReminderTime
     }
 }
 extension Activity {
@@ -194,6 +212,37 @@ extension Activity {
     var isCompletedToday: Bool {
         todayProgress >= goalValue
     }
+    
+    
+    ///Reminders helpers
+    var reminderType: ReminderType {
+        get {
+            ReminderType(rawValue: reminderTypeRawValue ?? "")
+            ?? .contextual
+        }
+        set {
+            reminderTypeRawValue = newValue.rawValue
+        }
+    }
+    
+    var reminderTone: ReminderTone {
+        get {
+            ReminderTone(rawValue: reminderToneRawValue ?? "")
+            ?? .light
+        }
+        set {
+            reminderToneRawValue = newValue.rawValue
+        }
+    }
+    var reminderPreset: ReminderPreset {
+        get {
+            ReminderPreset(rawValue: reminderPresetRawValue ?? "")
+            ?? .morning
+        }
+        set {
+            reminderPresetRawValue = newValue.rawValue
+        }
+    }
 
 }
 enum ActivityTypes: String, Codable, CaseIterable {
@@ -208,4 +257,19 @@ enum ActivityTypes: String, Codable, CaseIterable {
             case .maintain: return "🌊 Flow"
         }
     }
+}
+enum ReminderType: String, Codable, CaseIterable {
+    case scheduled
+    case contextual
+}
+enum ReminderPreset: String, Codable, CaseIterable  {
+    case morning = "☀️ Morning"
+    case midday  = "🌤 Midday"
+    case evening = "🌙 Evening"
+    case custom = "🕓 Custom"
+}
+enum ReminderTone: String, Codable, CaseIterable {
+    case light
+    case heavy
+    case gentle
 }

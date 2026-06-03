@@ -227,6 +227,7 @@ struct ActivityDraft {
         self.lifeArea = activity.lifeArea
         self.type = activity.type
         self.secondaryNote = activity.secondaryNote
+        
     }
 }
 
