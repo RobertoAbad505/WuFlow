@@ -52,9 +52,18 @@ struct ActivityListView: View {
                             .padding(10)
                     })
                 .buttonStyle(.glass)
+                resyncAllNotifications
             }
             .padding(EdgeInsets(top: 0, leading: 20, bottom: 30, trailing: 20))
         }
+    }
+    var resyncAllNotifications: some View {
+        Button(action: {
+            NotificationManager.shared.syncReminders(for: self.items)
+        }, label: {
+            Text("Resync all notifications!")
+        })
+        .buttonStyle(.glass)
     }
     var activityList: some View {
         LazyVGrid(columns: columns, spacing: 36) {

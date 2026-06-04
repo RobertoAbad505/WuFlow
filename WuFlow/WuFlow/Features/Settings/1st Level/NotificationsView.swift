@@ -15,30 +15,32 @@ struct NotificationsView: View {
     @State private var permissionStatus: NotificationPermissionStatus = .notDetermined
     
     
-    @State private var title: String = ""
-    @State private var bodyContent: String = ""
+    @State private var title: String = "WuFlow 🌿"
+    @State private var bodyContent: String = "A small pause for Meditation 🧘‍♂️"
     
     var body: some View {
         VStack(alignment: .leading) {
             Text("Notifications")
                 .font(Font.title.weight(.bold))
             notificationsEnableToggle
+            notificationTester
+        }
+        .padding()
+        .onAppear {
+            refreshPermissionStatus()
+        }
+    }
+    var notificationTester: some View {
+        VStack {
+            TextField("Title:", text: $title)
+            TextField("Body: ", text: $bodyContent)
             Button(action: {
                 NotificationManager.shared.sendTestNotification(title, bodyContent)
             }, label: {
                 Text("Send test notification")
                     .padding()
-                    .background(.blue.opacity(0.5))
             })
             .buttonStyle(.glass)
-            
-            TextField("Title", text: $title)
-            TextField("body", text: $bodyContent)
-            Spacer()
-        }
-        .padding()
-        .onAppear {
-            refreshPermissionStatus()
         }
     }
     
@@ -52,9 +54,14 @@ struct NotificationsView: View {
         Toggle(isOn: $notificationsEnabled, label: {
             Text("Notifications enabled")
         })
+        .padding(.bottom)
         .onChange(of: notificationsEnabled) { _, newValue in
             
             guard newValue else { return }
+            
+            if !newValue {
+                NotificationManager.shared.removeAllWuFlowReminders()
+            }
             
             NotificationManager.shared.currentPermissionStatus { status in
                 

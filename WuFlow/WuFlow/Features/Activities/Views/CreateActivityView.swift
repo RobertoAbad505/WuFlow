@@ -60,7 +60,7 @@ struct CreateActivityView: View {
             case .goal:
                 GoalStepView(draft: $draft)
             case .meaning:
-                MeaningStepView(draft: $draft)
+                MeaningStepView(draft: $draft, mode)
             case .visual:
                 VisualStepView(draft: $draft, cameraManager: cameraManager)
             case .review:
@@ -185,7 +185,7 @@ struct CreateActivityView: View {
     }
     
 }
-enum ActivityFlowMode {
+enum ActivityFlowMode: Equatable {
     case create
     case edit(Activity)
 }
@@ -227,7 +227,6 @@ struct ActivityDraft {
         self.lifeArea = activity.lifeArea
         self.type = activity.type
         self.secondaryNote = activity.secondaryNote
-        
     }
 }
 

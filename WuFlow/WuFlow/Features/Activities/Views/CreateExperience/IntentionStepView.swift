@@ -54,6 +54,3 @@ struct IntentionStepView: View {
     }
 }
 
-#Preview {
-    IntentionStepView(draft: .constant(ActivityDraft()))
-}

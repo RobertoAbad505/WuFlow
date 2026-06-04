@@ -7,9 +7,15 @@
 import SwiftUI
 
 struct MeaningStepView: View {
-    
+    let mode: ActivityFlowMode
     @Binding var draft: ActivityDraft
     @FocusState private var isFocused: Bool
+    @FocusState private var focusedField: Field?
+    
+    init(draft: Binding<ActivityDraft>,_ mode: ActivityFlowMode) {
+        _draft = draft
+        self.mode = mode
+    }
     
     var body: some View {
         VStack(spacing: 30) {
@@ -25,7 +31,7 @@ struct MeaningStepView: View {
             
             inputArea
             Image(systemName: "sparkles")
-                .font(.system(size: 32))
+                .font(.system(size: 28))
                 .foregroundColor(.green)
                 .symbolEffect(.pulse, value: draft.motivationDescription)
             optionalSecondary
@@ -33,8 +39,25 @@ struct MeaningStepView: View {
         }
         .padding()
         .onAppear {
+            if mode != ActivityFlowMode.create {
+                return
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isFocused = true
+                focusedField = .motivation
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+
+                Button("Next") {
+                    focusedField = .outcome
+                }
+
+                Spacer()
+
+                Button("Done") {
+                    focusedField = nil
+                }
             }
         }
     }
@@ -49,8 +72,9 @@ struct MeaningStepView: View {
             }
             
             TextEditor(text: $draft.motivationDescription)
-                .focused($isFocused)
-                .frame(minHeight: 120)
+                .textFieldStyle(.roundedBorder)
+                .focused($focusedField, equals: .motivation)
+                .frame(height: 120)
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
@@ -59,15 +83,24 @@ struct MeaningStepView: View {
         }
     }
     private var optionalSecondary: some View {
-        VStack(spacing: 8) {
-            
+        VStack(alignment: .leading, spacing: 8) {
+
             Text("What do you hope to gain?")
                 .font(.caption)
-                .foregroundColor(.secondary)
-            
-            TextField("More energy, clarity, confidence...", text: $draft.expectedOutcomeDescription)
-                .textFieldStyle(.roundedBorder)
+                .foregroundStyle(.secondary)
+
+            TextField(
+                "More energy, clarity, confidence...",
+                text: $draft.expectedOutcomeDescription
+            )
+            .padding()
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
-}
+    enum Field {
+        case motivation
+        case outcome
+    }
 
+}

@@ -144,7 +144,7 @@ final class NotificationManager {
 //        )
         
         // 6. Stable identifier
-        let identifier = activity.id.uuidString
+        let identifier = "activity_\(activity.id.uuidString)"
         
         let request = UNNotificationRequest(
             identifier: identifier,
@@ -230,7 +230,7 @@ final class NotificationManager {
     }
     func cancelReminder(for activity: Activity) {
         
-        let identifier = activity.id.uuidString
+        let identifier = "activity_\(activity.id.uuidString)"
         
         UNUserNotificationCenter.current()
             .removePendingNotificationRequests(
@@ -253,6 +253,39 @@ final class NotificationManager {
                     print("Title:", request.content.title)
                     print("Body:", request.content.body)
                 }
+            }
+    }
+    
+    func syncReminders(for activities: [Activity]) {
+        
+        removeAllWuFlowReminders()
+        
+        for activity in activities {
+            
+            guard activity.remindersEnabled else {
+                continue
+            }
+            
+            scheduleReminder(for: activity)
+        }
+        
+        print("🔄 Reminder sync completed")
+    }
+    func removeAllWuFlowReminders() {
+        
+        UNUserNotificationCenter.current()
+            .getPendingNotificationRequests { requests in
+                
+                let identifiers = requests
+                    .filter { $0.content.title == "WuFlow 🌿" }
+                    .map(\.identifier)
+                
+                UNUserNotificationCenter.current()
+                    .removePendingNotificationRequests(
+                        withIdentifiers: identifiers
+                    )
+                
+                print("🗑 Removed \(identifiers.count) reminders")
             }
     }
 }
