@@ -150,6 +150,16 @@ struct ActivityDetailView: View {
                 })
                 .buttonStyle(.glass)
             }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    presentEditProcess = true
+                }, label: {
+                    Image(systemName: "pencil")
+                        .font(Font.system(size: 20))
+                        .tint(activity.remindersEnabled ? .green: .gray)
+                })
+                .buttonStyle(.glass)
+            }
             if activity.remindersEnabled {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -182,21 +192,19 @@ extension ActivityDetailView {
             identity
             
             // Progress value
-            VStack(spacing: 8) {
-                Text("\(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
-                    .font(.headline)
-                
+            VStack(spacing: 15) {
                 ProgressView(value: progressRatio)
                     .tint(Color.colorForActivity(activity))
                     .animation(.easeInOut, value: progressRatio)
+                Text("\(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
+                    .font(.headline)
+                // Feedback (THIS is the key)
+                Text(feedbackMessage)
+                    .font(.subheadline)
+                    .foregroundColor(colorForStatus)
+                    .multilineTextAlignment(.center)
             }
-            
-            // Feedback (THIS is the key)
-            Text(feedbackMessage)
-                .font(.subheadline)
-                .foregroundColor(colorForStatus)
-                .multilineTextAlignment(.center)
-                .padding(.top, 4)
+            .padding(.leading)
             
             // CTA (important positioning)
             Button {
@@ -210,12 +218,15 @@ extension ActivityDetailView {
                     .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }
+            .padding(.top)
+            .padding(.leading)
         }
-        .padding()
+        .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 20))
         .background(
             RoundedRectangle(cornerRadius: 28)
                 .fill(.ultraThinMaterial)
         )
+        .cornerRadius(20)
     }
     var identity: some View {
         HStack(spacing: 16) {
@@ -224,30 +235,18 @@ extension ActivityDetailView {
                 Text(activity.name)
                     .font(.title2)
                     .fontWeight(.bold)
-                
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Text("\(progressPercentage)% complete today")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-            
-            Spacer()
-            VStack {
-                Button(action: {
-                    presentEditProcess = true
-                }, label: {
-                    Image(systemName: "pencil")
-                        .foregroundStyle(.white)
-                        .font(.system(size: 20, weight: .bold))
-                })
-                .buttonStyle(.bordered)
-                Spacer()
-            }
         }
+        .padding(.bottom)
     }
     
     var activityImage: some View {
         ActivityImageView(path: activity.imagePath, icon: activity.iconName)
-            .frame(width: 80, height: 80)
+            .frame(width: 130, height: 130)
             .id(activity.imagePath)
     }
     
@@ -259,7 +258,7 @@ extension ActivityDetailView {
         }
     }
     var meaningSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 0) {
             
             if hasMeaningContent {
                 
@@ -267,7 +266,7 @@ extension ActivityDetailView {
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 5) {
                     
                     if let motivation = activity.motivationDescription,
                        !motivation.isEmpty {
@@ -567,14 +566,20 @@ extension ActivityDetailView {
     private func enableNotifications() {
         withAnimation {
             self.activity.remindersEnabled.toggle()
-            self.activity.reminderType = .scheduled
-            self.activity.preferredReminderTime = nil
+            if self.activity.remindersEnabled {
+                NotificationManager.shared.scheduleReminder(for: self.activity)
+                print("Notifications enabled and scheduled")
+            } else {
+                NotificationManager.shared.cancelReminder(for: activity)
+                print("Notifications disabled and cleared schedule")
+            }
+            
             do {
                 try modelContext.save()
             } catch {
                 print("❌ Enable notifications failed:", error)
             }
-            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()            
         }
     }
 }

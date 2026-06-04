@@ -28,7 +28,7 @@ struct ActivityRowCard: View {
     
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 5) {
             VStack(alignment: .leading) {
                 HStack(alignment: .center ,spacing: 12) {
                     activityImage

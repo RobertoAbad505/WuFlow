@@ -108,6 +108,153 @@ final class NotificationManager {
                 }
             }
     }
+    
+    func scheduleReminder(for activity: Activity) {
+        
+        // 1. Remove old reminder first
+        cancelReminder(for: activity)
+        
+        // 2. Make sure reminders enabled
+        guard activity.remindersEnabled else {
+            print("⚠️ Reminders disabled")
+            return
+        }
+        
+        // 3. Resolve reminder time
+        let components = reminderDateComponents(for: activity)
+        
+        // 4. Build notification content
+        let content = UNMutableNotificationContent()
+        
+        content.title = "WuFlow 🌿"
+        content.body = reminderBody(for: activity)
+        content.sound = .default
+        
+        //REAL NOTIFICATION SCHEDULER TRIGGER
+        // 5. Create repeating trigger
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: components,
+            repeats: true
+        )
+        
+        //DEBUG 5s NOTIFICATION TRIGGER
+//        let trigger = UNTimeIntervalNotificationTrigger(
+//            timeInterval: 5,
+//            repeats: false
+//        )
+        
+        // 6. Stable identifier
+        let identifier = activity.id.uuidString
+        
+        let request = UNNotificationRequest(
+            identifier: identifier,
+            content: content,
+            trigger: trigger
+        )
+        
+        // 7. Schedule notification
+        UNUserNotificationCenter.current()
+            .add(request) { error in
+                
+                if let error {
+                    print("❌ Failed scheduling reminder:", error)
+                } else {
+                    print("✅ Reminder scheduled for \(activity.name)")
+                }
+            }
+    }
+    private func reminderDateComponents(
+        for activity: Activity
+    ) -> DateComponents {
+        
+        switch activity.reminderPreset {
+            
+        case .morning:
+            
+            return DateComponents(
+                hour: 8,
+                minute: 0
+            )
+            
+        case .midday:
+            
+            return DateComponents(
+                hour: 13,
+                minute: 0
+            )
+            
+        case .evening:
+            
+            return DateComponents(
+                hour: 20,
+                minute: 0
+            )
+            
+        case .custom:
+            
+            guard let reminderTime = activity.reminderTime else {
+                
+                // fallback
+                return DateComponents(
+                    hour: 20,
+                    minute: 0
+                )
+            }
+            
+            let calendar = Calendar.current
+            
+            return calendar.dateComponents(
+                [.hour, .minute],
+                from: reminderTime
+            )
+        }
+    }
+    private func reminderBody(
+        for activity: Activity
+    ) -> String {
+        
+        switch activity.reminderPreset {
+            
+        case .morning:
+            return "Start your day with \(activity.name)."
+            
+        case .midday:
+            return "A small pause for \(activity.name)."
+            
+        case .evening:
+            return "Would tonight be a good moment for \(activity.name)?"
+            
+        case .custom:
+            return "A reminder for \(activity.name)."
+        }
+    }
+    func cancelReminder(for activity: Activity) {
+        
+        let identifier = activity.id.uuidString
+        
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(
+                withIdentifiers: [identifier]
+            )
+        
+        print("🗑 Reminder removed for \(activity.name)")
+    }
+    func printPendingNotifications() {
+        
+        UNUserNotificationCenter.current()
+            .getPendingNotificationRequests { requests in
+                
+                print("📬 Pending notifications:")
+                
+                for request in requests {
+                    
+                    print("-------------------")
+                    print("Identifier:", request.identifier)
+                    print("Title:", request.content.title)
+                    print("Body:", request.content.body)
+                }
+            }
+    }
 }
 
 enum NotificationPermissionStatus {

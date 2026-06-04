@@ -46,6 +46,12 @@ struct ActivityListView: View {
                 highlights
                 activityList
                 addActivityBtn
+                Button(action: NotificationManager.shared
+                    .printPendingNotifications, label: {
+                        Text("PRINT PENDING NOTIFICATIONS")
+                            .padding(10)
+                    })
+                .buttonStyle(.glass)
             }
             .padding(EdgeInsets(top: 0, leading: 20, bottom: 30, trailing: 20))
         }

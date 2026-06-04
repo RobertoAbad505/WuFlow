@@ -45,20 +45,23 @@ struct ReminderSettingsView: View {
                     .font(.title)
                     .fontWeight(.bold)
             }
-            
-            Text("Reminders can help your activity become part of your natural flow.")
-                .font(Font.body.monospacedDigit())
-                .padding(.vertical, 10)
-                .padding(.horizontal, 30)
-                .frame(maxWidth: .infinity)
-                .glassEffect()
-            
-            Text("When would support feel most helpful?")
-                .font(Font.body.monospacedDigit())
-                .padding(.vertical, 20)
-                .padding(.horizontal, 30)
-                .frame(maxWidth: .infinity)
-                .glassEffect()
+            VStack {
+                Text("Reminders can help your activity become part of your natural flow.")
+                    .font(Font.body.monospacedDigit())
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 30)
+                    .frame(maxWidth: .infinity)
+                    
+                
+                Text("When would support feel most helpful?")
+                    .font(Font.body.monospacedDigit())
+            }
+            .padding()
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
+            .overlay {
+                RoundedRectangle(cornerRadius: 30)
+                    .stroke(.white, lineWidth: 3)
+            }
             
             HStack {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 100)), count: 2)) {
@@ -127,19 +130,34 @@ struct ReminderSettingsView: View {
         .padding()
     }
     func save() {
+
         activity.reminderPreset = selectedPreset
-        
+
         if selectedPreset == .custom {
             activity.reminderTime = selectedTime
         } else {
             activity.reminderTime = nil
         }
-        
+
+        guard let modelContext = activity.modelContext else {
+            print("❌ Missing model context")
+            return
+        }
+
         do {
-          try activity.modelContext?.save()
-//            NotificationManager.shared.scheduleReminder(for: activity)
-        } catch let error {
-            print("Error saving reminder: \(error.localizedDescription)")
+
+            try modelContext.save()
+
+            if activity.remindersEnabled {
+                NotificationManager.shared.scheduleReminder(for: activity)
+            } else {
+                NotificationManager.shared.cancelReminder(for: activity)
+            }
+
+            print("✅ Reminder configuration saved")
+
+        } catch {
+            print("❌ Error saving reminder: \(error)")
         }
     }
 }
