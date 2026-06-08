@@ -22,6 +22,36 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         
         return [.banner, .sound]
     }
+    
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        print("Action:", response.actionIdentifier)
+        let userInfo =
+            response.notification.request.content.userInfo
+        
+        let activityId =
+            userInfo["activityId"] as? String ?? "Unknown"
+        
+        switch response.actionIdentifier {
+            
+        case "DONE_ACTION":
+            
+            print("✅ DONE pressed")
+            print("Activity ID:", activityId)
+            
+        case "LATER_ACTION":
+            
+            print("⏰ LATER pressed")
+            print("Activity ID:", activityId)
+            
+        default:            
+            print("📲 Notification opened")
+            print("Action identifier:", response.actionIdentifier)
+            print("Activity ID:", activityId)
+        }
+    }
 }
 
 final class NotificationManager {
@@ -130,18 +160,22 @@ final class NotificationManager {
         content.body = reminderBody(for: activity)
         content.sound = .default
         
+        content.categoryIdentifier = NotificationAction.activityReminder
+        content.userInfo = [
+            "activityId": activity.id.uuidString
+        ]
         //REAL NOTIFICATION SCHEDULER TRIGGER
         // 5. Create repeating trigger
-        let trigger = UNCalendarNotificationTrigger(
-            dateMatching: components,
-            repeats: true
-        )
+//        let trigger = UNCalendarNotificationTrigger(
+//            dateMatching: components,
+//            repeats: true
+//        )
         
         //DEBUG 5s NOTIFICATION TRIGGER
-//        let trigger = UNTimeIntervalNotificationTrigger(
-//            timeInterval: 5,
-//            repeats: false
-//        )
+        let trigger = UNTimeIntervalNotificationTrigger(
+            timeInterval: 5,
+            repeats: false
+        )
         
         // 6. Stable identifier
         let identifier = "activity_\(activity.id.uuidString)"
@@ -252,6 +286,9 @@ final class NotificationManager {
                     print("Identifier:", request.identifier)
                     print("Title:", request.content.title)
                     print("Body:", request.content.body)
+                    
+                    print("Identifier:", request.identifier)
+                    print("Category:", request.content.categoryIdentifier)
                 }
             }
     }
@@ -270,6 +307,7 @@ final class NotificationManager {
         }
         
         print("🔄 Reminder sync completed")
+        printPendingNotifications()
     }
     func removeAllWuFlowReminders() {
         
@@ -288,10 +326,46 @@ final class NotificationManager {
                 print("🗑 Removed \(identifiers.count) reminders")
             }
     }
+    func registerNotificationCategories() {
+        
+        let doneAction = UNNotificationAction(
+            identifier: NotificationAction.done,
+            title: "Done ✅",
+            options: []
+        )
+        
+        let laterAction = UNNotificationAction(
+            identifier: NotificationAction.later,
+            title: "Later ⏰",
+            options: []
+        )
+        
+        let category = UNNotificationCategory(
+            identifier: NotificationAction.activityReminder,
+            actions: [
+                doneAction,
+                laterAction
+            ],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        UNUserNotificationCenter.current()
+            .setNotificationCategories([category])
+        
+        print("✅ Notification categories registered")
+    }
 }
 
 enum NotificationPermissionStatus {
     case notDetermined
     case denied
     case authorized
+}
+private enum NotificationAction {
+    
+    static let done = "DONE_ACTION"
+    static let later = "LATER_ACTION"
+    
+    static let activityReminder = "ACTIVITY_REMINDER"
 }

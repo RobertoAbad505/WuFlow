@@ -31,6 +31,7 @@ struct WuFlowApp: App {
     
     init() {
         UNUserNotificationCenter.current().delegate = notificationDelegate
+        NotificationManager.shared.registerNotificationCategories()
     }
 
     var body: some Scene {

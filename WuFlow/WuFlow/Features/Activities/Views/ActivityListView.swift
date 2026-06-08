@@ -28,6 +28,11 @@ struct ActivityListView: View {
                     .ignoresSafeArea()
                 content
             }
+            .onAppear {
+                NotificationManager.shared.syncReminders(
+                    for: items
+                )
+            }
             .fullScreenCover(isPresented: $toggleCreateActivity, content: {
                 CreateActivityView(mode: .create)
             })
