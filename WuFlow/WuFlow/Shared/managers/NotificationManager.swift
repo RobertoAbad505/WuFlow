@@ -37,7 +37,8 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         switch response.actionIdentifier {
             
         case "DONE_ACTION":
-            
+            NotificationActionHandler.shared
+                    .handleDone(activityId: activityId)
             print("✅ DONE pressed")
             print("Activity ID:", activityId)
             
@@ -46,7 +47,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
             print("⏰ LATER pressed")
             print("Activity ID:", activityId)
             
-        default:            
+        default:
             print("📲 Notification opened")
             print("Action identifier:", response.actionIdentifier)
             print("Activity ID:", activityId)
@@ -107,15 +108,21 @@ final class NotificationManager {
     }
     
     func sendTestNotification(_ title: String, _ body: String) {
-        
-        UNUserNotificationCenter.current()
-            .removeAllPendingNotificationRequests()
+//        
+//        UNUserNotificationCenter.current()
+//            .removeAllPendingNotificationRequests()
         
         let content = UNMutableNotificationContent()
         
         content.title = title
         content.body = body
         content.sound = .default
+        content.sound = .default
+        
+        content.categoryIdentifier = NotificationAction.activityReminder
+        content.userInfo = [
+            "activityId": "B8516AD4-3C7E-40E9-AC77-0BF8E015022E"
+        ]
         
         // Trigger after 5 seconds
         let trigger = UNTimeIntervalNotificationTrigger(
@@ -165,17 +172,17 @@ final class NotificationManager {
             "activityId": activity.id.uuidString
         ]
         //REAL NOTIFICATION SCHEDULER TRIGGER
-        // 5. Create repeating trigger
-//        let trigger = UNCalendarNotificationTrigger(
-//            dateMatching: components,
-//            repeats: true
-//        )
+        //5. Create repeating trigger
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: components,
+            repeats: true
+        )
         
         //DEBUG 5s NOTIFICATION TRIGGER
-        let trigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: 5,
-            repeats: false
-        )
+//        let trigger = UNTimeIntervalNotificationTrigger(
+//            timeInterval: 5,
+//            repeats: false
+//        )
         
         // 6. Stable identifier
         let identifier = "activity_\(activity.id.uuidString)"
@@ -283,11 +290,9 @@ final class NotificationManager {
                 for request in requests {
                     
                     print("-------------------")
-                    print("Identifier:", request.identifier)
                     print("Title:", request.content.title)
                     print("Body:", request.content.body)
-                    
-                    print("Identifier:", request.identifier)
+                    print("RequestID:", request.identifier)
                     print("Category:", request.content.categoryIdentifier)
                 }
             }
@@ -354,6 +359,38 @@ final class NotificationManager {
             .setNotificationCategories([category])
         
         print("✅ Notification categories registered")
+    }
+    func sendSuccessNotification(
+        activityName: String
+    ) {
+
+        let messages = [
+            "Small steps matter 🌱",
+            "Consistency beats intensity 🌿",
+            "Another step forward ✨",
+            "Progress recorded 💪"
+        ]
+        let content = UNMutableNotificationContent()
+
+        content.title = "🌿 Nice work"
+
+        content.body = messages.randomElement() ?? "Progress recorded"
+
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(
+            timeInterval: 1,
+            repeats: false
+        )
+
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: trigger
+        )
+
+        UNUserNotificationCenter.current()
+            .add(request)
     }
 }
 

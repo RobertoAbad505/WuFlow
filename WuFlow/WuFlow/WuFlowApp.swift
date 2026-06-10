@@ -14,20 +14,9 @@ struct WuFlowApp: App {
     
     let notificationDelegate = NotificationDelegate.shared
     
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Activity.self,
-            ProgressRecord.self 
-        ])
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false)
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    var sharedModelContainer: ModelContainer {
+        DataStore.shared.container
+    }
     
     init() {
         UNUserNotificationCenter.current().delegate = notificationDelegate

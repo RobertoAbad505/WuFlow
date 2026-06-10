@@ -153,12 +153,14 @@ struct HomeView: View {
                         FocusCardView(activity: activity) {
                             router.homePath.append(ActivitiesRoute.detail(activity))
                         }
-//                        .onAppear {
-//                            print("DEBUG ITEM:")
-//                            print("name:", activity.name)
-//                            print("icon:", activity.iconName ?? "nil")
-//                            print("has image:", activity.imagePath ?? "N/A")
-//                        }
+                        .onAppear {
+                            print("DEBUG ACTIVITY ---------------------------")
+                            print("id:", activity.id.uuidString)
+                            print("name:", activity.name)
+                            print("icon:", activity.iconName ?? "nil")
+                            print("has image:", activity.imagePath ?? "N/A")
+                            print("------------------------------------------")
+                        }
                     }
                 }
             }

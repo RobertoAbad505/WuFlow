@@ -10,4 +10,5 @@ enum TrackingType: String, Codable, CaseIterable {
     case healthSteps
     case healthWorkout
     case location
+    case reminder
 }
