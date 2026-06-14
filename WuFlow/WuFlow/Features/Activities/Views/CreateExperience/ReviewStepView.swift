@@ -13,11 +13,8 @@ struct ReviewStepView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                
                 header
-                
                 summaryCard
-                
             }
             .padding()
         }
@@ -34,37 +31,25 @@ struct ReviewStepView: View {
     }
     private var summaryCard: some View {
         VStack(spacing: 20) {
-            
             identitySection
-            
             Divider()
-            
             intentionSection
-            
             Divider()
-            
             lifeAreaSection
-            
             if draft.type != .maintain {
                 Divider()
                 goalSection
             }
-            
             if !draft.motivationDescription.isEmpty {
                 Divider()
                 motivationSection
             }
-            
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-        )
+        .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
     }
     private var identitySection: some View {
         VStack(spacing: 12) {
-            
             ZStack {
                 if let previewImg = ImageStore.shared.load(from: draft.imagePath, category: .activity) {
                     Image(uiImage: previewImg)
@@ -120,6 +105,8 @@ struct ReviewStepView: View {
     }
     private var goalSection: some View {
         HStack {
+            Image(systemName: "flag.pattern.checkered")
+                .font(.title3)
             Text(goalText)
             Spacer()
         }
@@ -135,13 +122,27 @@ struct ReviewStepView: View {
         }
     }
     private var motivationSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Why this matters")
-                .font(.caption)
-                .foregroundColor(.secondary)
-            
-            Text(draft.motivationDescription)
-                .font(.body)
+        HStack {
+            Image(systemName: "checkmark.seal")
+                .font(.title3)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Why this matters")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(draft.motivationDescription)
+                    .font(.body)
+            }
         }
     }
+}
+#Preview {
+    let activity = ActivityDraft(from: Activity(name: "Missing Kaomi so much that I can't take it anymore",
+                                                unitType: .pages,
+                                                goalValue: 3,
+                                                trackingType: .manual,
+                                                motivationDescription: "This is motivating because of xxxxxxx xxxx xxxx xxxx",
+                                                lifeArea: .health,
+                                                reminderType: .scheduled
+                                               ))
+    ReviewStepView(draft: activity)
 }

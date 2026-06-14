@@ -18,6 +18,7 @@ struct CreateActivityView: View {
     @StateObject private var cameraManager = CameraManager()
     let allSteps: [CreateActivityStep] = [
         .identity,
+        .measurement,
         .intention,
         .lifeArea,
         .goal,
@@ -53,8 +54,10 @@ struct CreateActivityView: View {
             switch step {
             case .identity:
                 IdentityStepView(draft: $draft)
+            case .measurement:
+                MeasurementStepView(draft: $draft)
             case .intention:
-                IntentionStepView(draft: $draft)                
+                IntentionStepView(draft: $draft)
             case .lifeArea:
                 LifeAreaStepView(draft: $draft)
             case .goal:
@@ -191,6 +194,7 @@ enum ActivityFlowMode: Equatable {
 }
 enum CreateActivityStep {
     case identity
+    case measurement
     case intention
     case lifeArea
     case goal
@@ -210,6 +214,9 @@ struct ActivityDraft {
     var lifeArea: LifeArea = .health
     var type: ActivityTypes = .increase
     var secondaryNote: String?
+    var measurementTypeRaw: String = MeasurementType.session.rawValue
+    var goalPeriodRaw: String = GoalPeriod.daily.rawValue
+    var defaultIncrement: Double = 1
     
     init() {
         
@@ -227,6 +234,29 @@ struct ActivityDraft {
         self.lifeArea = activity.lifeArea
         self.type = activity.type
         self.secondaryNote = activity.secondaryNote
+        self.measurementTypeRaw = activity.measurementType.rawValue
+        self.goalPeriodRaw = activity.goalPeriodType.rawValue
+    }
+    
+    var goalPeriod: GoalPeriod {
+        get {
+            GoalPeriod(
+                rawValue: goalPeriodRaw
+            ) ?? .daily
+        }
+        set {
+            goalPeriodRaw = newValue.rawValue
+        }
+    }
+    var measurementType: MeasurementType {
+        get {
+            MeasurementType(
+                rawValue: measurementTypeRaw
+            ) ?? .session
+        }
+        set {
+            measurementTypeRaw = newValue.rawValue
+        }
     }
 }
 

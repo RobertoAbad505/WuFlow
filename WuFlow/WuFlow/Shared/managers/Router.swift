@@ -54,6 +54,8 @@ final class Router: ObservableObject {
             settingsPath.append(route)
         case .appearance:
             settingsPath.append(route)
+        case .healtKitSettings:
+            settingsPath.append(route)
         }
     }
     

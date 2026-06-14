@@ -22,6 +22,8 @@ struct SettingsNavigationView: View {
                         Text("Account settings view - still in development")
                     case .appearance:
                         Text("Appearance view - still in development")
+                    case .healtKitSettings:
+                        HealtKitSettingsView()
                     }
                 }
         }

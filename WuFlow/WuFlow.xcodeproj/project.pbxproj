@@ -415,6 +415,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WuFlow/WuFlow.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KK7484G74W;
@@ -436,6 +439,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WuFlow/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "WuFlow necesita tu permiso para capturar fotos";
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "WuFlow uses Health data to automatically track activities such as workouts, meditation sessions, and daily steps.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "WuFlow uses Health data to automatically track activities such as workouts, meditation sessions, and daily steps.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "WuFlow can write progress updates related to your activities when enabled.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -453,6 +459,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.robertsoft.WuFlow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -472,6 +479,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WuFlow/WuFlow.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KK7484G74W;
@@ -493,6 +503,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WuFlow/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "WuFlow necesita tu permiso para capturar fotos";
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "WuFlow uses Health data to automatically track activities such as workouts, meditation sessions, and daily steps.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "WuFlow uses Health data to automatically track activities such as workouts, meditation sessions, and daily steps.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "WuFlow can write progress updates related to your activities when enabled.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -510,6 +523,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.robertsoft.WuFlow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

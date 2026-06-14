@@ -7,93 +7,174 @@
 import SwiftUI
 
 struct GoalStepView: View {
-    
+
     @Binding var draft: ActivityDraft
-    
+
+    @FocusState private var isFocused: Bool
+
     var body: some View {
-        VStack(spacing: 30) {
-            
-            Text(titleText)
-                .font(.title2)
-                .multilineTextAlignment(.center)
-            
-            // VALUE INPUT (only for increase/decrease)
-            if draft.type != .maintain {
-                valueInput
-                quickValues
-            } else {
-                flowView
-            }
-            
-            unitSelector
+
+        VStack(spacing: 24) {
+
+            titleSection
+
+            goalInput
+
+            periodSelector
+
+            goalPreview
+
+            Spacer()
         }
         .padding()
-    }
-    private var titleText: String {
-        switch draft.type {
-        case .increase:
-            return "How much do you want to build daily?"
-        case .decrease:
-            return "What limit do you want to set?"
-        case .maintain:
-            return "Just show up consistently 🌊"
+        .onAppear {
+            isFocused = true
         }
     }
-    private var valueInput: some View {
-        VStack(spacing: 12) {
-            
-            TextField("0", value: $draft.goalValue, format: .number)
-                .keyboardType(.decimalPad)
-                .font(.system(size: 48, weight: .bold))
+    private var title: String {
+
+        switch draft.measurementType {
+
+        case .session:
+            return "What's your target?"
+
+        case .duration:
+            return "How much time would you like to dedicate?"
+
+        case .count:
+            return "What's your target count?"
+
+        case .distance:
+            return "How far would you like to go?"
+        }
+    }
+    private var subtitle: String {
+
+        switch draft.measurementType {
+
+        case .session:
+            return "Choose how many sessions you'd like to complete."
+
+        case .duration:
+            return "Choose how many minutes you'd like to invest."
+
+        case .count:
+            return "Choose a measurable target."
+
+        case .distance:
+            return "Choose the distance you'd like to achieve."
+        }
+    }
+    
+    private var titleSection: some View {
+
+        VStack(spacing: 8) {
+
+            Text(title)
+                .font(.title2.bold())
+
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            
-            Text(goalDescription)
-                .font(.caption)
-                .foregroundColor(.secondary)
         }
     }
-    private var unitSelector: some View {
-        //Unit type input
-        Picker("Unit type", selection: $draft.unitType) {
-            ForEach(UnitType.allCases, id: \.self) {
-                Text($0.rawValue.capitalized)
-            }
-        }
-        .pickerStyle(.segmented)
-    }
-    private var goalDescription: String {
-        switch draft.type {
-        case .increase:
-            return "At least this amount per day"
-        case .decrease:
-            return "No more than this amount"
-        case .maintain:
-            return ""
-        }
-    }
-    private var flowView: some View {
-        VStack(spacing: 12) {
-            
-            Image(systemName: "waveform.path.ecg")
-                .font(.system(size: 50))
-                .foregroundColor(.blue)
-                .symbolEffect(.bounce)
-            
-            Text("Focus on consistency, not quantity")
-                .font(.caption)
-                .foregroundColor(.secondary)
+    private var goalInput: some View {
+
+        VStack(spacing: 8) {
+
+            TextField(
+                "0",
+                value: $draft.goalValue,
+                format: .number
+            )
+            .keyboardType(.numberPad)
+            .multilineTextAlignment(.center)
+            .font(.system(size: 48, weight: .bold))
+            .focused($isFocused)
+
+            Text(unitLabel)
+                .font(.headline)
+                .foregroundStyle(.secondary)
         }
     }
-    private var quickValues: some View {
-        HStack(spacing: 12) {
-            ForEach([10, 20, 30, 60], id: \.self) { value in
-                Button("\(value)") {
-                    draft.goalValue = Double(value)
+    private var unitLabel: String {
+
+        switch draft.measurementType {
+
+        case .session:
+            return draft.goalValue == 1
+            ? "Session"
+            : "Sessions"
+
+        case .duration:
+            return "Minutes"
+
+        case .count:
+            return "Count"
+
+        case .distance:
+            return "Kilometers"
+        }
+    }
+    private var periodSelector: some View {
+
+        VStack(alignment: .leading) {
+
+            Text("How often?")
+                .font(.headline)
+
+            HStack {
+
+                ForEach(
+                    GoalPeriod.allCases,
+                    id: \.self
+                ) { period in
+
+                    Button {
+
+                        draft.goalPeriod = period
+
+                    } label: {
+
+                        Text(period.displayName)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(
+                                draft.goalPeriod == period
+                                ? Color.accentColor.opacity(0.2)
+                                : Color.secondary.opacity(0.1)
+                            )
+                            .clipShape(
+                                RoundedRectangle(
+                                    cornerRadius: 12
+                                )
+                            )
+                    }
                 }
-                .padding(8)
-                .background(.ultraThinMaterial)
-                .clipShape(Capsule())
             }
         }
+    }
+    private var goalPreview: some View {
+
+        VStack(spacing: 8) {
+
+            Text("Your Goal")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Text(goalSummary)
+                .font(.title3.bold())
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
+        .clipShape(
+            RoundedRectangle(cornerRadius: 16)
+        )
+    }
+    private var goalSummary: String {
+
+        "\(Int(draft.goalValue)) \(unitLabel) \(draft.goalPeriod.displayName)"
     }
 }

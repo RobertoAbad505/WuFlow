@@ -258,7 +258,7 @@ extension ActivityDetailView {
         }
     }
     var meaningSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 20) {
             
             if hasMeaningContent {
                 
@@ -266,7 +266,7 @@ extension ActivityDetailView {
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(alignment: .leading, spacing: 15) {
                     
                     if let motivation = activity.motivationDescription,
                        !motivation.isEmpty {

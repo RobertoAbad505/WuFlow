@@ -19,7 +19,7 @@ final class Activity {
     
     var unitType: UnitType
     
-    var goalValue: Double
+    var goalValue: Double = 1
     
     var trackingType: TrackingType
     
@@ -52,6 +52,12 @@ final class Activity {
     var reminderTime: Date?
     
     var reminderToneRawValue: String?
+    
+    var measurementTypeRaw: String = MeasurementType.session.rawValue
+    
+    var goalPeriodRaw: String = GoalPeriod.daily.rawValue
+    
+    var defaultIncrement: Double = 1
     
     // Relationship
     @Relationship(deleteRule: .cascade)
@@ -213,8 +219,7 @@ extension Activity {
         todayProgress >= goalValue
     }
     
-    
-    ///Reminders helpers
+    ///Property helpers
     var reminderType: ReminderType {
         get {
             ReminderType(rawValue: reminderTypeRawValue ?? "")
@@ -241,6 +246,27 @@ extension Activity {
         }
         set {
             reminderPresetRawValue = newValue.rawValue
+        }
+    }
+    var measurementType: MeasurementType {
+        get {
+            MeasurementType(
+                rawValue: measurementTypeRaw
+            ) ?? .session
+        }
+        set {
+            measurementTypeRaw = newValue.rawValue
+        }
+    }
+
+    var goalPeriodType: GoalPeriod {
+        get {
+            GoalPeriod(
+                rawValue: goalPeriodRaw
+            ) ?? .daily
+        }
+        set {
+            goalPeriodRaw = newValue.rawValue
         }
     }
 
@@ -272,4 +298,30 @@ enum ReminderTone: String, Codable, CaseIterable {
     case light
     case heavy
     case gentle
+}
+enum MeasurementType: String, Codable, CaseIterable {
+
+    case session
+    case duration
+    case count
+    case distance
+
+    var displayName: String {
+        switch self {
+        case .session: "Sessions"
+        case .duration: "Minutes"
+        case .count: "Count"
+        case .distance: "Distance"
+        }
+    }
+}
+enum GoalPeriod: String, Codable, CaseIterable {
+
+    case daily
+    case weekly
+    case monthly
+
+    var displayName: String {
+        rawValue.capitalized
+    }
 }

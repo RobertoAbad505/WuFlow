@@ -27,6 +27,9 @@ struct SettingsView: View {
                 NavigationLink(value: SettingsRoute.appearance) {
                     Label("Appearance", systemImage: "eye")
                 }
+                NavigationLink(value: SettingsRoute.healtKitSettings) {
+                    Label("Healt Kit Settings", systemImage: "figure.cooldown")
+                }
             }
             
         }
