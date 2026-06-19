@@ -5,11 +5,20 @@
 //  Created by Roberto Ramirez on 4/22/26.
 //
 import SwiftUI
+import PhotosUI
 
 struct VisualStepView: View {
     
     @Binding var draft: ActivityDraft
     @ObservedObject var cameraManager: CameraManager
+    
+    @State private var selectedPhoto: PhotosPickerItem?
+
+    @State private var selectedImage: UIImage?
+    @State private var imageSource: ImageSource = .defaultImage
+    var image: UIImage? {
+        ImageStore.shared.load(from: draft.imagePath, category: .activity)
+    }
     
     var body: some View {
         VStack(spacing: 30) {
@@ -39,6 +48,7 @@ struct VisualStepView: View {
                 print("New image is null!!!")
                 return
             }
+            imageSource = .camera
             let path = try? ImageStore.shared.save(
                 newImage,
                 category: .activity,
@@ -48,23 +58,42 @@ struct VisualStepView: View {
 
             draft.imagePath = path
         }
+        .onChange(of: selectedPhoto) { _, newImage in
+            
+            guard let newImage else { return }
+
+            Task {
+                do {
+                    if let data = try await newImage.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        
+                        selectedImage = image
+
+                        // Reuse your existing save logic here
+                        let path = try? ImageStore.shared.save(
+                            image,
+                            category: .activity,
+                            maxDimension: 1024,
+                            compression: 0.6
+                        )
+                        imageSource = .library
+                        draft.imagePath = path
+                    }
+
+                } catch {
+                    print("❌ Failed loading image:", error)
+                }
+            }
+        }
     }
     private var preview: some View {
         ZStack {
-            if let uiImage = ImageStore.shared.load(from: draft.imagePath, category: .activity), cameraManager.image == nil {
-                Image(uiImage: uiImage)
+            if let img = image {
+                Image(uiImage: img)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 200, height: 200)
                     .clipShape(Circle())
-                
-            } else if let uiImage = cameraManager.image {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 200, height: 200)
-                    .clipShape(Circle())
-                
             } else {
                 Image(systemName: draft.iconName)
                     .font(.system(size: 70))
@@ -75,6 +104,7 @@ struct VisualStepView: View {
                     .symbolEffect(.pulse, value: draft.iconName)
             }
         }
+        .id("id\(draft.imagePath)")
     }
     private var actions: some View {
         VStack(spacing: 16) {
@@ -90,11 +120,25 @@ struct VisualStepView: View {
                     draft.imagePath == nil ? "Take a picture" : "Retake picture",
                     systemImage: "camera.fill"
                 )
+                .frame(maxWidth: 200)
             }
             .buttonStyle(.borderedProminent)
             
+            PhotosPicker(
+                selection: $selectedPhoto,
+                matching: .images
+            ) {
+                HStack {
+                    Image(systemName: "photo")
+                    Text("Choose from Library")
+                }
+                .frame(maxWidth: 200)
+            }
+            .buttonStyle(.bordered)
+            
             if draft.imagePath != nil {
                 Button("Remove image") {
+                    ImageStore.shared.delete(at: draft.imagePath)
                     draft.imagePath = nil
                     cameraManager.image = nil
                 }
@@ -102,6 +146,12 @@ struct VisualStepView: View {
             }
         }
     }
+}
+enum ImageSource {
+    case library
+    case icon
+    case camera
+    case defaultImage
 }
 
 #Preview {

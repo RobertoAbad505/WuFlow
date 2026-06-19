@@ -19,7 +19,6 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     ) async -> UNNotificationPresentationOptions {
         
         print("🔥 Foreground notification received")
-        
         return [.banner, .sound]
     }
     
@@ -27,7 +26,6 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
-        print("Action:", response.actionIdentifier)
         let userInfo =
             response.notification.request.content.userInfo
         
@@ -37,13 +35,11 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         switch response.actionIdentifier {
             
         case "DONE_ACTION":
-            NotificationActionHandler.shared
-                    .handleDone(activityId: activityId)
+            NotificationActionHandler.shared.handleDone(activityId: activityId)
             print("✅ DONE pressed")
             print("Activity ID:", activityId)
             
         case "LATER_ACTION":
-            
             print("⏰ LATER pressed")
             print("Activity ID:", activityId)
             

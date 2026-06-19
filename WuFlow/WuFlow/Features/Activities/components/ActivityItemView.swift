@@ -30,7 +30,7 @@ struct ActivitySelectionGridView: View {
                         ActivityCircleView(activity: activity)
                     }
                     .buttonStyle(.plain)
-                    .glassEffect(.clear, in: Circle())
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 15))
                 }
             }
         }
@@ -43,10 +43,8 @@ struct ActivityCircleView: View {
     
     var body: some View {
         VStack(spacing: 5) {
-            Image(systemName: "circle.dotted")
-                .font(.system(size: 40))
-                .foregroundStyle(.primary)
-            
+            ActivityImageView(path: activity.imagePath, icon: activity.iconName)
+                .frame(width: 100, height: 100)
             Text(activity.name)
                 .font(.system(size: 12))
                 .fontWeight(.medium)
@@ -56,11 +54,12 @@ struct ActivityCircleView: View {
         }
         .padding()
         .frame(width: 150, height: 150)
+        .border(.gray, width: 1)
     }
 }
 
 #Preview {
-    ActivitySelectionGridView(activities: [
+    let items = [
         Activity(name: "Test",
                  unitType: .count,
                  goalValue: 25,
@@ -86,6 +85,7 @@ struct ActivityCircleView: View {
                  goalValue: 25,
                  trackingType: .manual)
                                                     
-    ],
-                                                onSelect: { _ in })
+    ]
+    ActivitySelectionGridView(activities: items,
+                              onSelect: { _ in })
 }

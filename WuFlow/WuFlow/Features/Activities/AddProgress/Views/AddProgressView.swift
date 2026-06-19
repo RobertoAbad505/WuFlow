@@ -50,21 +50,23 @@ struct AddActivityProgressView: View {
     }
     
     var body: some View {
+        ZStack {
+            AnimatedBackgroundView(style: .wuFlow)
+                .ignoresSafeArea()
+            content
+        }
+    }
+    
+    var content: some View {
         VStack {
-            ZStack {
-                AnimatedBackgroundView(style: .wuFlow)
-                    .ignoresSafeArea()
-                VStack {
-                    switch step {
-                    case .selectActivity:
-                        selectActivityView
-                    case .inputValue:
-                        inputView
-                    }
-                }
-                .padding()
+            switch step {
+            case .selectActivity:
+                selectActivityView
+            case .inputValue:
+                inputView
             }
         }
+        .padding()
         .animation(.easeInOut, value: step)
     }
     var inputView: some View {
@@ -171,17 +173,15 @@ struct AddActivityProgressView: View {
     func save() {
         guard let activity = selectedActivity else { return }
         
-        let record = ProgressRecord(
-            value: value,
-            source: .manual,
-            activity: activity
-        )
         
-        activity.progressRecords.append(record)
-        context.insert(record)
-        
-        try? context.save()
-        
+        do {
+            try ProgressRecordingService.shared.recordProgress(for: activity,
+                                                           value: value,
+                                                           source: activity.trackingType,
+                                                           context: context)
+        } catch let error {
+            print("Error saving progress: \(error)")
+        }
         dismiss()
     }
     
@@ -189,27 +189,6 @@ struct AddActivityProgressView: View {
 enum AddProgressStep {
     case selectActivity
     case inputValue
-}
-struct FloatingBlob: View {
-    
-    @State private var move = false
-    let color: Color = .purple
-    
-    var body: some View {
-        Circle()
-            .fill(color.opacity(0.5))
-            .frame(width: 250)
-            .blur(radius: 80)
-            .offset(x: move ? 250 : -300, y: move ? -200 : 200)
-            .animation(
-                .easeInOut(duration: 10)
-                .repeatForever(autoreverses: true),
-                value: move
-            )
-            .onAppear {
-                move.toggle()
-            }
-    }
 }
 #Preview {
     AddActivityProgressView(

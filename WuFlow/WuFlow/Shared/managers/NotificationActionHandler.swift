@@ -52,15 +52,15 @@ final class NotificationActionHandler {
                 return
             }
             
-            let progress = ProgressRecord(value: reminderIncrement(for: activity),
-                                          date: .now,
-                                          source: .reminder,
-                                          activity: activity)
-            progress.activity = activity
-            context.insert(progress)
-            try context.save()
-            print("✅ Progress recorded")
-            print("Activity:", activity.name)
+            do {
+                try ProgressRecordingService.shared.recordProgress(for: activity,
+                                                                   value: activity.defaultIncrement,
+                                                                   source: .reminder,
+                                                                   context: context)
+            } catch let error {
+                print("Error saving progress: \(error)")
+            }
+            
             NotificationManager.shared
                 .sendSuccessNotification(
                     activityName: activity.name
@@ -68,19 +68,6 @@ final class NotificationActionHandler {
         } catch {
 
             print("❌ Fetch failed:", error)
-        }
-    }
-    private func reminderIncrement(
-        for activity: Activity
-    ) -> Double {
-
-        switch activity.unitType {
-
-        case .sessions:
-            return 1
-
-        default:
-            return 1
         }
     }
 }
