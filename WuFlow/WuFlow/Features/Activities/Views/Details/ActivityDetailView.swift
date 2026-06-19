@@ -34,6 +34,17 @@ struct ActivityDetailView: View {
             $0.date >= range.start && $0.date <= range.end
         }
     }
+    var groupedRecordsByDay: [(date: Date, records: [ProgressRecord])] {
+        let calendar = Calendar.current
+        
+        let grouped = Dictionary(grouping: filteredRecords) {
+            calendar.startOfDay(for: $0.date)
+        }
+        
+        return grouped
+            .map { ($0.key, $0.value) }
+            .sorted { $0.date > $1.date }
+    }
 
     var groupedData: [Date: Double] {
         ProgressAnalytics.groupByDay(filteredRecords)
@@ -41,67 +52,10 @@ struct ActivityDetailView: View {
     var chartData: [DailyProgress] {
         ProgressAnalytics.makeChartData(from: groupedData)
     }
-    
-    var todayProgress: Double {
-        let calendar = Calendar.current
-        
-        let todayRecords = records.filter {
-            calendar.isDateInToday($0.date)
-        }
-        
-        return todayRecords.reduce(0) { $0 + $1.value }
-    }
-    
-    var progressRatio: Double {
-        guard activity.goalValue > 0 else { return 0 }
-        return min(todayProgress / activity.goalValue, 1.0)
-    }
-    
-    var progressPercentage: Int {
-        Int(progressRatio * 100)
-    }
-    
-    var goalStatus: GoalStatus {
-        if todayProgress >= activity.goalValue {
-            return todayProgress > activity.goalValue ? .exceeded : .completed
-        } else {
-            return .inProgress
-        }
-    }
-    
+
     var activeDaysLast7: Int {
         ActivityInsights.activeDaysLast7(records: records)
     }
-    
-    var feedbackMessage: String {
-        switch goalStatus {
-        case .inProgress:
-            if progressRatio == 0 {
-                return "Start small today 🌱"
-            } else if progressRatio < 0.5 {
-                return "You're building momentum"
-            } else {
-                return "You're almost there"
-            }
-        case .completed:
-            return "Goal reached 🎉"
-        case .exceeded:
-            return "You exceeded your goal 🚀"
-        }
-    }
-    var streakMessage: String {
-        switch activity.currentStreak {
-        case 0:
-            return "Start your streak today"
-        case 1...2:
-            return "You're getting started"
-        case 3...6:
-            return "You're building consistency"
-        default:
-            return "You're on fire 🔥"
-        }
-    }
-    
     
     // MARK: - Init
     
@@ -125,18 +79,7 @@ struct ActivityDetailView: View {
         ZStack {
             AnimatedBackgroundView(style: .calm)
                 .ignoresSafeArea()
-            
-            ScrollView {
-                VStack(spacing: 24) {
-                    heroSection
-                    meaningSection
-                    insightsSection
-                    chartSection
-                    recordsSection
-                    deleteButton
-                }
-                .padding()
-            }
+            content
         }
         .toolbar(content: {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -183,23 +126,36 @@ struct ActivityDetailView: View {
             CreateActivityView(mode: .edit(self.activity))
         }
     }
+    var content: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                heroSection
+                meaningSection
+                insightsSection
+                chartSection
+                recordsSection
+                deleteButton
+            }
+            .padding()
+        }
+    }
 }
 extension ActivityDetailView {
+    
     var heroSection: some View {
         VStack(spacing: 20) {
-            
             // Identity
             identity
             
             // Progress value
             VStack(spacing: 15) {
-                ProgressView(value: progressRatio)
+                ProgressView(value: activity.progressRatio)
                     .tint(Color.colorForActivity(activity))
-                    .animation(.easeInOut, value: progressRatio)
-                Text("\(todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
+                    .animation(.easeInOut, value: activity.progressRatio)
+                Text(activity.progressDescription)
                     .font(.headline)
                 // Feedback (THIS is the key)
-                Text(feedbackMessage)
+                Text(activity.feedbackMessage)
                     .font(.subheadline)
                     .foregroundColor(colorForStatus)
                     .multilineTextAlignment(.center)
@@ -236,7 +192,10 @@ extension ActivityDetailView {
                     .font(.title2)
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("\(progressPercentage)% complete today")
+                Text(activity.goalDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(activity.periodDescription)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -244,33 +203,16 @@ extension ActivityDetailView {
         .padding(.bottom)
     }
     
-    var activityImage: some View {
-        ActivityImageView(path: activity.imagePath, icon: activity.iconName)
-            .frame(width: 130, height: 130)
-            .id(activity.imagePath)
-    }
-    
-    var colorForStatus: Color {
-        switch goalStatus {
-        case .inProgress: return .green
-        case .completed: return .blue
-        case .exceeded: return .purple
-        }
-    }
     var meaningSection: some View {
         VStack(alignment: .leading, spacing: 20) {
-            
             if hasMeaningContent {
-                
                 Text("Why this matters")
                     .font(.headline)
                     .foregroundColor(.primary)
                 
                 VStack(alignment: .leading, spacing: 15) {
-                    
                     if let motivation = activity.motivationDescription,
                        !motivation.isEmpty {
-                        
                         MeaningBlock(
                             icon: "leaf.fill",
                             title: "Your reason",
@@ -278,7 +220,6 @@ extension ActivityDetailView {
                             color: .green
                         )
                     }
-                    
                     if let outcome = activity.expectedOutcomeDescription,
                        !outcome.isEmpty {
                         
@@ -316,7 +257,7 @@ extension ActivityDetailView {
                     icon: "flame.fill",
                     color: .red,
                     title: "\(activity.currentStreak) day streak",
-                    subtitle: streakMessage
+                    subtitle: activity.streakMessage
                 )
                 
                 InsightRow(
@@ -422,33 +363,6 @@ extension ActivityDetailView {
             return "Your activity has slowed down"
         }
     }
-    var groupedRecordsByDay: [(date: Date, records: [ProgressRecord])] {
-        let calendar = Calendar.current
-        
-        let grouped = Dictionary(grouping: filteredRecords) {
-            calendar.startOfDay(for: $0.date)
-        }
-        
-        return grouped
-            .map { ($0.key, $0.value) }
-            .sorted { $0.date > $1.date }
-    }
-    func barColor(for item: DailyProgress) -> Color {
-        guard let index = chartData.firstIndex(where: { $0.date == item.date }),
-              index > 0 else {
-            return Color.colorForActivity(activity)
-        }
-        
-        let previous = chartData[index - 1].total
-        
-        if item.total > previous {
-            return .green
-        } else if item.total < previous {
-            return .red.opacity(0.7)
-        } else {
-            return .gray
-        }
-    }
     
     //Records section
     var recordsSection: some View {
@@ -478,8 +392,7 @@ extension ActivityDetailView {
         )
     }
     var emptyState: some View {
-        VStack(spacing: 12) {
-            
+        VStack(spacing: 12) {            
             Image(systemName: "sparkles")
                 .font(.system(size: 30))
                 .foregroundColor(.secondary)
@@ -495,6 +408,12 @@ extension ActivityDetailView {
         .frame(maxWidth: .infinity)
         .padding()
     }
+    var activityImage: some View {
+        ActivityImageView(path: activity.imagePath, icon: activity.iconName)
+            .frame(width: 130, height: 130)
+            .id(activity.imagePath)
+    }
+    
     var deleteButton: some View {
         HStack {
             Image(systemName: "trash")
@@ -580,6 +499,29 @@ extension ActivityDetailView {
                 print("❌ Enable notifications failed:", error)
             }
             UIImpactFeedbackGenerator(style: .heavy).impactOccurred()            
+        }
+    }
+    func barColor(for item: DailyProgress) -> Color {
+        guard let index = chartData.firstIndex(where: { $0.date == item.date }),
+              index > 0 else {
+            return Color.colorForActivity(activity)
+        }
+        
+        let previous = chartData[index - 1].total
+        
+        if item.total > previous {
+            return .green
+        } else if item.total < previous {
+            return .red.opacity(0.7)
+        } else {
+            return .gray
+        }
+    }
+    var colorForStatus: Color {
+        switch activity.goalStatus {
+        case .inProgress: return .green
+        case .completed: return .blue
+        case .exceeded: return .purple
         }
     }
 }

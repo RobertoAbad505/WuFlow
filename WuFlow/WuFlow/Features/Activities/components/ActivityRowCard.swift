@@ -83,7 +83,7 @@ struct ActivityRowCard: View {
                 Image(systemName: activity.unitType.iconName())
                     .font(.system(size: 18).bold())
                 VStack {
-                    Text("\(activity.todayProgress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f")")
+                    Text(activity.progressDescription)
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Text(activity.unitType.rawValue)

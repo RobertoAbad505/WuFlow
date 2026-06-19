@@ -11,15 +11,6 @@ struct FocusCardView: View {
     let activity: Activity
     let action: () -> Void
     
-    var progress: Double {
-        activity.todayProgress
-    }
-    
-    var progressRatio: Double {
-        if progress == 0 && activity.goalValue == 0 { return 0 }
-        return min(progress / activity.goalValue, 1)
-    }
-    
     var body: some View {
         Button(action: action) {
             
@@ -35,12 +26,12 @@ struct FocusCardView: View {
                     .lineLimit(1)
                 
                 // Progress text
-                Text("\(Int(progress)) / \(Int(activity.goalValue)) \(activity.unitType.rawValue)")
+                Text("\(activity.progressDescription)")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
                 // Progress bar
-                ProgressView(value: progressRatio)
+                ProgressView(value: activity.progressRatio)
                     .tint(colorForActivity())
             }
             .padding()
@@ -52,9 +43,9 @@ struct FocusCardView: View {
     }
     
     func colorForActivity() -> Color {
-        if progressRatio >= 1 {
+        if activity.progressRatio >= 1 {
             return .green
-        } else if progressRatio > 0 {
+        } else if activity.progressRatio > 0 {
             return .orange
         } else {
             return .gray

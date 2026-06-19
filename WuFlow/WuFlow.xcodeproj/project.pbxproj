@@ -41,6 +41,11 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Domain/Models/Activity.swift,
+				"Domain/Models/Activity+Enums.swift",
+				"Domain/Models/Activity+Image.swift",
+				"Domain/Models/Activity+Progress.swift",
+				"Domain/Models/Activity+Properties.swift",
+				"Domain/Models/Activity+Streaks.swift",
 				Domain/Models/LifeArea.swift,
 				Domain/Models/ProgressRecord.swift,
 				Domain/Models/TrackingType.swift,

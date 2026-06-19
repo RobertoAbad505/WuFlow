@@ -36,7 +36,7 @@ struct MeasurementStepView: View {
             ForEach(MeasurementType.allCases, id: \.self) { type in
 
                 MeasurementCard(type: type, isSelected: $draft.measurementTypeRaw.wrappedValue == type.rawValue) {
-                    draft.measurementTypeRaw = type.rawValue
+                    draft.measurement = type
                 }
             }
         }

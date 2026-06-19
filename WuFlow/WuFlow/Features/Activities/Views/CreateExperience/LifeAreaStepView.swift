@@ -25,10 +25,7 @@ struct LifeAreaStepView: View {
             
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(LifeArea.allCases, id: \.self) { area in
-                    LifeAreaCard(
-                        area: area,
-                        isSelected: draft.lifeArea == area
-                    ) {
+                    LifeAreaCard(area: area, isSelected: draft.lifeArea == area) {
                         draft.lifeArea = area
                     }
                 }

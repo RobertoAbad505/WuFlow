@@ -102,7 +102,9 @@ struct CreateActivityView: View {
                     imagePath: draft.imagePath,
                     type: draft.type,
                     lifeArea: draft.lifeArea,
-                    secondaryNote: draft.secondaryNote
+                    secondaryNote: draft.secondaryNote,
+                    goalPeriod: draft.goalPeriod,
+                    measurement: draft.measurement
                 )
                 
                 modelContext.insert(newActivity)
@@ -120,6 +122,8 @@ struct CreateActivityView: View {
                 activity.type = draft.type
                 activity.lifeArea = draft.lifeArea
                 activity.secondaryNote = draft.secondaryNote
+                activity.measurement = draft.measurement
+                activity.goalPeriod = draft.goalPeriod
             }
             
             // Save context explicitly (important for edit)
@@ -234,8 +238,8 @@ struct ActivityDraft {
         self.lifeArea = activity.lifeArea
         self.type = activity.type
         self.secondaryNote = activity.secondaryNote
-        self.measurementTypeRaw = activity.measurementType.rawValue
-        self.goalPeriodRaw = activity.goalPeriodType.rawValue
+        self.measurement = activity.measurement
+        self.goalPeriod = activity.goalPeriod
     }
     
     var goalPeriod: GoalPeriod {
@@ -248,7 +252,7 @@ struct ActivityDraft {
             goalPeriodRaw = newValue.rawValue
         }
     }
-    var measurementType: MeasurementType {
+    var measurement: MeasurementType {
         get {
             MeasurementType(
                 rawValue: measurementTypeRaw

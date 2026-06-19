@@ -168,9 +168,9 @@ struct ReminderSettingsView: View {
         unitType: .sessions,
         goalValue: 3,
         trackingType: .manual,
-        remindersEnabled: true,
-        reminderType: ReminderType.scheduled,
-        preferredReminderTime: nil
+        remindersEnabled: true
+//        ,
+//        reminderType: ReminderType.scheduled
     )
     ReminderSettingsView(activity: activity)
         .modelContainer(for: Activity.self, inMemory: false)

@@ -35,9 +35,9 @@ final class Activity {
     
     var imagePath: String?
     
-    var type: ActivityTypes
+    var typeRaw: String?
     
-    var lifeArea: LifeArea
+    var lifeAreaRaw: String?
     
     var secondaryNote: String?
     
@@ -45,15 +45,13 @@ final class Activity {
     
     var reminderTypeRawValue: String?
     
-    var preferredReminderTime: Date? = nil
-    
     var reminderPresetRawValue: String?
     
     var reminderTime: Date?
     
     var reminderToneRawValue: String?
     
-    var measurementTypeRaw: String = MeasurementType.session.rawValue
+    var measurementRaw: String = MeasurementType.session.rawValue
     
     var goalPeriodRaw: String = GoalPeriod.daily.rawValue
     
@@ -80,7 +78,8 @@ final class Activity {
         progressRecords: [ProgressRecord] = [],
         remindersEnabled: Bool = false,
         reminderType: ReminderType = .scheduled,
-        preferredReminderTime: Date? = nil
+        goalPeriod: GoalPeriod = .daily,
+        measurement: MeasurementType = .session
     ) {
         self.id = id
         self.name = name
@@ -98,230 +97,8 @@ final class Activity {
         self.progressRecords = progressRecords
         self.remindersEnabled = remindersEnabled
         self.reminderType = reminderType
-        self.preferredReminderTime = preferredReminderTime
+        self.goalPeriod = goalPeriod
+        self.measurement = measurement
     }
 }
-extension Activity {
-    var todayProgress: Double {
-        let calendar = Calendar.current
-        
-        return progressRecords
-            .filter {
-                calendar.isDateInToday($0.date)
-            }
-            .reduce(0) { $0 + $1.value }
-    }
-    var progressRatio: Double {
-        guard goalValue > 0 else { return 0 }
-        return min(todayProgress / goalValue, 1.0)
-    }
-    var progressPercentage: Int {
-        Int(progressRatio * 100)
-    }
-    var status: ActivityStatus {
-        if todayProgress == 0 {
-            return .notStarted
-        } else if todayProgress < goalValue {
-            return .inProgress
-        } else if todayProgress == goalValue {
-            return .completed
-        } else {
-            return .exceeded
-        }
-    }
-    var currentStreak: Int {
-        let calendar = Calendar.current
-        let grouped = Dictionary(grouping: progressRecords) {
-            calendar.startOfDay(for: $0.date)
-        }
-        
-        var streak = 0
-        var date = Date()
-        
-        // 🔥 If today is not completed, start from yesterday
-        let todayTotal = grouped[calendar.startOfDay(for: date)]?
-            .reduce(0) { $0 + $1.value } ?? 0
-        
-        if !isDayCompleted(total: todayTotal) {
-            date = calendar.date(byAdding: .day, value: -1, to: date)!
-        }
-        
-        while true {
-            let day = calendar.startOfDay(for: date)
-            let total = grouped[day]?.reduce(0) { $0 + $1.value } ?? 0
-            
-            if isDayCompleted(total: total) {
-                streak += 1
-                date = calendar.date(byAdding: .day, value: -1, to: date)!
-            } else {
-                break
-            }
-        }
-        
-        return streak
-    }
-    var longestStreak: Int {
-        let calendar = Calendar.current
-        
-        let days = dailyTotals
-        
-        var longest = 0
-        var current = 0
-        var previousDay: Date?
-        
-        for day in days {
-            
-            if isDayCompleted(total: day.total) {
-                
-                if let prev = previousDay,
-                   calendar.isDate(
-                       day.date,
-                       inSameDayAs: calendar.date(byAdding: .day, value: 1, to: prev)!
-                   ) {
-                    
-                    current += 1
-                } else {
-                    current = 1
-                }
-                
-                longest = max(longest, current)
-                previousDay = day.date
-                
-            } else {
-                current = 0
-                previousDay = nil
-            }
-        }
-        
-        return longest
-    }
-    func isDayCompleted(total: Double) -> Bool {
-        total >= goalValue
-    }
-    func isDayCompleted(for date: Date, total: Double) -> Bool {
-        total >= goalValue
-    }
-    var dailyTotals: [(date: Date, total: Double)] {
-        let calendar = Calendar.current
-        
-        let grouped = Dictionary(grouping: progressRecords) {
-            calendar.startOfDay(for: $0.date)
-        }
-        
-        return grouped
-            .map { (date: $0.key, total: $0.value.reduce(0) { $0 + $1.value }) }
-            .sorted { $0.date < $1.date }
-    }
-    var uiImage: UIImage? {
-        ImageStore.shared.load(from: imagePath)
-    }
-    var isCompletedToday: Bool {
-        todayProgress >= goalValue
-    }
-    
-    ///Property helpers
-    var reminderType: ReminderType {
-        get {
-            ReminderType(rawValue: reminderTypeRawValue ?? "")
-            ?? .contextual
-        }
-        set {
-            reminderTypeRawValue = newValue.rawValue
-        }
-    }
-    
-    var reminderTone: ReminderTone {
-        get {
-            ReminderTone(rawValue: reminderToneRawValue ?? "")
-            ?? .light
-        }
-        set {
-            reminderToneRawValue = newValue.rawValue
-        }
-    }
-    var reminderPreset: ReminderPreset {
-        get {
-            ReminderPreset(rawValue: reminderPresetRawValue ?? "")
-            ?? .morning
-        }
-        set {
-            reminderPresetRawValue = newValue.rawValue
-        }
-    }
-    var measurementType: MeasurementType {
-        get {
-            MeasurementType(
-                rawValue: measurementTypeRaw
-            ) ?? .session
-        }
-        set {
-            measurementTypeRaw = newValue.rawValue
-        }
-    }
 
-    var goalPeriodType: GoalPeriod {
-        get {
-            GoalPeriod(
-                rawValue: goalPeriodRaw
-            ) ?? .daily
-        }
-        set {
-            goalPeriodRaw = newValue.rawValue
-        }
-    }
-
-}
-enum ActivityTypes: String, Codable, CaseIterable {
-    case increase// build / do more
-    case maintain// stay consistent (Wu Wei)
-    case decrease// reduce / avoid
-    
-    var name: String {
-        switch self {
-            case .increase: return "🌱 Build"
-            case .decrease: return "🔥 Reduce"
-            case .maintain: return "🌊 Flow"
-        }
-    }
-}
-enum ReminderType: String, Codable, CaseIterable {
-    case scheduled
-    case contextual
-}
-enum ReminderPreset: String, Codable, CaseIterable  {
-    case morning = "☀️ Morning"
-    case midday  = "🌤 Midday"
-    case evening = "🌙 Evening"
-    case custom = "🕓 Custom"
-}
-enum ReminderTone: String, Codable, CaseIterable {
-    case light
-    case heavy
-    case gentle
-}
-enum MeasurementType: String, Codable, CaseIterable {
-
-    case session
-    case duration
-    case count
-    case distance
-
-    var displayName: String {
-        switch self {
-        case .session: "Sessions"
-        case .duration: "Minutes"
-        case .count: "Count"
-        case .distance: "Distance"
-        }
-    }
-}
-enum GoalPeriod: String, Codable, CaseIterable {
-
-    case daily
-    case weekly
-    case monthly
-
-    var displayName: String {
-        rawValue.capitalized
-    }
-}

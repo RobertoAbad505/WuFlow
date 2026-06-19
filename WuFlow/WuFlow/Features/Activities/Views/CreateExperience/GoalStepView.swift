@@ -33,7 +33,7 @@ struct GoalStepView: View {
     }
     private var title: String {
 
-        switch draft.measurementType {
+        switch draft.measurement {
 
         case .session:
             return "What's your target?"
@@ -50,7 +50,7 @@ struct GoalStepView: View {
     }
     private var subtitle: String {
 
-        switch draft.measurementType {
+        switch draft.measurement {
 
         case .session:
             return "Choose how many sessions you'd like to complete."
@@ -100,7 +100,7 @@ struct GoalStepView: View {
     }
     private var unitLabel: String {
 
-        switch draft.measurementType {
+        switch draft.measurement {
 
         case .session:
             return draft.goalValue == 1
@@ -174,7 +174,6 @@ struct GoalStepView: View {
         )
     }
     private var goalSummary: String {
-
-        "\(Int(draft.goalValue)) \(unitLabel) \(draft.goalPeriod.displayName)"
+        "\(Int(draft.goalValue)) \(unitLabel) \($draft.wrappedValue.goalPeriod.displayName)"
     }
 }
