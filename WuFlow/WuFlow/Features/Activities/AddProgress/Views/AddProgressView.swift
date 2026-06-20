@@ -55,6 +55,11 @@ struct AddActivityProgressView: View {
                 .ignoresSafeArea()
             content
         }
+        .onAppear {
+            if value == 0 {
+                value = selectedActivity?.defaultIncrement ?? 0
+            }
+        }
     }
     
     var content: some View {
@@ -70,70 +75,195 @@ struct AddActivityProgressView: View {
         .animation(.easeInOut, value: step)
     }
     var inputView: some View {
-        VStack(alignment: .center, spacing: 10) {
-            ZStack {
-                ActivityImageView(path: selectedActivity?.imagePath, icon: selectedActivity?.iconName)
-                    .edgesIgnoringSafeArea(.horizontal)
-                
-                VStack {
-                    //Title
-                    Text("Add your progress for")
-                        .font(.title)
-                        .fontWeight(.medium)
-                    // Header
-                    Text(selectedActivity?.name ?? "")
-                        .font(.headline)
-                        .padding(.bottom, 60)
-                }
-                .background(.white.opacity(0.2))
-            }
-            
-            //Label
-            Text(getLabel())
-                .font(.headline)
-                .padding()
-            
-            // Input field
-            HStack {
-                TextField("Enter value", value: $value, formatter: NumberFormatter())
-                    .keyboardType(.decimalPad)
-                    .padding(7)
-                    .glassEffect()
-                    .frame(maxWidth: 100, alignment: .center)
-                Button(action: {
-                    value = 0
-                }, label: {
-                    Label("Cancel", systemImage: "xmark")
-                        .padding(9)
-                })
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 26))
+
+        ScrollView {
+
+            VStack(spacing: 24) {
+
+                activityHeader
+
+                progressSummary
+
+                inputSection
+
+                quickActions
+
+                actionButtons
             }
             .padding()
-            // Quick buttons
-            HStack(spacing: 12) {
-                ForEach(quickButtonsSuggestions(selectedActivity?.unitType ?? .count), id: \.self) { suggestion in
-                    quickButton(suggestion)
+        }
+    }
+    private var activityHeader: some View {
+
+        VStack(spacing: 12) {
+
+            ActivityImageView(
+                path: selectedActivity?.imagePath,
+                icon: selectedActivity?.iconName
+            )
+            .frame(height: 160)
+
+            Text(selectedActivity?.name ?? "")
+                .font(.title2.bold())
+
+            if let activity = selectedActivity {
+
+                Text(activity.goalDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+    private var progressSummary: some View {
+
+        VStack(spacing: 12) {
+
+            if let activity = selectedActivity {
+
+                ProgressView(
+                    value: activity.progressRatio
+                )
+
+                Text(activity.progressDescription)
+                    .font(.headline)
+
+                Text(activity.periodDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+    private var inputSection: some View {
+
+        VStack(spacing: 12) {
+
+            Text(inputTitle)
+                .font(.headline)
+
+            TextField(
+                "0",
+                value: $value,
+                format: .number
+            )
+            .keyboardType(.decimalPad)
+            .multilineTextAlignment(.center)
+            .font(.system(size: 42, weight: .bold))
+            .padding()
+            .glassEffect()
+        }
+    }
+    private var inputTitle: String {
+
+        guard let activity = selectedActivity else {
+            return "Add Progress"
+        }
+
+        switch activity.measurement {
+
+        case .session:
+            return "How many sessions?"
+
+        case .duration:
+            return "How many minutes?"
+
+        case .count:
+            return "How much progress?"
+
+        case .distance:
+            return "How many kilometers?"
+        }
+    }
+    private var quickActions: some View {
+
+        HStack(spacing: 12) {
+
+            ForEach(
+                suggestedValues,
+                id: \.self
+            ) { amount in
+
+                Button {
+
+                    value += amount
+
+                } label: {
+
+                    Text("+\(Int(amount))")
+                        .font(.headline)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                }
+                .glassEffect(
+                    .clear,
+                    in: Capsule()
+                )
+            }
+        }
+    }
+    private var suggestedValues: [Double] {
+
+        guard let activity = selectedActivity else {
+            return []
+        }
+
+        switch activity.measurement {
+
+        case .session:
+            return [1]
+
+        case .duration:
+            return [5, 10, 15, 30]
+
+        case .count:
+            return [100, 500, 1000, 5000]
+
+        case .distance:
+            return [1, 2, 5, 10]
+        }
+    }
+    private var actionButtons: some View {
+
+        VStack(spacing: 12) {
+
+            Button {
+
+                save()
+
+            } label: {
+
+                Text(saveButtonTitle)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+
+            if !entryFromSelectedActivity {
+
+                Button("Choose Another Activity") {
+
+                    step = .selectActivity
                 }
             }
-                            
-            HStack {
-                //RETURN ACTIVITY PICK
-                if !entryFromSelectedActivity {
-                    Button("Select activity") {
-                        self.step = .selectActivity
-                    }
-                    .padding(15)
-                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 26))
-                }
-                
-                // Save
-                Button("Save") {
-                    save()
-                }
-                .padding()
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 26))
-            }
-            .padding(.vertical, 40)
+        }
+    }
+    private var saveButtonTitle: String {
+
+        guard let activity = selectedActivity else {
+            return "Save"
+        }
+
+        switch activity.measurement {
+
+        case .session:
+            return "Complete Session"
+
+        case .duration:
+            return "Add \(Int(value)) Minutes"
+
+        case .count:
+            return "Add Progress"
+
+        case .distance:
+            return "Add Distance"
         }
     }
     var selectActivityView: some View {
@@ -143,31 +273,6 @@ struct AddActivityProgressView: View {
                 selectedActivity = activitySelected
                 step = .inputValue
             })
-        }
-    }
-    func quickButton(_ amount: Double) -> some View {
-        Button("+\(Int(amount))") {
-            value += amount
-        }
-        .padding(13)
-        .font(.system(size: 14, weight: .bold, design: .rounded))
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 10))
-    }
-    
-    func getLabel() -> String {
-        switch selectedActivity?.unitType {
-        case .minutes:
-            return "How many minutes?"
-        case .steps:
-            return "How many steps?"
-        case .sessions:
-            return "How many sessions?"
-        case .count:
-            return "How many?"
-        case .pages:
-            return "How many pages?"
-        case .none:
-            return "None"
         }
     }
     func save() {
@@ -191,6 +296,12 @@ enum AddProgressStep {
     case inputValue
 }
 #Preview {
+    // Seed initial data into an in-memory model container so @Query works in previews
+    let previewItems = [
+        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual),
+        Activity(name: "Meditation", unitType: .count, goalValue: 20, trackingType: .manual),
+        Activity(name: "Push-ups", unitType: .count, goalValue: 20, trackingType: .manual)
+    ]
     AddActivityProgressView(
         activity: Activity(
             name: "Meditation",
@@ -199,7 +310,13 @@ enum AddProgressStep {
             trackingType: .manual)
 //        activity: nil
     )
-    .modelContainer(for: Activity.self, inMemory: false)
+    .modelContainer(for: Activity.self, inMemory: true) { result in
+        if case let .success(container) = result {
+            let context = container.mainContext
+            previewItems.forEach { context.insert($0) }
+            try? context.save()
+        }
+    }
     .modelContainer(for: ProgressRecord.self, inMemory: false)
 }
 

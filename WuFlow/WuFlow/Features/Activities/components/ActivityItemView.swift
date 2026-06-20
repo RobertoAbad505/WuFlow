@@ -18,23 +18,28 @@ struct ActivitySelectionGridView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
-            Text("Select Activity")
-                .font(.title)
-                .fontWeight(.medium)
-                .padding(.bottom, 50)
-            LazyVGrid(columns: columns, spacing: 35) {
-                ForEach(activities) { activity in
-                    Button {
-                        onSelect(activity)
-                    } label: {
-                        ActivityCircleView(activity: activity)
-                    }
-                    .buttonStyle(.plain)
-                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 15))
-                }
-            }
+            title
+            list
         }
         .padding()
+    }
+    var title: some View {
+        Text("Select an activity")
+            .font(.title3)
+            .foregroundStyle(.secondary)
+            .fontWeight(.medium)            
+    }
+    var list: some View {
+        LazyVGrid(columns: columns, spacing: 35) {
+            ForEach(activities) { activity in
+                Button {
+                    onSelect(activity)
+                } label: {
+                    ActivityCircleView(activity: activity)
+                }
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 15))
+            }
+        }
     }
 }
 struct ActivityCircleView: View {
@@ -42,23 +47,34 @@ struct ActivityCircleView: View {
     let activity: Activity
     
     var body: some View {
-        VStack(spacing: 5) {
+        ZStack {
             ActivityImageView(path: activity.imagePath, icon: activity.iconName)
-                .frame(width: 100, height: 100)
-            Text(activity.name)
-                .font(.system(size: 12))
-                .fontWeight(.medium)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.7)
+            infoSquare
         }
-        .padding()
-        .frame(width: 150, height: 150)
-        .border(.gray, width: 1)
+        .frame(width: 150, height: 185)
+        .background(.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+    }
+    var infoSquare: some View {
+        VStack {
+            Spacer()
+            HStack(alignment: .bottom){
+                Text(activity.name)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.white)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity, maxHeight: 30)
+            .background(.ultraThinMaterial)
+        }
     }
 }
 
 #Preview {
+    
     let items = [
         Activity(name: "Test",
                  unitType: .count,
@@ -68,24 +84,27 @@ struct ActivityCircleView: View {
                  unitType: .count,
                  goalValue: 25,
                  trackingType: .manual),
-        Activity(name: "Test",
+        Activity(name: "Test3",
                  unitType: .count,
                  goalValue: 25,
                  trackingType: .manual),
-        Activity(name: "Test2",
+        Activity(name: "Test4",
                  unitType: .count,
                  goalValue: 25,
                  trackingType: .manual),
-        Activity(name: "Test",
+        Activity(name: "Test5",
                  unitType: .count,
                  goalValue: 25,
                  trackingType: .manual),
-        Activity(name: "Test2",
+        Activity(name: "Test6",
                  unitType: .count,
                  goalValue: 25,
                  trackingType: .manual)
                                                     
     ]
-    ActivitySelectionGridView(activities: items,
-                              onSelect: { _ in })
+    ZStack {
+        AnimatedBackgroundView(style: .focus)
+        ActivitySelectionGridView(activities: items,
+                                  onSelect: { _ in })
+    }
 }

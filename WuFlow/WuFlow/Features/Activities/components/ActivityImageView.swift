@@ -25,7 +25,7 @@ struct ActivityImageView: View {
             if let image {
                 Image(uiImage: image)
                     .resizable()
-                    .scaledToFill()
+                    .scaledToFit()
             } else {
                 placeholder
             }
@@ -37,6 +37,7 @@ struct ActivityImageView: View {
     
     var placeholder: some View {
         Image(systemName: icon ?? "circle.dotted")
+            .symbolEffect(.breathe.byLayer)
             .font(.system(size: 30))
             .foregroundColor(.secondary)
     }

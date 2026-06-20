@@ -12,9 +12,6 @@ struct ActivityProgressCardView: View {
     let activity: Activity
     let progress: Double
     let onTap: (Activity) -> Void
-    var progressRatio: Double {
-        min(progress / activity.goalValue, 1.0)
-    }
     
     var body: some View {
         Button(action: {
@@ -33,13 +30,13 @@ struct ActivityProgressCardView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundStyle(.green)
-                        Text("\(progress, specifier: "%.0f") / \(activity.goalValue, specifier: "%.0f") \(activity.unitType.rawValue)")
+                        Text(activity.progressDescription)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
                 .padding()
-                ProgressView(value: progressRatio)
+                ProgressView(value: activity.progressRatio)
                     .tint(Color.colorForActivity(activity))
                     .scaleEffect(x: 1, y: 1.2, anchor: .center)
             }
