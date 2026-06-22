@@ -15,16 +15,18 @@ struct IdentityStepView: View {
         "heart.fill", "figure.walk", "figure.run", "figure.strengthtraining.traditional",
         
         // Mind
-        "brain.head.profile", "sparkles", "moon.stars.fill",
+        "brain.head.profile", "sparkles",
+//        "moon.stars.fill",
         
         // Growth
         "book.fill", "graduationcap.fill", "lightbulb.fill",
         
         // Work
-        "briefcase.fill", "laptopcomputer", "hammer.fill",
+        "briefcase.fill", "laptopcomputer",
+//        "hammer.fill",
         
         // Social
-        "person.2.fill", "bubble.left.and.bubble.right.fill",
+        "person.2.fill","bubble.left.and.bubble.right.fill",
         
         // Leisure
         "leaf.fill", "gamecontroller.fill", "music.note",
@@ -56,7 +58,7 @@ struct IdentityStepView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             // Icon grid
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 16) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 8) {
                 ForEach(icons, id: \.self) { icon in
                     IconCell(
                         icon: icon,
@@ -68,4 +70,14 @@ struct IdentityStepView: View {
             }
         }
     }
+}
+
+#Preview {
+    VStack {
+        IdentityStepView(draft: .constant(ActivityDraft(from: Activity(name: "Test",
+                                                             unitType: .count,
+                                                             goalValue: 25,
+                                                             trackingType: .manual))))
+    }
+    .padding()
 }

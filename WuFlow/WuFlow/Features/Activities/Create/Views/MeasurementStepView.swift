@@ -14,13 +14,19 @@ struct MeasurementStepView: View {
     var body: some View {
         VStack(spacing: 24) {
 
-            Text("How would you like to track progress?")
-                .font(.title2)
-                .multilineTextAlignment(.center)
+            VStack {
+                Text("How would you like to track progress?")
+                    .font(.title2)
+                    .multilineTextAlignment(.center)
 
-            Text("Choose the type of measurement that best fits this activity.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text("Choose the type of measurement that best fits this activity.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding()
+            .background(Color.gray.opacity(0.2))
+            .cornerRadius(20)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
 
             measurementOptions
 
@@ -73,10 +79,11 @@ struct MeasurementCard: View {
             }
             .padding()
         }
-        .buttonStyle(.plain)
+        .foregroundStyle(isSelected ? Color.secondary: .black)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 26))
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(isSelected ? .green.opacity(0.15) : .clear)
+            RoundedRectangle(cornerRadius: 26)
+                .fill(isSelected ? .green.opacity(0.75) : .clear)
         )
     }
 }

@@ -36,7 +36,9 @@ struct HomeView: View {
                 Image("plantBackground")
                     .resizable()
                     .ignoresSafeArea()
-                    .blur(radius: 1)
+                    .blur(radius: 3)
+                Color.black.opacity(0.1)
+                    .ignoresSafeArea()
                 content
             }
             .navigationDestination(for: ActivitiesRoute.self) { route in
@@ -259,6 +261,19 @@ struct ProgressRingView: View {
     }
 }
 #Preview {
+    let previewItems = [
+        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual),
+        Activity(name: "Meditation", unitType: .count, goalValue: 20, trackingType: .manual),
+        Activity(name: "Push-ups", unitType: .count, goalValue: 20, trackingType: .manual)
+    ]
     HomeView()
-        .modelContainer(for: Activity.self, inMemory: false)
+            .modelContainer(for: Activity.self, inMemory: true) { result in
+                if case let .success(container) = result {
+                    let context = container.mainContext
+                    previewItems.forEach { context.insert($0) }
+                    try? context.save()
+                }
+            }
+//            .modelContainer(for: ProgressRecord.self, inMemory: true)
+    
 }

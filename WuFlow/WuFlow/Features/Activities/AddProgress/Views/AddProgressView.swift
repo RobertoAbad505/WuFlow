@@ -96,7 +96,6 @@ struct AddActivityProgressView: View {
     private var activityHeader: some View {
 
         VStack(spacing: 12) {
-
             ActivityImageView(
                 path: selectedActivity?.imagePath,
                 icon: selectedActivity?.iconName

@@ -25,7 +25,7 @@ struct ActivityImageView: View {
             if let image {
                 Image(uiImage: image)
                     .resizable()
-                    .scaledToFit()
+                    .scaledToFill()
             } else {
                 placeholder
             }

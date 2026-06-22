@@ -29,10 +29,10 @@ struct ActivityRowCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            VStack(alignment: .leading) {
-                HStack(alignment: .center ,spacing: 12) {
-                    activityImage
-                    HStack(alignment: .bottom, spacing: 0) {
+            HStack(alignment: .center ,spacing: 0) {
+                activityImage
+                VStack {
+                    HStack(alignment: .center, spacing: 0) {
                         VStack(alignment: .leading, spacing: 0){
                             Text(activity.name)
                                 .font(.subheadline.bold())
@@ -44,27 +44,27 @@ struct ActivityRowCard: View {
                         }
                         .frame(maxWidth: .infinity)
                         badgesItems
+                        Image(systemName: "chevron.right")
+                            .font(Font.system(size: 18))
+                            .padding(.bottom, 5)
                     }
-                    Image(systemName: "chevron.right")
-                        .font(Font.system(size: 18))
-                        .padding(.bottom, 5)
+                    VStack(alignment: .center, spacing: 5) {
+                        ProgressView(value: activity.progressRatio)
+                        Text("\(activity.progressPercentage)%")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.bottom, 5)
                 }
-                .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+                .padding()
+                .background(.regularMaterial)
             }
-            VStack(alignment: .center, spacing: 5) {
-                ProgressView(value: activity.progressRatio)
-                Text("\(activity.progressPercentage)%")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.bottom, 5)
-            .background(strokeColor.opacity(0.20))
         }
-        .cornerRadius(20)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
         .overlay {
             RoundedRectangle(cornerRadius: 20)
-                .stroke(.white, lineWidth: 3)
+                .stroke(.white, lineWidth: 1)
         }
     }
     var badgesItems: some View {
@@ -96,7 +96,7 @@ struct ActivityRowCard: View {
     }
     var activityImage: some View {
         ActivityImageView(path: activity.imagePath, icon: activity.iconName)
-            .frame(width: 100, height: 120)
+            .frame(maxWidth: 100, maxHeight: 100)
     }
 }
 
@@ -104,10 +104,25 @@ struct ActivityRowCard: View {
 #Preview {
     ZStack {
         Color.gray.opacity(0.4).ignoresSafeArea()
-        ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
-                                           unitType: .pages,
-                                           goalValue: 3,
-                                           trackingType: .manual))
+        VStack(alignment: .center, spacing: 20) {
+            ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
+                                               unitType: .pages,
+                                               goalValue: 3,
+                                               trackingType: .manual))
+            ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
+                                               unitType: .pages,
+                                               goalValue: 3,
+                                               trackingType: .manual))
+            ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
+                                               unitType: .pages,
+                                               goalValue: 3,
+                                               trackingType: .manual))
+            ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
+                                               unitType: .pages,
+                                               goalValue: 3,
+                                               trackingType: .manual))
+        }
+        .padding()
     }
     
 }

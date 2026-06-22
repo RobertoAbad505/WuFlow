@@ -131,11 +131,11 @@ struct GoalStepView: View {
                     id: \.self
                 ) { period in
 
-                    Button {
+                    Button(action: {
 
                         draft.goalPeriod = period
 
-                    } label: {
+                    }, label: {
 
                         Text(period.displayName)
                             .frame(maxWidth: .infinity)
@@ -150,7 +150,7 @@ struct GoalStepView: View {
                                     cornerRadius: 12
                                 )
                             )
-                    }
+                    })
                 }
             }
         }

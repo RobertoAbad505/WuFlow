@@ -39,16 +39,30 @@ struct ActivitiesHighlightView: View {
                     .font(.system(size: footNoteSize, weight: .regular))
             }
         }
-        .padding(10)
+        .padding()
+        .background(.ultraThinMaterial) 
         .frame(maxHeight: .infinity)
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        
     }
 }
 
 #Preview {
-    ActivitiesHighlightView(systemNameImage: "flame",
-                            count: "2",
-                            description: "activities",
-                            footnote: "Total",
-                            tint: .green)
+    VStack {
+        Spacer()
+        ActivitiesHighlightView(systemNameImage: "flame",
+                                count: "2",
+                                description: "activities",
+                                footnote: "Total",
+                                tint: .green)
+        .frame(width: 120, height: 120)
+        Spacer()
+        HStack {
+            Spacer()
+        }
+    }
+    .background(.gray)
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    
 }

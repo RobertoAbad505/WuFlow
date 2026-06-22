@@ -24,7 +24,11 @@ struct ActivityListView: View {
     var body: some View {
         VStack {
             ZStack {
-                AnimatedBackgroundView(style: .wuFlow)
+                Image("zengarden")
+                    .resizable()
+                    .ignoresSafeArea()
+                    .blur(radius: 0.1)
+                Color.black.opacity(0.1)
                     .ignoresSafeArea()
                 content
             }
@@ -71,7 +75,7 @@ struct ActivityListView: View {
         .buttonStyle(.glass)
     }
     var activityList: some View {
-        LazyVGrid(columns: columns, spacing: 36) {
+        LazyVGrid(columns: columns, spacing: 40) {
             ForEach(items) { item in
                 NavigationLink(value: item) {
                     ActivityRowCard(activity: item)
@@ -110,6 +114,8 @@ struct ActivityListView: View {
             Text("Track what matters. Every step counts!")
                 .font(.caption)
         }
+        .padding()
+        .glassEffect()
     }
     private var highlights: some View {
         VStack(alignment: .center, spacing: 10) {
@@ -117,19 +123,18 @@ struct ActivityListView: View {
                 Button(action: addItem) {
                     VStack {
                         Image(systemName: "plus.square.dashed")
-                            .font(.system(size: 32))
+                            .font(.system(size: 25))
+                            .tint(.green)
                         Text("Add new activity")
                             .font(.system(size: 10, weight: .regular))
+                            .tint(.black)
                     }
                     .padding(.horizontal, 20)
                     .frame(maxHeight: .infinity)
-                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(.white, lineWidth: 2)
-                    }
                 }
-                .tint(.green)
+                .frame(maxWidth: 100)
+                .background(.regularMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
                 ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
                                         count: items.count.description,
                                         description: "Activities",
@@ -140,14 +145,8 @@ struct ActivityListView: View {
                                         count: calculateGlobalStreak().description,
                                         description: getStreakMessage(),
                                         footnote: "Strike",
-                                        tint: .green
+                                        tint: .red
                 )
-//                ActivitiesHighlightView(systemNameImage: "figure.run.square.stack",
-//                                        count: items.count.description,
-//                                        description: "Activities",
-//                                        footnote: "Total",
-//                                        tint: .purple
-//                )
             }
             .frame(maxHeight: .infinity)
             Divider()
@@ -196,7 +195,7 @@ struct ActivityListView: View {
             }
         }
         .padding()
-        .background(Color.green.opacity(0.3))
+        .background(Color.green.opacity(0.4).blur(radius: 6))
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay {
             RoundedRectangle(cornerRadius: 10)

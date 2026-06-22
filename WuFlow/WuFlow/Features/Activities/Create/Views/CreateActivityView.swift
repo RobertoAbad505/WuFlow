@@ -12,6 +12,7 @@ struct CreateActivityView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    @State private var imageIndex: Int = 1
     @State private var mode: ActivityFlowMode
     @State private var step: CreateActivityStep = .identity
     @State private var draft = ActivityDraft()
@@ -41,12 +42,22 @@ struct CreateActivityView: View {
        
     var body: some View {
         VStack {
-            stepView
-            navigationControls
-        }        
-        .padding()
+            ZStack {
+                Image("backgroundCA\(imageIndex)")
+                    .resizable()
+                    .ignoresSafeArea()
+                content
+            }
+        }
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
+    }
+    var content: some View {
+        VStack {
+            stepView
+            navigationControls
+        }
+        .padding()
     }
     var stepView: some View {
         VStack(alignment: .center, spacing: 0) {
@@ -166,20 +177,44 @@ struct CreateActivityView: View {
     }
     var navigationControls: some View {
         HStack(alignment: .top, spacing: 0) {
-            
             if step != .identity {
-                Button("Back") {
+                Button(action: {
                     withAnimation {
                         step = previousStep()
+                        imageIndex -= 1
+                        if imageIndex == 0 {
+                            imageIndex = 1
+                        }
                     }
-                }
+                }, label: {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                            .font(Font.body)
+                        Text("Back")
+                    }
+                })
+                .padding()
+                .glassEffect()
             }
             Spacer()
-            Button(step == .review ? modeTitle : "Next") {
+            Button(action: {
                 handleNext()
-            }
+                imageIndex += 1
+                if imageIndex == 5 {
+                    imageIndex = 1
+                }
+            }, label: {
+                HStack {
+                    Text(step == .review ? modeTitle : "Next")
+                    Image(systemName: "chevron.right")
+                        .font(Font.body)
+                }
+            })
+            .padding()
+            .glassEffect()
         }
-        .padding(.horizontal)
+        .tint(.green)
+        .padding()
         .font(.body)
     }
     var modeTitle: String {

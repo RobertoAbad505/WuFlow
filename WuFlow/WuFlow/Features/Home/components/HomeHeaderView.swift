@@ -17,17 +17,13 @@ struct HomeHeaderView: View {
         HStack(alignment: .center) {            
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(HomeHeaderView.currentGreeting()),")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
+                    .font(.headline)
                 Text(userName)
-                    .font(.largeTitle)
+                    .font(.title)
                     .fontWeight(.bold)
                 Text("Let’s keep your flow today")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.subheadline)
             }
-            
             Spacer()
             avatarView
         }
@@ -43,7 +39,7 @@ private extension HomeHeaderView {
             Image(imageName)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 100, height: 100)
+                .frame(width: 120, height: 120)
                 .clipShape(Circle())
                 .overlay {
                     Circle().stroke(.white, lineWidth: 5)
