@@ -30,7 +30,7 @@ struct ActivitySelectionGridView: View {
             .fontWeight(.medium)            
     }
     var list: some View {
-        LazyVGrid(columns: columns, spacing: 35) {
+        LazyVGrid(columns: columns, spacing: 25) {
             ForEach(activities) { activity in
                 Button {
                     onSelect(activity)
@@ -47,47 +47,51 @@ struct ActivityCircleView: View {
     let activity: Activity
     
     var body: some View {
-        ZStack {
+        VStack {
             ActivityImageView(path: activity.imagePath, icon: activity.iconName)
-            infoSquare
         }
-        .frame(width: 150, height: 185)
+        .frame(width: 160, height: 195)
+        .overlay { infoSquare }
         .background(.clear)
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
     var infoSquare: some View {
         VStack {
             Spacer()
-            HStack(alignment: .bottom){
+            HStack {
                 Text(activity.name)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.white)
-                    .fontWeight(.medium)
+                    .font(.system(size: 11).bold())
+                    .foregroundStyle(.black)
                     .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.7)
+                    .lineLimit(2)                    
+                    .frame(maxWidth: .infinity, maxHeight: 32)
             }
-            .frame(maxWidth: .infinity, maxHeight: 30)
             .background(.ultraThinMaterial)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
 #Preview {
-    
+    let path = try? ImageStore.shared.save(UIImage(named: "selfie") ?? UIImage(),
+                                           category: .activity)
     let items = [
         Activity(name: "Test",
                  unitType: .count,
                  goalValue: 25,
-                 trackingType: .manual),
+                 trackingType: .manual,
+                 imagePath: path
+                ),
         Activity(name: "Test2",
                  unitType: .count,
                  goalValue: 25,
-                 trackingType: .manual),
-        Activity(name: "Test3",
+                 trackingType: .manual,
+                 imagePath: path),
+        Activity(name: "Test3xxxxxxxxxxxxxxxx xxxxxxxxxxx xxxx xxxxxx",
                  unitType: .count,
                  goalValue: 25,
-                 trackingType: .manual),
+                 trackingType: .manual,
+                 imagePath: path),
         Activity(name: "Test4",
                  unitType: .count,
                  goalValue: 25,
@@ -99,7 +103,8 @@ struct ActivityCircleView: View {
         Activity(name: "Test6",
                  unitType: .count,
                  goalValue: 25,
-                 trackingType: .manual)
+                 trackingType: .manual,
+                 imagePath: path)
                                                     
     ]
     ZStack {

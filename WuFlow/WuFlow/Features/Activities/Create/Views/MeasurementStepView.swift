@@ -24,12 +24,10 @@ struct MeasurementStepView: View {
                     .foregroundStyle(.secondary)
             }
             .padding()
-            .background(Color.gray.opacity(0.2))
+            .background(Color.white.opacity(0.5).blur(radius: 15))
             .cornerRadius(20)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
-
+            .padding(.bottom, 20)
             measurementOptions
-
             Spacer()
         }
         .padding()
@@ -145,5 +143,10 @@ extension MeasurementType {
 }
 
 #Preview {
-    MeasurementStepView(draft: .constant(.init()))
+    ZStack {
+        Image("backgroundCA1")
+            .resizable()
+            .ignoresSafeArea()
+        MeasurementStepView(draft: .constant(.init()))
+    }
 }

@@ -56,6 +56,9 @@ struct ActivityDetailView: View {
     var activeDaysLast7: Int {
         ActivityInsights.activeDaysLast7(records: records)
     }
+    var isPresentingImage: Bool {
+        return !(activity.imagePath == nil || (activity.imagePath ?? "").isEmpty)
+    }
     
     // MARK: - Init
     
@@ -72,8 +75,6 @@ struct ActivityDetailView: View {
             order: .reverse
         )
     }
-    
-    // MARK: - Body
     
     var body: some View {
         ZStack {
@@ -128,22 +129,27 @@ struct ActivityDetailView: View {
     }
     var content: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                heroSection
-                meaningSection
-                insightsSection
-                chartSection
-                recordsSection
-                deleteButton
+            activityImage
+            VStack {
+                VStack(spacing: 24) {
+                    heroSection
+                    meaningSection
+                    insightsSection
+                    chartSection
+                    recordsSection
+                    deleteButton
+                }
+                .padding()
+                .offset(y: !isPresentingImage ? 0: -150)
             }
-            .padding()
         }
+        .edgesIgnoringSafeArea(.top)
     }
 }
 extension ActivityDetailView {
     
     var heroSection: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 15) {
             // Identity
             identity
             
@@ -174,33 +180,26 @@ extension ActivityDetailView {
                     .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .padding(.top)
-            .padding(.leading)
         }
-        .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 20))
+        .padding()
         .background(
             RoundedRectangle(cornerRadius: 28)
-                .fill(.ultraThinMaterial)
+                .fill(.regularMaterial)
         )
         .cornerRadius(20)
     }
     var identity: some View {
-        HStack(spacing: 16) {
-            activityImage
-            VStack(alignment: .leading, spacing: 6) {
-                Text(activity.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text(activity.goalDescription)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(activity.periodDescription)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
+        VStack(alignment: .center, spacing: 6) {
+            Text(activity.name)
+                .font(.title2)
+                .fontWeight(.bold)
+            Text(activity.goalDescription)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(activity.periodDescription)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
         }
-        .padding(.bottom)
     }
     
     var meaningSection: some View {
@@ -236,7 +235,7 @@ extension ActivityDetailView {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 28)
-                .fill(.ultraThinMaterial)
+                .fill(.regularMaterial)
         )
     }
 }
@@ -278,7 +277,7 @@ extension ActivityDetailView {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 28)
-                .fill(.ultraThinMaterial)
+                .fill(.regularMaterial)
         )
     }
     var averageText: String {
@@ -344,7 +343,7 @@ extension ActivityDetailView {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 28)
-                .fill(.ultraThinMaterial)
+                .fill(.regularMaterial)
         )
     }
     var chartInsight: String {
@@ -388,7 +387,7 @@ extension ActivityDetailView {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 28)
-                .fill(.ultraThinMaterial)
+                .fill(.regularMaterial)
         )
     }
     var emptyState: some View {
@@ -409,9 +408,14 @@ extension ActivityDetailView {
         .padding()
     }
     var activityImage: some View {
-        ActivityImageView(path: activity.imagePath, icon: activity.iconName)
-            .frame(width: 130, height: 130)
-            .id(activity.imagePath)
+        VStack(spacing: 0) {
+            if !isPresentingImage {
+                Spacer(minLength: 190)
+            }
+            ActivityImageView(path: activity.imagePath, icon: activity.iconName)
+                .frame(maxHeight: 600)
+                .id(activity.imagePath)
+        }
     }
     
     var deleteButton: some View {
@@ -527,15 +531,17 @@ extension ActivityDetailView {
 }
 
 #Preview {
+    let path = try? ImageStore.shared.save(UIImage(named: "activityImg") ?? UIImage(),
+                                           category: .activity)
     NavigationStack {
         ActivityDetailView(activity: Activity(name: "Meditation",
                                               unitType: .sessions,
                                               goalValue: 3,
-                                              trackingType: .manual,
+                                              trackingType: .healthSteps,
                                               iconName: "circle.dotted",
                                               motivationDescription: "Remember always is a great time to meditate",
-                                              expectedOutcomeDescription: "We want to relax at the beach without mental noise, just be there and be present"
-                                             ))
+                                              expectedOutcomeDescription: "We want to relax at the beach without mental noise, just be there and be present",
+                                              imagePath: path))
         .modelContainer(for: Activity.self, inMemory: false)
         .modelContainer(for: ProgressRecord.self, inMemory: true)
     }

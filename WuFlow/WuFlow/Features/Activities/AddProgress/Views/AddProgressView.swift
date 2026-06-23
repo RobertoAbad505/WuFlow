@@ -75,43 +75,33 @@ struct AddActivityProgressView: View {
         .animation(.easeInOut, value: step)
     }
     var inputView: some View {
-
-        ScrollView {
-
-            VStack(spacing: 24) {
-
-                activityHeader
-
-                progressSummary
-
-                inputSection
-
-                quickActions
-
-                actionButtons
-            }
-            .padding()
+        VStack(spacing: 24) {
+            activityImageHeader
+            activityHeader
+            progressSummary
+            inputSection
+            quickActions
+            actionButtons
         }
+        .frame(maxWidth: .infinity)
+    }
+    var activityImageHeader: some View {
+        ActivityImageView(
+            path: selectedActivity?.imagePath,
+            icon: selectedActivity?.iconName
+        )
+        .frame(width: 250, height: 250)
+        .clipShape(RoundedRectangle(cornerRadius: 40))
     }
     private var activityHeader: some View {
-
-        VStack(spacing: 12) {
-            ActivityImageView(
-                path: selectedActivity?.imagePath,
-                icon: selectedActivity?.iconName
-            )
-            .frame(height: 160)
-
+        VStack(spacing: 20) {
             Text(selectedActivity?.name ?? "")
                 .font(.title2.bold())
-
-            if let activity = selectedActivity {
-
-                Text(activity.goalDescription)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+            Text(selectedActivity?.goalDescription ?? "")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity)
     }
     private var progressSummary: some View {
 
@@ -266,7 +256,7 @@ struct AddActivityProgressView: View {
         }
     }
     var selectActivityView: some View {
-        VStack(alignment: .center, spacing: 24) {
+        ScrollView {
             ActivitySelectionGridView(activities: self.activities,
                                       onSelect: { activitySelected in
                 selectedActivity = activitySelected
@@ -295,18 +285,21 @@ enum AddProgressStep {
     case inputValue
 }
 #Preview {
+    let path = try? ImageStore.shared.save(UIImage(named: "selfie") ?? UIImage(),
+                                           category: .activity)
     // Seed initial data into an in-memory model container so @Query works in previews
     let previewItems = [
-        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual),
-        Activity(name: "Meditation", unitType: .count, goalValue: 20, trackingType: .manual),
-        Activity(name: "Push-ups", unitType: .count, goalValue: 20, trackingType: .manual)
+        Activity(name: "GYM", unitType: .count, goalValue: 20, trackingType: .manual, imagePath: path),
+        Activity(name: "Meditation", unitType: .count, goalValue: 20, trackingType: .manual, imagePath: path),
+        Activity(name: "Push-ups", unitType: .count, goalValue: 20, trackingType: .manual, imagePath: path)
     ]
     AddActivityProgressView(
         activity: Activity(
             name: "Meditation",
             unitType: .sessions,
             goalValue: 3,
-            trackingType: .manual)
+            trackingType: .manual,
+            imagePath: path)
 //        activity: nil
     )
     .modelContainer(for: Activity.self, inMemory: true) { result in

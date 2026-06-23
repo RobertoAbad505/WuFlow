@@ -38,7 +38,7 @@ struct ActivityImageView: View {
     var placeholder: some View {
         Image(systemName: icon ?? "circle.dotted")
             .symbolEffect(.breathe.byLayer)
-            .font(.system(size: 30))
+            .font(.system(size: 35))
             .foregroundColor(.secondary)
     }
     
