@@ -20,6 +20,7 @@ struct CreateActivityView: View {
     let allSteps: [CreateActivityStep] = [
         .identity,
         .measurement,
+        .trackingType,
         .intention,
         .lifeArea,
         .goal,
@@ -67,6 +68,8 @@ struct CreateActivityView: View {
                 IdentityStepView(draft: $draft)
             case .measurement:
                 MeasurementStepView(draft: $draft)
+            case .trackingType:
+                TrackingStepView(draft: $draft)
             case .intention:
                 IntentionStepView(draft: $draft)
             case .lifeArea:
@@ -234,6 +237,7 @@ enum ActivityFlowMode: Equatable {
 enum CreateActivityStep {
     case identity
     case measurement
+    case trackingType
     case intention
     case lifeArea
     case goal

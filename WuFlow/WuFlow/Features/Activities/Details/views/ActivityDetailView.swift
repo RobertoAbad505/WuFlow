@@ -133,6 +133,7 @@ struct ActivityDetailView: View {
             VStack {
                 VStack(spacing: 24) {
                     heroSection
+                    trackingSection
                     meaningSection
                     insightsSection
                     chartSection
@@ -361,6 +362,32 @@ extension ActivityDetailView {
         } else {
             return "Your activity has slowed down"
         }
+    }
+    //tracking Section
+    private var trackingSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Tracking Method")
+                .font(.headline)
+            HStack(spacing: 16) {
+                Image(systemName: activity.trackingType.icon)
+                    .font(.title2)
+                    .foregroundStyle(.green)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(activity.trackingType.title)
+                        .font(.headline)
+                    Text(activity.trackingType.description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+        )
+        .cornerRadius(20)
     }
     
     //Records section
