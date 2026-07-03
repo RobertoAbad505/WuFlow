@@ -85,10 +85,9 @@ struct ActivityDetailView: View {
         .toolbar(content: {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    print("Enable notifications: \(activity.remindersEnabled ? "off":"on")")
-                    enableNotifications()
+                    presentEditProcess = true
                 }, label: {
-                    Image(systemName: "bell")
+                    Image(systemName: "pencil")
                         .font(Font.system(size: 20))
                         .tint(activity.remindersEnabled ? .green: .gray)
                 })
@@ -96,9 +95,20 @@ struct ActivityDetailView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    presentEditProcess = true
+                    setPinnedActivity()
                 }, label: {
-                    Image(systemName: "pencil")
+                    Image(systemName: activity.isPinned ? "pin.fill":"pin")
+                        .font(Font.system(size: 20))
+                        .tint(.green)
+                })
+                .buttonStyle(.glass)
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    print("Enable notifications: \(activity.remindersEnabled ? "off":"on")")
+                    enableNotifications()
+                }, label: {
+                    Image(systemName: "bell")
                         .font(Font.system(size: 20))
                         .tint(activity.remindersEnabled ? .green: .gray)
                 })
@@ -115,16 +125,6 @@ struct ActivityDetailView: View {
                     })
                     .buttonStyle(.glass)
                 }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    presentRemindersProcess.toggle()
-                }, label: {
-                    Image(systemName: activity.isPinned ? "pin.fill":"pin")
-                        .font(Font.system(size: 20))
-                        .tint(.green)
-                })
-                .buttonStyle(.glass)
             }
         })
         .sheet(isPresented: $presentAddProgress) {
@@ -178,7 +178,17 @@ extension ActivityDetailView {
                     .multilineTextAlignment(.center)
             }
             .padding(.leading)
-            
+            heroButtons
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+        )
+        .cornerRadius(20)
+    }
+    var heroButtons: some View {
+        VStack {
             if activity.allowsManualProgress {
                 // CTA (important positioning)
                 Button {
@@ -223,12 +233,6 @@ extension ActivityDetailView {
                 }
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 28)
-                .fill(.regularMaterial)
-        )
-        .cornerRadius(20)
     }
     var identity: some View {
         VStack(alignment: .center, spacing: 6) {
@@ -573,6 +577,19 @@ extension ActivityDetailView {
             UIImpactFeedbackGenerator(style: .heavy).impactOccurred()            
         }
     }
+    private func setPinnedActivity() {
+        withAnimation {
+            self.activity.isPinned.toggle()
+            self.activity.pinPriority = activity.isPinned ? 1:0
+            print("Pinned: \(activity.isPinned ? "enabled" : "disabled") order: \(activity.pinPriority)")
+            do {
+                try modelContext.save()
+            } catch {
+                print("❌ Enable notifications failed:", error)
+            }
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        }
+    }
     func barColor(for item: DailyProgress) -> Color {
         guard let index = chartData.firstIndex(where: { $0.date == item.date }),
               index > 0 else {
@@ -610,6 +627,7 @@ extension ActivityDetailView {
                                               motivationDescription: "Remember always is a great time to meditate",
                                               expectedOutcomeDescription: "We want to relax at the beach without mental noise, just be there and be present",
                                               imagePath: path,
+                                              remindersEnabled: true,
                                               isPinned: true
                                              ))
         .modelContainer(for: Activity.self, inMemory: false)

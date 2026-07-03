@@ -11,7 +11,13 @@ import SwiftData
 struct HomeView: View {
     @EnvironmentObject var router: Router
     @Environment(\.modelContext) var modelContext
-    @Query private var activities: [Activity]
+    @Query(
+        sort: [
+            SortDescriptor(\Activity.pinPriority, order: .reverse),
+            SortDescriptor(\Activity.createdAt)
+        ]
+    )
+    private var activities: [Activity]
     @State private var isPresentedAddProgress: Bool = false
     
     var totalActivities: Int {
@@ -27,7 +33,7 @@ struct HomeView: View {
         return Double(completedToday) / Double(totalActivities)
     }
     var focusActivities: [Activity] {
-        Array(activities.prefix(4))
+        Array(activities.prefix(5))
     }
     
     var body: some View {
@@ -150,25 +156,14 @@ struct HomeView: View {
             }
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
+                HStack(spacing: 12) {
                     ForEach(focusActivities) { activity in
                         FocusCardView(activity: activity) {
                             router.homePath.append(ActivitiesRoute.detail(activity))
                         }
-//                        .onAppear {
-//                            print("DEBUG ACTIVITY ---------------------------")
-//                            print("id:", activity.id.uuidString)
-//                            print("name:", activity.name)
-//                            print("icon:", activity.iconName ?? "nil")
-//                            print("has image:", activity.imagePath ?? "N/A")
-//                            print("------------------------------------------")
-//                        }
                     }
                 }
             }
-            .padding(15)
-            .background(.ultraThinMaterial)
-            .cornerRadius(24)
         }
         .padding()
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24))

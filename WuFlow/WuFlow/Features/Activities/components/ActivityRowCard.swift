@@ -26,9 +26,8 @@ struct ActivityRowCard: View {
     }
     let activity: Activity
     
-    
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 15) {
             HStack(alignment: .center ,spacing: 0) {
                 activityImage
                 VStack {
@@ -62,6 +61,21 @@ struct ActivityRowCard: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
+        .overlay {
+            VStack {
+                HStack {
+                    Spacer()
+                    if activity.isPinned {
+                        Image(systemName: "pin.fill")
+                            .font(.system(size: 16))
+                            .rotationEffect(.degrees(45))
+                            .tint(.secondary.opacity(0.55))
+                    }
+                }
+                .padding(12)
+                Spacer()
+            }
+        }
         .overlay {
             RoundedRectangle(cornerRadius: 20)
                 .stroke(.white, lineWidth: 1)
@@ -108,7 +122,9 @@ struct ActivityRowCard: View {
             ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
                                                unitType: .pages,
                                                goalValue: 3,
-                                               trackingType: .manual))
+                                               trackingType: .manual,
+                                               isPinned: true
+                                              ))
             ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
                                                unitType: .pages,
                                                goalValue: 3,

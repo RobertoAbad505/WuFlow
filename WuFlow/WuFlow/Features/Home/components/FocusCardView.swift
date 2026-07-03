@@ -13,17 +13,17 @@ struct FocusCardView: View {
     
     var body: some View {
         Button(action: action) {
-            
-            VStack(alignment: .leading, spacing: 12) {
-                
+            VStack(alignment: .center, spacing: 10) {
                 // Icon
                 Image(systemName: activity.iconName ?? "circle.dotted")
                     .font(.system(size: 22))
+//                    .tint(.black)
                 
                 // Name
                 Text(activity.name)
                     .font(.headline)
-                    .lineLimit(1)
+                    .lineLimit(5)
+                    .tint(.black)
                 
                 // Progress text
                 Text("\(activity.progressDescription)")
@@ -35,11 +35,25 @@ struct FocusCardView: View {
                     .tint(colorForActivity())
             }
             .padding()
-            .frame(width: 180, height: 140)
+            .frame(width: 160, height: 150)
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 24))
+            .overlay {
+                VStack {
+                    HStack {
+                        Spacer()
+                        if activity.isPinned {
+                            Image(systemName: "pin.fill")
+                                .font(.system(size: 16))
+                                .rotationEffect(.degrees(45))
+                                .tint(.secondary.opacity(0.55))
+                        }
+                    }
+                    .padding(12)
+                    Spacer()
+                }
+            }
         }
-        .buttonStyle(.plain)
     }
     
     func colorForActivity() -> Color {

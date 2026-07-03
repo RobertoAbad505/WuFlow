@@ -27,6 +27,8 @@ final class Activity {
     
     var isPinned: Bool = false
     
+    var pinPriority: Int = 0
+    
     var motivationDescription: String?
     
     var expectedOutcomeDescription: String?

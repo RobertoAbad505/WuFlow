@@ -9,7 +9,13 @@ import SwiftData
 
 struct ActivityListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Activity]
+    @Query(
+        sort: [
+            SortDescriptor(\Activity.pinPriority, order: .reverse),
+            SortDescriptor(\Activity.createdAt, order: .forward)
+        ]
+    )
+    private var items: [Activity]
     @State var toggleCreateActivity: Bool = false
     
     //ON DELETE
@@ -88,6 +94,11 @@ struct ActivityListView: View {
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
+                    Button(role: .confirm) {
+                        pinActivity(item)
+                    } label: {
+                        Label(item.isPinned ? "Unpin" :"Pin", systemImage: item.isPinned ? "pin":"pin.fill")
+                    }
                 }
             }
         }
@@ -107,6 +118,19 @@ struct ActivityListView: View {
             }
         } message: {
             Text("This action cannot be undone.")
+        }
+    }
+    func pinActivity(_ activity: Activity) {
+        withAnimation {
+            activity.isPinned.toggle()
+            activity.pinPriority = activity.isPinned ? 1:0
+            print("Pinned: \(activity.isPinned ? "enabled" : "disabled") order: \(activity.pinPriority)")
+            do {
+                try modelContext.save()
+            } catch {
+                print("❌ Enable notifications failed:", error)
+            }
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
     }
     private var headerSection: some View {
