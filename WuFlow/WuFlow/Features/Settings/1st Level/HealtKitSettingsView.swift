@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct HealtKitSettingsView: View {
+    @State private var workoutSessions: [WorkoutSummary] = []
     @State private var mindfulSessions: [MindfulnessSessionSummary] = []
     @State private var stepCount: Double = 0.0
     @AppStorage("healtKitEnabled")
-    
     private var healtKitEnabled: Bool = false
+    
+    
     
     var body: some View {
         ZStack {
@@ -23,30 +25,26 @@ struct HealtKitSettingsView: View {
     var content: some View {
         VStack(alignment: .leading, spacing: 30) {
             titleHeader
-            stepCountSection
-            workoutsInfo
-            mindfulnessSection
+            firstRow
             requestPermissionButton
         }
         .padding()
     }
-    var workoutsInfo: some View {
-        Button("Read Recent Workouts") {
-            HealthKitService.shared
-                .fetchRecentWorkouts { workouts in
-
-                    print("🏋️ Workouts:")
-
-                    for workout in workouts {
-
-                        print(
-                            workout.workoutType,
-                            workout.durationMinutes,
-                            workout.startDate
-                        )
-                    }
-                }
+    var titleHeader: some View {
+        HStack(alignment: .top) {
+            Image(systemName: "figure.cooldown")
+                .font(Font.largeTitle.weight(.bold))
+            Text("HealtKit Settings")
+                .font(Font.largeTitle.weight(.bold))
         }
+    }
+    var firstRow: some View {
+        HStack(alignment: .top) {
+            stepCountSection
+            mindfulnessSection
+            workoutsInfo
+        }
+        .frame(maxWidth: .infinity)
     }
     var stepCountSection: some View {
         VStack {
@@ -56,7 +54,7 @@ struct HealtKitSettingsView: View {
                 Text(stepCount.formatted())
                     .font(.largeTitle.bold())
             }
-            Text("Steps")
+            Text("Today's\nSteps")
                 .font(Font.body.weight(.bold))
             Button(action: {
                 HealthKitService.shared.fetchTodayStepCount(completion: { steps in
@@ -71,7 +69,6 @@ struct HealtKitSettingsView: View {
             })
             .buttonStyle(.glass)
         }
-        .padding(.vertical)
     }
     var mindfulnessSection: some View {
         VStack {
@@ -81,7 +78,7 @@ struct HealtKitSettingsView: View {
                 Text("\(mindfulSessions.count)")
                     .font(.largeTitle.bold())
             }
-            Text("Mindfulness Sessions")
+            Text("Mindfulness\nSessions")
                 .font(Font.body.weight(.bold))
             Button(action: {
                 HealthKitService.shared.fetchRecentMindfulnessSessions(completion: { data in
@@ -96,35 +93,64 @@ struct HealtKitSettingsView: View {
                     self.mindfulSessions = data
                 })
             }, label: {
-              Text("Refresh mindfulness sessions")
+              Text("Refresh")
                     .padding(5)
             })
             .buttonStyle(.glass)
         }
-        .padding(.vertical)
     }
-    var titleHeader: some View {
-        HStack {
-            Image(systemName: "figure.cooldown")
-                .font(Font.largeTitle.weight(.bold))
-            Text("HealtKit Settings")
-                .font(Font.largeTitle.weight(.bold))
+    var workoutsInfo: some View {
+        VStack {
+            HStack {
+                Image(systemName: "figure.run")
+                    .font(.title)
+                Text("\(workoutSessions.count)")
+                    .font(.largeTitle.bold())
+            }
+            Text("Workout\n Sessions")
+                .font(Font.body.weight(.bold))
+            Button(action: {
+                HealthKitService.shared
+                    .fetchRecentWorkouts { workouts in
+                        print("🏋️ Workouts:")
+                        self.workoutSessions = workouts
+                        for workout in workouts {
+                            print("Type: \(workout.workoutType)")
+                            print("Start date: \(workout.startDate)")
+                            print("Duration minutes: \(workout.durationMinutes)")
+                        }
+                    }
+            }, label: {
+              Text("Refresh")
+                    .padding(5)
+            })
+            .buttonStyle(.glass)
         }
     }
+    
     var requestPermissionButton: some View {
-        HStack {
-            Button("Request HealthKit Access") {
+        VStack(alignment: .center) {
+            Text("Request HealthKit Access")
+                .bold(true)
+            Button("HealtKit permission") {
                 HealthKitService.shared
                     .requestAuthorization { granted in
                         healtKitEnabled = granted
                         print("Granted:", granted)
                     }
             }
+            .background(healtKitEnabled ? .green : .red)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .frame(maxWidth: .infinity)
             .buttonStyle(.glass)
+            .padding(.bottom, 30)
+            Text("Request HealthKit Access")
+                .bold(true)
             Button("Create Test Mindfulness Session") {
                 HealthKitService.shared
                     .createTestMindfulnessSession()
             }
+            .frame(maxWidth: .infinity)
             .buttonStyle(.glass)
         }
     }

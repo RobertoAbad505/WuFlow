@@ -18,23 +18,14 @@ final class ProgressRecordingService {
         for activity: Activity,
         value: Double,
         source: TrackingType,
-        context: ModelContext
-    ) throws {
-
+        context: ModelContext) throws {
         let record = ProgressRecord(
             value: value,
             source: source,
             activity: activity
         )
-
         context.insert(record)
-
         try context.save()
-
-        print("✅ Progress saved")
-        print("Activity:", activity.name)
-        print("Value:", value)
-        print("Source:", source.rawValue)
     }
 }
 

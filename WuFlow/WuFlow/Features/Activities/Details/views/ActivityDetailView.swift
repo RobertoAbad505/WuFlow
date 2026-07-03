@@ -116,6 +116,16 @@ struct ActivityDetailView: View {
                     .buttonStyle(.glass)
                 }
             }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    presentRemindersProcess.toggle()
+                }, label: {
+                    Image(systemName: activity.isPinned ? "pin.fill":"pin")
+                        .font(Font.system(size: 20))
+                        .tint(.green)
+                })
+                .buttonStyle(.glass)
+            }
         })
         .sheet(isPresented: $presentAddProgress) {
             AddActivityProgressView(activity: activity)
@@ -169,17 +179,48 @@ extension ActivityDetailView {
             }
             .padding(.leading)
             
-            // CTA (important positioning)
-            Button {
-                presentAddProgress.toggle()
-            } label: {
-                Label("Add progress", systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+            if activity.allowsManualProgress {
+                // CTA (important positioning)
+                Button {
+                    presentAddProgress.toggle()
+                } label: {
+                    Label("Add progress", systemImage: "plus.circle.fill")
+                        .font(.headline)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+            }
+            if activity.isAutomated && activity.trackingType == .healthSteps {
+                Button {
+                    HealthKitSyncService.shared.syncHealthSteps(modelContext)
+                } label: {
+                    Label("Sync Steps",
+                          systemImage: "arrow.trianglehead.2.clockwise.rotate.90.circle")
+                        .font(.headline)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+            }
+            if activity.isAutomated && activity.trackingType == .healthSteps {
+                Button {
+                    HealthKitSyncService.shared.resetTodayHealthStepSync(self.activity,
+                                                                         context: modelContext)
+                } label: {
+                    Label("Clean up today steps",
+                          systemImage: "eraser.badge.xmark.fill")
+                        .font(.headline)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
             }
         }
         .padding()
@@ -568,7 +609,9 @@ extension ActivityDetailView {
                                               iconName: "circle.dotted",
                                               motivationDescription: "Remember always is a great time to meditate",
                                               expectedOutcomeDescription: "We want to relax at the beach without mental noise, just be there and be present",
-                                              imagePath: path))
+                                              imagePath: path,
+                                              isPinned: true
+                                             ))
         .modelContainer(for: Activity.self, inMemory: false)
         .modelContainer(for: ProgressRecord.self, inMemory: true)
     }

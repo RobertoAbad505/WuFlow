@@ -61,9 +61,7 @@ final class HealthKitService {
             completion(success)
         }
     }
-    func fetchTodayStepCount(
-        completion: @escaping (Double) -> Void
-    ) {
+    func fetchTodayStepCount(completion: @escaping (Double) -> Void) {
         
         guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
             completion(0)

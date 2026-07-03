@@ -10,7 +10,9 @@ import SwiftData
 
 @main
 struct WuFlowApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var router = Router()
+    
     
     let notificationDelegate = NotificationDelegate.shared
     
@@ -33,5 +35,11 @@ struct WuFlowApp: App {
                 .environmentObject(router)
         }
         .modelContainer(sharedModelContainer)
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else {
+                return
+            }
+            HealthKitSyncService.shared.sync(sharedModelContainer)
+        }
     }
 }

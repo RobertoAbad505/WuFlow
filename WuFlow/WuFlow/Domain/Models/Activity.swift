@@ -79,7 +79,8 @@ final class Activity {
         remindersEnabled: Bool = false,
         reminderType: ReminderType = .scheduled,
         goalPeriod: GoalPeriod = .daily,
-        measurement: MeasurementType = .session
+        measurement: MeasurementType = .session,
+        isPinned: Bool? = false
     ) {
         self.id = id
         self.name = name
@@ -99,6 +100,7 @@ final class Activity {
         self.reminderType = reminderType
         self.goalPeriod = goalPeriod
         self.measurement = measurement
+        self.isPinned = isPinned ?? false
     }
 }
 
