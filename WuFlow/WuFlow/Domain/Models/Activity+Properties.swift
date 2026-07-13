@@ -11,8 +11,7 @@ extension Activity {
     ///Property helpers
     var reminderType: ReminderType {
         get {
-            ReminderType(rawValue: reminderTypeRawValue ?? "")
-            ?? .contextual
+            ReminderType(rawValue: reminderTypeRawValue ?? "") ?? .contextual
         }
         set {
             reminderTypeRawValue = newValue.rawValue
@@ -21,8 +20,7 @@ extension Activity {
     
     var reminderTone: ReminderTone {
         get {
-            ReminderTone(rawValue: reminderToneRawValue ?? "")
-            ?? .light
+            ReminderTone(rawValue: reminderToneRawValue ?? "") ?? .light
         }
         set {
             reminderToneRawValue = newValue.rawValue
@@ -30,8 +28,7 @@ extension Activity {
     }
     var reminderPreset: ReminderPreset {
         get {
-            ReminderPreset(rawValue: reminderPresetRawValue ?? "")
-            ?? .morning
+            ReminderPreset(rawValue: reminderPresetRawValue ?? "") ?? .morning
         }
         set {
             reminderPresetRawValue = newValue.rawValue
@@ -39,9 +36,7 @@ extension Activity {
     }
     var measurement: MeasurementType {
         get {
-            MeasurementType(
-                rawValue: measurementRaw
-            ) ?? .session
+            MeasurementType(rawValue: measurementRaw) ?? .session
         }
         set {
             measurementRaw = newValue.rawValue
@@ -50,9 +45,7 @@ extension Activity {
 
     var goalPeriod: GoalPeriod {
         get {
-            GoalPeriod(
-                rawValue: goalPeriodRaw
-            ) ?? .daily
+            GoalPeriod(rawValue: goalPeriodRaw) ?? .daily
         }
         set {
             goalPeriodRaw = newValue.rawValue
@@ -60,9 +53,7 @@ extension Activity {
     }
     var lifeArea: LifeArea {
         get {
-            LifeArea(
-                rawValue: lifeAreaRaw ?? ""
-            ) ?? .social
+            LifeArea(rawValue: lifeAreaRaw ?? "") ?? .social
         }
         set {
             lifeAreaRaw = newValue.rawValue
@@ -77,6 +68,14 @@ extension Activity {
         }
         set {
             typeRaw = newValue.rawValue
+        }
+    }    
+    var trackingType: TrackingType {
+        get {
+            TrackingType(rawValue: trackingTypeRaw) ?? .manual
+        }
+        set {
+            trackingTypeRaw = newValue.rawValue
         }
     }
 }

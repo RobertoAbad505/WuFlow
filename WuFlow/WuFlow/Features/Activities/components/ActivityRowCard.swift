@@ -28,7 +28,7 @@ struct ActivityRowCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            HStack(alignment: .center ,spacing: 0) {
+            HStack(alignment: .center ,spacing: 10) {
                 activityImage
                 VStack {
                     HStack(alignment: .center, spacing: 0) {
@@ -56,8 +56,8 @@ struct ActivityRowCard: View {
                     .padding(.bottom, 5)
                 }
                 .padding()
-                .background(.regularMaterial)
             }
+            .background(.ultraThinMaterial)
         }
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
@@ -117,7 +117,9 @@ struct ActivityRowCard: View {
 
 #Preview {
     ZStack {
-        Color.gray.opacity(0.4).ignoresSafeArea()
+        Image("zengarden")
+            .resizable()
+            .ignoresSafeArea()
         VStack(alignment: .center, spacing: 20) {
             ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
                                                unitType: .pages,

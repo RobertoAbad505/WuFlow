@@ -10,64 +10,27 @@ import SwiftData
 
 final class NotificationActionHandler {
 
-    static let shared = NotificationActionHandler()
+    private let repository: ActivityRepository
 
-    private init() {}
+    init(repository: ActivityRepository) {
+        self.repository = repository
+    }
 
     func handleDone(activityId: String) {
-
-        let context = ModelContext(
-            DataStore.shared.container
-        )
-
-        do {
-            print(" NotificationActionHandler: HANDLE DONE ACTION")
-            let uuid = UUID(uuidString: activityId)
-
-            let descriptor = FetchDescriptor<Activity>()
-
-            let activities = try context.fetch(descriptor)
-            print("Searching for : \(activityId)")
-            guard let activity = activities.first(
-                where: { $0.id == uuid }
-            ) else {
-                print("❌ Activity not found")
-                return
-            }
-            print("✅ Found Activity")
-            
-            // Duplicate protection
-            let fiveMinutesAgo = Date().addingTimeInterval(-300)
-
-            let progressDescriptor = FetchDescriptor<ProgressRecord>()
-
-            let progressRecords = try context.fetch(progressDescriptor)
-            
-            let recentRecord = progressRecords.first { record in
-                record.activity?.id == activity.id &&
-                record.date >= fiveMinutesAgo
-            }
-            if recentRecord != nil {
-                print("⚠️ Duplicate prevented")
-                return
-            }
-            
+        guard let activityId = UUID(uuidString: activityId) else {
+            return
+        }
+        Task {
             do {
-                try ProgressRecordingService.shared.recordProgress(for: activity,
-                                                                   value: activity.defaultIncrement,
-                                                                   source: .reminder,
-                                                                   context: context)
-            } catch let error {
-                print("Error saving progress: \(error)")
-            }
-            
-            NotificationManager.shared
-                .sendSuccessNotification(
-                    activityName: activity.name
-                )
-        } catch {
+                guard let activity = try await repository.completeReminder(activityId: activityId) else {
+                    print("Error: Could not find activity. This should never happen.")
+                    return
+                }
+                NotificationManager.shared.sendSuccessNotification(activityName: activity.name)
+            } catch {
+                print(error)
 
-            print("❌ Fetch failed:", error)
+            }
         }
     }
 }

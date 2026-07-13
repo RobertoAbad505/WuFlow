@@ -11,6 +11,8 @@ import SwiftData
 struct AddActivityProgressView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var context
+    @Environment(\.repository)
+    private var repository
     
     @Query var activities: [Activity]
     
@@ -265,16 +267,22 @@ struct AddActivityProgressView: View {
         }
     }
     func save() {
-        guard let activity = selectedActivity else { return }
-        
-        
-        do {
-            try ProgressRecordingService.shared.recordProgress(for: activity,
-                                                           value: value,
-                                                           source: activity.trackingType,
-                                                           context: context)
-        } catch let error {
-            print("Error saving progress: \(error)")
+        guard let repository else {
+            return
+        }
+        guard let activity = selectedActivity else {
+            return
+        }
+        Task {
+            do {                
+                try await repository.addProgress(
+                    activityId: activity.id,
+                    value: value,
+                    source: .manual
+                )
+            } catch let error {
+                print("Error saving progress: \(error)")
+            }
         }
         dismiss()
     }

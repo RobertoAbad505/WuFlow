@@ -128,7 +128,7 @@ struct CreateActivityView: View {
                 activity.name = draft.name
                 activity.unitType = draft.unitType
                 activity.goalValue = draft.goalValue
-                activity.trackingType = draft.trackingType
+                activity.trackingType = draft.trackingType                
                 activity.iconName = draft.iconName
                 activity.motivationDescription = draft.motivationDescription
                 activity.expectedOutcomeDescription = draft.expectedOutcomeDescription

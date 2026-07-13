@@ -11,7 +11,12 @@ import UIKit
 
 final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     
-    static let shared = NotificationDelegate()
+    private let actionHandler: NotificationActionHandler
+
+   init(actionHandler: NotificationActionHandler) {
+       self.actionHandler = actionHandler
+       super.init()
+   }
     
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
@@ -35,7 +40,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         switch response.actionIdentifier {
             
         case "DONE_ACTION":
-            NotificationActionHandler.shared.handleDone(activityId: activityId)
+            actionHandler.handleDone(activityId: activityId)
             print("✅ DONE pressed")
             print("Activity ID:", activityId)
             

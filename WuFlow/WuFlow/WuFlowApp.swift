@@ -12,15 +12,12 @@ import SwiftData
 struct WuFlowApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var router = Router()
+    let notificationDelegate: NotificationDelegate
     
-    
-    let notificationDelegate = NotificationDelegate.shared
-    
-    var sharedModelContainer: ModelContainer {
-        DataStore.shared.container
-    }
+    let container = AppContainer()
     
     init() {
+        notificationDelegate = NotificationDelegate(actionHandler: container.notificationActionHandler)
         UNUserNotificationCenter.current().delegate = notificationDelegate
         NotificationManager.shared.registerNotificationCategories()
     }
@@ -33,13 +30,15 @@ struct WuFlowApp: App {
                     router.handleDeepLink(url)
                 }
                 .environmentObject(router)
+                .environment(container.healthKitSyncService)
+                .environment(\.repository, container.repository)
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(container.persistence.container)
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else {
                 return
             }
-            HealthKitSyncService.shared.sync(sharedModelContainer)
+            container.healthKitSyncService.sync()
         }
     }
 }

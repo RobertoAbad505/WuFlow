@@ -56,7 +56,6 @@ extension TrackingType {
 
     var icon: String {
         switch self {
-
         case .manual:
             return "square.and.pencil"
 

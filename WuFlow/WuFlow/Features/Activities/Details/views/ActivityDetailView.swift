@@ -14,6 +14,8 @@ import SwiftData
 struct ActivityDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(HealthKitSyncService.self)
+    private var healthKit
     @Query var records: [ProgressRecord] = []
     
     @State var presentAddProgress: Bool = false
@@ -205,7 +207,7 @@ extension ActivityDetailView {
             }
             if activity.isAutomated && activity.trackingType == .healthSteps {
                 Button {
-                    HealthKitSyncService.shared.syncHealthSteps(modelContext)
+                    healthKit.sync()
                 } label: {
                     Label("Sync Steps",
                           systemImage: "arrow.trianglehead.2.clockwise.rotate.90.circle")
@@ -219,8 +221,7 @@ extension ActivityDetailView {
             }
             if activity.isAutomated && activity.trackingType == .healthSteps {
                 Button {
-                    HealthKitSyncService.shared.resetTodayHealthStepSync(self.activity,
-                                                                         context: modelContext)
+                    healthKit.resetTodayHealthStepSync(self.activity.id)
                 } label: {
                     Label("Clean up today steps",
                           systemImage: "eraser.badge.xmark.fill")

@@ -21,8 +21,6 @@ final class Activity {
     
     var goalValue: Double = 1
     
-    var trackingType: TrackingType
-    
     var createdAt: Date
     
     var isPinned: Bool = false
@@ -53,6 +51,8 @@ final class Activity {
     
     var reminderToneRawValue: String?
     
+    var trackingTypeRaw: String = TrackingType.manual.rawValue
+    
     var measurementRaw: String = MeasurementType.session.rawValue
     
     var goalPeriodRaw: String = GoalPeriod.daily.rawValue
@@ -68,7 +68,7 @@ final class Activity {
         name: String,
         unitType: UnitType,
         goalValue: Double,
-        trackingType: TrackingType,
+        trackingType: TrackingType = .manual,
         createdAt: Date = Date(),
         iconName: String = "circle",
         motivationDescription: String? = nil,
@@ -88,20 +88,25 @@ final class Activity {
         self.name = name
         self.unitType = unitType
         self.goalValue = goalValue
-        self.trackingType = trackingType
+
+        self.trackingTypeRaw = trackingType.rawValue
+
         self.createdAt = createdAt
-        self.motivationDescription = motivationDescription
-        self.expectedOutcomeDescription = expectedOutcomeDescription
         self.iconName = iconName
         self.imagePath = imagePath
-        self.type = type
-        self.lifeArea = lifeArea
+
+        self.typeRaw = type.rawValue
+        self.lifeAreaRaw = lifeArea.rawValue
+
         self.secondaryNote = secondaryNote
         self.progressRecords = progressRecords
+
         self.remindersEnabled = remindersEnabled
-        self.reminderType = reminderType
-        self.goalPeriod = goalPeriod
-        self.measurement = measurement
+        self.reminderTypeRawValue = reminderType.rawValue
+
+        self.goalPeriodRaw = goalPeriod.rawValue
+        self.measurementRaw = measurement.rawValue
+
         self.isPinned = isPinned ?? false
     }
 }
