@@ -154,7 +154,7 @@ final class NotificationManager {
         
         // 2. Make sure reminders enabled
         guard activity.remindersEnabled else {
-            print("⚠️ Reminders disabled")
+            print("⚠️ Reminders DISABLED")
             return
         }
         

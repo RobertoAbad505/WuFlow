@@ -13,7 +13,7 @@ import SwiftData
 
 struct ActivityDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.repository) private var repository
     @Environment(HealthKitSyncService.self)
     private var healthKit
     @Query var records: [ProgressRecord] = []
@@ -107,7 +107,7 @@ struct ActivityDetailView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    print("Enable notifications: \(activity.remindersEnabled ? "off":"on")")
+                    print("Enable notifications: \(activity.remindersEnabled ? "OFF":"ON")")
                     enableNotifications()
                 }, label: {
                     Image(systemName: "bell")
@@ -547,44 +547,44 @@ extension ActivityDetailView {
         }
     }
     private func delete() {
-        withAnimation {
-            modelContext.delete(self.activity)
-            
+        Task {
+            guard let repository else { return }
             do {
-                try modelContext.save()
-            } catch {
-                print("❌ Delete failed:", error)
+                try await repository.deleteActivity(id: activity.id)
+            } catch let error {
+                print("❌ Delete activity failed:", error)
+                print("activity name: \(activity.name)")
+                print("error.localizedDescription:", error)
             }
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
         dismiss()
     }
     private func enableNotifications() {
-        withAnimation {
-            self.activity.remindersEnabled.toggle()
-            if self.activity.remindersEnabled {
-                NotificationManager.shared.scheduleReminder(for: self.activity)
-                print("Notifications enabled and scheduled")
-            } else {
-                NotificationManager.shared.cancelReminder(for: activity)
-                print("Notifications disabled and cleared schedule")
-            }
-            
+        Task {
+            guard let repository else { return }
             do {
-                try modelContext.save()
-            } catch {
+                try await repository.enableNotifications(id: activity.id)                
+                if self.activity.remindersEnabled {
+                    NotificationManager.shared.scheduleReminder(for: self.activity)
+                    print("Notifications enabled and scheduled")
+                } else {
+                    NotificationManager.shared.cancelReminder(for: activity)
+                    print("Notifications disabled and cleared schedule")
+                }
+                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            } catch let error {
                 print("❌ Enable notifications failed:", error)
             }
-            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()            
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
     }
     private func setPinnedActivity() {
-        withAnimation {
-            self.activity.isPinned.toggle()
-            self.activity.pinPriority = activity.isPinned ? 1:0
+        Task {
+            guard let repository else { return }
             print("Pinned: \(activity.isPinned ? "enabled" : "disabled") order: \(activity.pinPriority)")
             do {
-                try modelContext.save()
+                try await repository.togglePinned(id: activity.id)
             } catch {
                 print("❌ Enable notifications failed:", error)
             }

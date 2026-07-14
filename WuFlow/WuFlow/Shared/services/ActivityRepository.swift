@@ -19,6 +19,53 @@ actor ActivityRepository {
         return try modelContext.fetch(descriptor).first
     }
     
+    func createActivity(from draft: ActivityDraft) throws {
+        let activity = Activity(
+            name: "",
+            unitType: .count,
+            goalValue: 1
+        )
+        apply(
+            draft: draft,
+            to: activity
+        )
+        modelContext.insert(activity)
+        try modelContext.save()
+    }
+    
+    func updateActivity(id: UUID, from draft: ActivityDraft) throws {
+        guard let activity = try activity(id: id) else {
+            return
+        }
+        apply(
+            draft: draft,
+            to: activity
+        )
+        modelContext.insert(activity)
+        try modelContext.save()
+    }
+    func deleteActivity(id: UUID) throws {
+        guard let activity = try activity(id: id) else {
+            return
+        }
+        modelContext.delete(activity)
+        try modelContext.save()
+    }
+    func togglePinned(id: UUID) throws {
+        guard let activity = try activity(id: id) else {
+            return
+        }
+        activity.isPinned.toggle()
+        activity.pinPriority = activity.isPinned ? 1:0        
+        try modelContext.save()
+    }
+    func enableNotifications(id: UUID) throws {
+        guard let activity = try activity(id: id) else {
+            return
+        }
+        activity.remindersEnabled.toggle()
+        try modelContext.save()
+    }
     func syncHealthSteps(totalSteps: Double) throws {
         guard totalSteps > 0 else {
             print("No steps today, sync skipped")
@@ -117,36 +164,44 @@ actor ActivityRepository {
         guard let activity = try activity(id: activityId) else {
             return nil
         }
-
-        guard try !hasRecentReminderProgress(activity: activity) else {
-            print("⚠️ Duplicate prevented")
+        guard !hasRecentProgress(activity: activity, source: .reminder, within: 300) else {
             return nil
         }
-        do {
-            try addProgress(
-                activity: activity,
-                value: activity.defaultIncrement,
-                source: .reminder
-            )
-            return activity
-        } catch let error {
-            throw error
+        try addProgress(
+            activity: activity,
+            value: activity.defaultIncrement,
+            source: .reminder
+        )
+        return activity
+    }
+    private func hasRecentProgress(
+        activity: Activity,
+        source: TrackingType,
+        within interval: TimeInterval
+    ) -> Bool {
+
+        let threshold = Date().addingTimeInterval(-interval)
+        return activity.progressRecords.contains {
+            $0.source == source &&
+            $0.date >= threshold
         }
     }
-    func hasRecentReminderProgress(activity: Activity) throws -> Bool {
-        // Duplicate protection
-        let fiveMinutesAgo = Date().addingTimeInterval(-300)
-
-        let progressDescriptor = FetchDescriptor<ProgressRecord>()
-
-        let progressRecords = try modelContext.fetch(progressDescriptor)
-        
-        let recentRecord = activity.progressRecords.first { record in
-            record.date >= fiveMinutesAgo
-        }
-        if recentRecord != nil {
-            return false
-        }
-        return true
+    private func apply(
+        draft: ActivityDraft,
+        to activity: Activity
+    ) {
+        activity.name = draft.name
+        activity.unitType = draft.unitType
+        activity.goalValue = draft.goalValue
+        activity.trackingType = draft.trackingType
+        activity.iconName = draft.iconName
+        activity.motivationDescription = draft.motivationDescription
+        activity.expectedOutcomeDescription = draft.expectedOutcomeDescription
+        activity.imagePath = draft.imagePath
+        activity.type = draft.type
+        activity.lifeArea = draft.lifeArea
+        activity.secondaryNote = draft.secondaryNote
+        activity.measurement = draft.measurement
+        activity.goalPeriod = draft.goalPeriod
     }
 }

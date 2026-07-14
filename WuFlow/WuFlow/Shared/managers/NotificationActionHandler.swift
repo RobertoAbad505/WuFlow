@@ -17,17 +17,19 @@ final class NotificationActionHandler {
     }
 
     func handleDone(activityId: String) {
-        guard let activityId = UUID(uuidString: activityId) else {
-            return
-        }
         Task {
+            guard let activityId = UUID(uuidString: activityId) else {
+                print("Handle done: Invalid UUID")
+                return
+            }
             do {
                 guard let activity = try await repository.completeReminder(activityId: activityId) else {
-                    print("Error: Could not find activity. This should never happen.")
+                    print("Handle done: Duplication prevention ON - Activity already completed")
                     return
                 }
                 NotificationManager.shared.sendSuccessNotification(activityName: activity.name)
-            } catch {
+                print("Handle done: confirmation notification sent 📩 ")
+            } catch let error {
                 print(error)
 
             }

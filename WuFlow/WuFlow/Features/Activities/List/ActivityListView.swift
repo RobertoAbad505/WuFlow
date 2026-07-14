@@ -8,7 +8,7 @@ import SwiftUI
 import SwiftData
 
 struct ActivityListView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.repository) private var repository
     @Query(
         sort: [
             SortDescriptor(\Activity.pinPriority, order: .reverse),
@@ -120,13 +120,12 @@ struct ActivityListView: View {
             Text("This action cannot be undone.")
         }
     }
-    func pinActivity(_ activity: Activity) {
-        withAnimation {
-            activity.isPinned.toggle()
-            activity.pinPriority = activity.isPinned ? 1:0
+    private func pinActivity(_ activity: Activity) {
+        Task {
+            guard let repository else { return }
             print("Pinned: \(activity.isPinned ? "enabled" : "disabled") order: \(activity.pinPriority)")
             do {
-                try modelContext.save()
+                try await repository.togglePinned(id: activity.id)
             } catch {
                 print("❌ Enable notifications failed:", error)
             }
@@ -180,14 +179,6 @@ struct ActivityListView: View {
     private func addItem() {
         withAnimation {
             toggleCreateActivity.toggle()
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
         }
     }
     var addActivityBtn: some View {
@@ -263,15 +254,16 @@ struct ActivityListView: View {
     }
 
     private func delete(_ activity: Activity) {
-        withAnimation {
-            modelContext.delete(activity)
-            
+        Task {
+            guard let repository else { return }
             do {
-                try modelContext.save()
-            } catch {
-                print("❌ Delete failed:", error)
+                try await repository.deleteActivity(id: activity.id)
+            } catch let error {
+                print("❌ Delete activity failed:", error)
+                print("activity name: \(activity.name)")
+                print("error.localizedDescription:", error)
             }
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
         selectedToDelete = nil
     }

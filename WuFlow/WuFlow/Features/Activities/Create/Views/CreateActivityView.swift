@@ -10,7 +10,7 @@ import SwiftData
 
 struct CreateActivityView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.repository) private var repository
     
     @State private var imageIndex: Int = 1
     @State private var mode: ActivityFlowMode
@@ -99,58 +99,30 @@ struct CreateActivityView: View {
         .foregroundStyle(Color(.label))
     }
     private func saveActivity() {
-        withAnimation {
-            
-            // Prefer draft.imageData (source of truth)
-            switch mode {
-                
-            case .create:
-                let newActivity = Activity(
-                    name: draft.name,
-                    unitType: draft.unitType,
-                    goalValue: draft.goalValue,
-                    trackingType: draft.trackingType,
-                    iconName: draft.iconName,
-                    motivationDescription: draft.motivationDescription,
-                    expectedOutcomeDescription: draft.expectedOutcomeDescription,
-                    imagePath: draft.imagePath,
-                    type: draft.type,
-                    lifeArea: draft.lifeArea,
-                    secondaryNote: draft.secondaryNote,
-                    goalPeriod: draft.goalPeriod,
-                    measurement: draft.measurement
-                )
-                
-                modelContext.insert(newActivity)
-                
-                
-            case .edit(let activity):
-                activity.name = draft.name
-                activity.unitType = draft.unitType
-                activity.goalValue = draft.goalValue
-                activity.trackingType = draft.trackingType                
-                activity.iconName = draft.iconName
-                activity.motivationDescription = draft.motivationDescription
-                activity.expectedOutcomeDescription = draft.expectedOutcomeDescription
-                activity.imagePath = draft.imagePath
-                activity.type = draft.type
-                activity.lifeArea = draft.lifeArea
-                activity.secondaryNote = draft.secondaryNote
-                activity.measurement = draft.measurement
-                activity.goalPeriod = draft.goalPeriod
+        Task {
+            guard let repository else {
+                return
             }
-            
-            // Save context explicitly (important for edit)
             do {
-                try modelContext.save()
-                print("✅ Save success")
-            } catch let error {
-                print("❌ Save failed:", error.localizedDescription)
+                switch mode {
+                case .create:
+                    try await repository.createActivity(from: draft)
+                case .edit(let activity):
+                    try await repository.updateActivity(
+                        id: activity.id,
+                        from: draft
+                    )
+                }
+                // 🔥 IMPORTANT: clean camera state
+                cameraManager.image = nil
             }
-            // 🔥 IMPORTANT: clean camera state
-            cameraManager.image = nil
+            catch let error {
+                print("Error on \(mode == .create ? "create" : "update") activity \(draft.name)")
+                print(error)
+                print(error.localizedDescription)
+            }
         }
-    }
+    }    
     func nextStep() -> CreateActivityStep {
         guard let index = allSteps.firstIndex(of: step),
               index < allSteps.count - 1 else {
@@ -246,6 +218,7 @@ enum CreateActivityStep {
     case review
 }
 struct ActivityDraft {
+    var id: UUID?
     var name: String = ""
     var unitType: UnitType = .count
     var goalValue: Double = 0
@@ -266,6 +239,7 @@ struct ActivityDraft {
     }
     
     init(from activity: Activity) {
+        self.id = activity.id
         self.name = activity.name
         self.unitType = activity.unitType
         self.goalValue = activity.goalValue
