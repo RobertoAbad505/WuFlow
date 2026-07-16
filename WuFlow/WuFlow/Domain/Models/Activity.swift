@@ -68,7 +68,7 @@ final class Activity {
     // Relationship
     @Relationship(deleteRule: .cascade)
     var progressRecords: [ProgressRecord] = []
-//    var automation: AutomationConfiguration?
+    var place: Place?
     
     init(
         id: UUID = UUID(),

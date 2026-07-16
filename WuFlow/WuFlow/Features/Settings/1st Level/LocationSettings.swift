@@ -10,24 +10,21 @@ import SwiftUI
 struct LocationSettings: View {
     
     @State var location: CLLocation?
-//    @State var selectedMonitorRegion: TestRegion
     @Environment(LocationService.self)
     private var locationService
     
+    @Environment(\.repository) var repository
+    
     //IRON GYM COORDENATES
-    let gym = TestRegion(
-        identifier: "🏋️ GYM",
-        latitude: 20.586552,
-        longitude: -100.375174,
-        radius: 100
-    )
+    var gym = Place(identifier: "🏋️ GYM",
+                    name: "🏋️ GYM",
+                    latitude: 20.586552,
+                    longitude: -100.375174)
     // Dalia 2
-    let home = TestRegion(
-        identifier: "🏠 Home",
-        latitude: 20.587466399192166,
-        longitude: -100.36885007990087,
-        radius: 100
-    )
+    var home = Place(identifier: "🏠 Home",
+                     name: "🏠 Home",
+                     latitude: 20.587466399192166,
+                     longitude: -100.36885007990087)
     
     var body: some View {
         VStack {
@@ -99,9 +96,7 @@ struct LocationSettings: View {
                 .font(.footnote.bold())
             HStack {
                 Button(action: {
-                    print("START monitoring ...")
-                    locationService.startMonitoring(region: home)
-                    locationService.startMonitoring(region: gym)
+                    startMonitoring()
                 }, label: {
                     Text("Start monitoring")
                 })
@@ -118,8 +113,8 @@ struct LocationSettings: View {
             }
             HStack {
                 Button("Determine state") {
-                    locationService.requestState(region: home)
-                    locationService.requestState(region: gym)
+                    locationService.requestState(place: home)
+                    locationService.requestState(place: gym)
                 }
                 .buttonStyle(.glass)
                 Button("Clear Logs") {
@@ -146,6 +141,30 @@ struct LocationSettings: View {
     func getCoordenatesStringFormatt(_ location: CLLocation?) -> String {
         guard let location else { return "-" }
         return "\(location.coordinate.latitude), \(location.coordinate.longitude)"
+    }
+    func startMonitoring() {
+        guard let repository else {
+            return
+        }
+        print("START monitoring ...")
+        Task {
+            do {
+                var places = try await repository.monitoredPlaces()
+                if places.isEmpty {
+                    places.append(contentsOf: [
+                        gym, home
+                    ])
+                    print("No monitored places to monitor....")
+//                    return DELETE THIS LATER
+                }
+                for place in places {
+                    locationService.startMonitoring(place: place)
+                }
+            } catch let error {
+                print("Error starting monitoring places")
+                print(error.localizedDescription)
+            }
+        }
     }
 }
 struct DebugLogRow: View {

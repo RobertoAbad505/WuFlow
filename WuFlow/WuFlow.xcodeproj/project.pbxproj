@@ -49,6 +49,7 @@
 				"Domain/Models/Activity+Streaks.swift",
 				Domain/Models/AutomationConfiguration.swift,
 				Domain/Models/LifeArea.swift,
+				Domain/Models/Place.swift,
 				Domain/Models/ProgressRecord.swift,
 				Domain/Models/TrackingType.swift,
 				Domain/Models/UnitType.swift,

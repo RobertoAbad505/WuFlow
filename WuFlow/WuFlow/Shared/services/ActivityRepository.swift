@@ -205,3 +205,84 @@ actor ActivityRepository {
         activity.goalPeriod = draft.goalPeriod
     }
 }
+extension ActivityRepository {
+    // MARK: - Places
+    func createPlace(
+        identifier: String,
+        name: String,
+        latitude: Double,
+        longitude: Double,
+        radius: Double = 100,
+        isMonitored: Bool = true
+    ) throws -> Place {
+        let place = Place(
+            identifier: identifier,
+            name: name,
+            latitude: latitude,
+            longitude: longitude,
+            isMonitored: isMonitored,
+            radius: radius
+        )
+        modelContext.insert(place)
+        try modelContext.save()
+        return place
+    }
+    
+    func place(identifier: String) throws -> Place? {
+        let descriptor = FetchDescriptor<Place>(
+            predicate: #Predicate {
+                $0.identifier == identifier
+            })
+
+        return try modelContext.fetch(descriptor).first
+    }
+    func place(named name: String) throws -> Place? {
+        let descriptor = FetchDescriptor<Place>(
+            predicate: #Predicate {
+                $0.name == name
+            }
+        )
+        return try modelContext.fetch(descriptor).first
+    }
+    func places() throws -> [Place] {
+        let descriptor = FetchDescriptor<Place>(
+            sortBy: [
+                SortDescriptor(\.name)
+            ]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+    func monitoredPlaces() throws -> [Place] {
+        let descriptor = FetchDescriptor<Place>(
+            predicate: #Predicate {
+                $0.isMonitored
+            },
+            sortBy: [
+                SortDescriptor(\.name)
+            ]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+    func updatePlace(
+        _ place: Place,
+        identifier: String,
+        name: String,
+        latitude: Double,
+        longitude: Double,
+        radius: Double,
+        isMonitored: Bool
+    ) throws {
+        place.identifier = identifier
+        place.name = name
+        place.latitude = latitude
+        place.longitude = longitude
+        place.radius = radius
+        place.isMonitored = isMonitored
+
+        try modelContext.save()
+    }
+    func deletePlace(_ place: Place) throws {
+        modelContext.delete(place)
+        try modelContext.save()
+    }
+}

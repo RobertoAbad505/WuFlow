@@ -65,7 +65,6 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         }
     }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
         guard let location = locations.last else {
             return
         }
@@ -98,30 +97,31 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     }
     
     //monitor region
-    func startMonitoring(region: TestRegion) {
+    func startMonitoring(place: Place) {
+        
         guard !manager.monitoredRegions.contains(where: {
-            $0.identifier == region.identifier
+            $0.identifier == place.region.identifier
         }) else {
-            print("Already monitoring \(region.identifier)")
+            print("Already monitoring \(place.identifier)")
             return
         }
         
         let center = CLLocationCoordinate2D(
-            latitude: region.latitude,
-            longitude: region.longitude
+            latitude: place.latitude,
+            longitude: place.longitude
         )
 
         let monitoredRegion = CLCircularRegion(
             center: center,
-            radius: region.radius,
-            identifier: region.identifier
+            radius: place.radius,
+            identifier: place.identifier
         )
         manager.startMonitoring(for: monitoredRegion)
         manager.requestState(for: monitoredRegion)
     }
-    func requestState(region: TestRegion) {
+    func requestState(place: Place) {
         guard let monitoredRegion = manager.monitoredRegions.first(where: {
-            $0.identifier == region.identifier
+            $0.identifier == place.identifier
         }) else {
             return
         }        
