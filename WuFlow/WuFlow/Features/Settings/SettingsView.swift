@@ -30,6 +30,9 @@ struct SettingsView: View {
                 NavigationLink(value: SettingsRoute.healtKitSettings) {
                     Label("Healt Kit Settings", systemImage: "figure.cooldown")
                 }
+                NavigationLink(value: SettingsRoute.locations) {
+                    Label("Location Settings", systemImage: "location")
+                }
             }
             
         }

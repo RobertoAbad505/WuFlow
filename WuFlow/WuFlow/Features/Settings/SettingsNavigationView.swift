@@ -24,6 +24,8 @@ struct SettingsNavigationView: View {
                         Text("Appearance view - still in development")
                     case .healtKitSettings:
                         HealtKitSettingsView()
+                    case .locations:
+                        LocationSettings()
                     }
                 }
         }

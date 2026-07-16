@@ -47,6 +47,7 @@
 				"Domain/Models/Activity+Progress.swift",
 				"Domain/Models/Activity+Properties.swift",
 				"Domain/Models/Activity+Streaks.swift",
+				Domain/Models/AutomationConfiguration.swift,
 				Domain/Models/LifeArea.swift,
 				Domain/Models/ProgressRecord.swift,
 				Domain/Models/TrackingType.swift,
@@ -353,6 +354,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "WuFlow requires your location to track your presence on your places";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "WuFlow requires your location to track your presence on your places";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -409,6 +412,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "WuFlow requires your location to track your presence on your places";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "WuFlow requires your location to track your presence on your places";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

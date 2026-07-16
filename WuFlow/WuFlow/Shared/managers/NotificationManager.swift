@@ -109,9 +109,9 @@ final class NotificationManager {
     }
     
     func sendTestNotification(_ title: String, _ body: String) {
-//        
-//        UNUserNotificationCenter.current()
-//            .removeAllPendingNotificationRequests()
+        
+        UNUserNotificationCenter.current()
+            .removeAllPendingNotificationRequests()
         
         let content = UNMutableNotificationContent()
         

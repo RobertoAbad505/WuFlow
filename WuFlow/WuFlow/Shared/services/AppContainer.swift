@@ -14,6 +14,8 @@ final class AppContainer {
     let repository: ActivityRepository
 
     let healthKitSyncService: HealthKitSyncService
+    
+    let locationService: LocationService
 
     let notificationActionHandler: NotificationActionHandler
 
@@ -25,5 +27,7 @@ final class AppContainer {
         self.healthKitSyncService = HealthKitSyncService(repository: repository)
 
         self.notificationActionHandler = NotificationActionHandler(repository: repository)
+        
+        self.locationService = LocationService()
     }
 }

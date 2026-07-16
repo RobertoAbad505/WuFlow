@@ -59,9 +59,16 @@ final class Activity {
     
     var defaultIncrement: Double = 1
     
+    var latitude: Double?
+    
+    var longitude: Double?
+    
+    var radius: Double = 100
+    
     // Relationship
     @Relationship(deleteRule: .cascade)
     var progressRecords: [ProgressRecord] = []
+//    var automation: AutomationConfiguration?
     
     init(
         id: UUID = UUID(),
@@ -82,7 +89,8 @@ final class Activity {
         reminderType: ReminderType = .scheduled,
         goalPeriod: GoalPeriod = .daily,
         measurement: MeasurementType = .session,
-        isPinned: Bool? = false
+        isPinned: Bool? = false,
+//        automation: AutomationConfiguration? = nil
     ) {
         self.id = id
         self.name = name
@@ -108,6 +116,7 @@ final class Activity {
         self.measurementRaw = measurement.rawValue
 
         self.isPinned = isPinned ?? false
+//        self.automation = automation
     }
 }
 

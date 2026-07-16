@@ -32,13 +32,14 @@ struct WuFlowApp: App {
                 .environmentObject(router)
                 .environment(container.healthKitSyncService)
                 .environment(\.repository, container.repository)
+                .environment(container.locationService)
         }
         .modelContainer(container.persistence.container)
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else {
                 return
             }
-            container.healthKitSyncService.sync()
+//            container.healthKitSyncService.sync()
         }
     }
 }
