@@ -108,43 +108,21 @@ final class NotificationManager {
             }
     }
     
-    func sendTestNotification(_ title: String, _ body: String) {
-        
+    func sendTestNotification(_ title: String = "WuFlow 🌿", _ body: String) {
         UNUserNotificationCenter.current()
             .removeAllPendingNotificationRequests()
+        sendNotification(title, body, "B8516AD4-3C7E-40E9-AC77-0BF8E015022E")
         
-        let content = UNMutableNotificationContent()
-        
-        content.title = title
-        content.body = body
-        content.sound = .default
-        content.sound = .default
-        
-        content.categoryIdentifier = NotificationAction.activityReminder
-        content.userInfo = [
-            "activityId": "B8516AD4-3C7E-40E9-AC77-0BF8E015022E"
-        ]
-        
-        // Trigger after 5 seconds
-        let trigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: 5,
-            repeats: false
-        )
-        
-        let request = UNNotificationRequest(
-            identifier: UUID().uuidString,
-            content: content,
-            trigger: trigger
-        )
-        
-        UNUserNotificationCenter.current()
-            .add(request) { error in                
-                if let error {
-                    print("❌ Failed to schedule notification:", error)
-                } else {
-                    print("✅ Test notification scheduled")
-                }
-            }
+    }
+    func sendGeoFenceNotification(activity: Activity, event: RegionEvent) {
+        // 2. Make sure reminders enabled
+        guard activity.remindersEnabled else {
+            print("⚠️ Reminders DISABLED")
+            return
+        }
+        sendNotification("WuFlow 🌿 - GeoFence crossed",
+                         event.notificationBody(for: activity),
+                         activity.id.uuidString)
     }
     
     func scheduleReminder(for activity: Activity) {
@@ -158,82 +136,67 @@ final class NotificationManager {
             return
         }
         
-        // 3. Resolve reminder time
-        let components = reminderDateComponents(for: activity)
-        
-        // 4. Build notification content
-        let content = UNMutableNotificationContent()
-        
-        content.title = "WuFlow 🌿"
-        content.body = reminderBody(for: activity)
-        content.sound = .default
-        
-        content.categoryIdentifier = NotificationAction.activityReminder
-        content.userInfo = [
-            "activityId": activity.id.uuidString
-        ]
-        //REAL NOTIFICATION SCHEDULER TRIGGER
         //5. Create repeating trigger
-        let trigger = UNCalendarNotificationTrigger(
-            dateMatching: components,
+        let trigger = UNCalendarNotificationTrigger (
+            dateMatching: reminderDateComponents(for: activity),
             repeats: true
         )
+        sendNotification("WuFlow 🌿",
+                         reminderBody(for: activity),
+                         activity.id.uuidString,
+                         trigger,
+                         NotificationAction.activityReminder
+        )
+    }
+    func sendNotification(_ title: String,
+                          _ body: String,
+                          _ activityId: String,
+                          _ scheduled: UNCalendarNotificationTrigger? = nil,
+                          _ category: String? = NotificationAction.activityReminder) {
         
-        //DEBUG 5s NOTIFICATION TRIGGER
-//        let trigger = UNTimeIntervalNotificationTrigger(
-//            timeInterval: 5,
-//            repeats: false
-//        )
+        let content = UNMutableNotificationContent()
         
+        content.title = title
+        content.body = body
+        content.sound = .default
+        
+        content.categoryIdentifier = category ?? NotificationAction.activityReminder
+        content.userInfo = [
+            "activityId": "\(activityId)"
+        ]
+        
+        // Trigger after 4 seconds
+        let trigger =  UNTimeIntervalNotificationTrigger(
+            timeInterval: 4,
+            repeats: false
+        )
         // 6. Stable identifier
-        let identifier = "activity_\(activity.id.uuidString)"
-        
+        let identifier = "activity_\(activityId)"
         let request = UNNotificationRequest(
             identifier: identifier,
             content: content,
-            trigger: trigger
+            trigger: scheduled ?? trigger
         )
         
-        // 7. Schedule notification
         UNUserNotificationCenter.current()
             .add(request) { error in
-                
                 if let error {
-                    print("❌ Failed scheduling reminder:", error)
+                    print("❌ Failed to schedule notification:", error)
                 } else {
-                    print("✅ Reminder scheduled for \(activity.name)")
+                    print("✅ Notification scheduled")
                 }
             }
     }
-    private func reminderDateComponents(
-        for activity: Activity
-    ) -> DateComponents {
+    private func reminderDateComponents(for activity: Activity) -> DateComponents {
         
         switch activity.reminderPreset {
-            
         case .morning:
-            
-            return DateComponents(
-                hour: 8,
-                minute: 0
-            )
-            
+            return DateComponents(hour: 8, minute: 0)
         case .midday:
-            
-            return DateComponents(
-                hour: 13,
-                minute: 0
-            )
-            
+            return DateComponents(hour: 13, minute: 0)
         case .evening:
-            
-            return DateComponents(
-                hour: 20,
-                minute: 0
-            )
-            
+            return DateComponents(hour: 20, minute: 0)
         case .custom:
-            
             guard let reminderTime = activity.reminderTime else {
                 
                 // fallback
@@ -242,7 +205,6 @@ final class NotificationManager {
                     minute: 0
                 )
             }
-            
             let calendar = Calendar.current
             
             return calendar.dateComponents(
@@ -285,11 +247,8 @@ final class NotificationManager {
         
         UNUserNotificationCenter.current()
             .getPendingNotificationRequests { requests in
-                
                 print("📬 Pending notifications:")
-                
                 for request in requests {
-                    
                     print("-------------------")
                     print("Title:", request.content.title)
                     print("Body:", request.content.body)

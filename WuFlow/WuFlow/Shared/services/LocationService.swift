@@ -9,9 +9,11 @@ import Observation
 import Foundation
 import CoreLocation
 import UIKit
+import SwiftUI
 
 @Observable
 final class LocationService: NSObject, CLLocationManagerDelegate {
+    
     var debugEvents: [DebugEvent] = []
     var currentLocation: CLLocation?
     private let manager = CLLocationManager()
@@ -25,13 +27,15 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         manager.monitoredRegions.map(\.identifier)
     }
     
-    
-    override init() {
+    private let automationEngine: LocationAutomationEngine
+
+    init(automationEngine: LocationAutomationEngine) {
+        self.automationEngine = automationEngine
         super.init()
         manager.delegate = self
         log("🌎 LocationService initialized")
     }
-    
+        
     func requestPermission() {
         switch manager.authorizationStatus {
         case .notDetermined:
@@ -43,8 +47,10 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
             UIApplication.shared.open(
                 URL(string: UIApplication.openSettingsURLString)!
             )
-        case .authorizedAlways, .authorizedWhenInUse:
-            log("GPS authorization: authorized")
+        case .authorizedWhenInUse:
+            log("GPS authorization: authorized when in use")
+        case .authorizedAlways:
+            log("GPS authorization: authorized always")
         @unknown default:
             log("GPS authorization: Error")
         }
@@ -83,16 +89,15 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
             log("GPS Authorization: Not Determined")
         case .restricted, .denied:
             log("GPS Authorization: restricted - denied")
-        case .authorizedAlways, .authorizedWhenInUse:
-            log("GPS Authorization: authorized")
+        case .authorizedAlways:
+            log("GPS Authorization: authorized always")
+        case .authorizedWhenInUse:
+            log("GPS Authorization: authorized when in use")
         @unknown default:
             log("GPS Authorization: Error")
         }
     }
-    func locationManager(
-        _ manager: CLLocationManager,
-        didFailWithError error: Error
-    ) {
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         log("Location Error: \(error.localizedDescription)")
     }
     
@@ -139,12 +144,22 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         log("Entered: \(region.identifier)")
         lastRegionEvent = "Entered \(region.identifier)"
-        notify("Entered \(region.identifier)")
+        Task {
+            await automationEngine.handle(
+                regionIdentifier: region.identifier,
+                event: .entered
+            )
+        }
     }
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         log("Exited: \(region.identifier)")
         lastRegionEvent = "Exited \(region.identifier)"
-        notify("Exited \(region.identifier)")
+//        Task {
+//            await automationEngine.handle(
+//                regionIdentifier: region.identifier,
+//                event: .exited
+//            )
+//        }
     }
     func printMonitoredRegions() {
         log("──---── Monitored Regions ────")
@@ -158,22 +173,19 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
         switch state {
         case .inside:
-            log("region: \(region.identifier); state: Already inside")
+            log("STATE: Already inside \(region.identifier)")
 
         case .outside:
-            log("region: \(region.identifier); state: Outside")
+            log("STATE: Outside \(region.identifier)")
 
         case .unknown:
-            log("region: \(region.identifier); state: location unknown state ...")
+            log("STATE: unkown for \(region.identifier); state: location unknown state ...")
         @unknown default:
             break
         }
     }
     func requestAlwaysPermission() {
         manager.requestAlwaysAuthorization()
-    }
-    private func notify(_ message: String) {
-        NotificationManager.shared.sendTestNotification("GeoFence crossed", message)
     }
 }
 extension LocationService {
@@ -210,9 +222,7 @@ extension LocationService {
         )
         debugEvents.append(event)
         if debugEvents.count > 50 {
-
             debugEvents.removeFirst()
-
         }
         print(message)
     }

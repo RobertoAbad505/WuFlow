@@ -18,6 +18,8 @@ final class AppContainer {
     let locationService: LocationService
 
     let notificationActionHandler: NotificationActionHandler
+    
+    let locationAutomationEngine: LocationAutomationEngine
 
     init() {
         self.persistence = DataStore.shared
@@ -28,6 +30,8 @@ final class AppContainer {
 
         self.notificationActionHandler = NotificationActionHandler(repository: repository)
         
-        self.locationService = LocationService()
+        self.locationAutomationEngine = LocationAutomationEngine(repository: repository)
+
+        self.locationService = LocationService(automationEngine: locationAutomationEngine)
     }
 }

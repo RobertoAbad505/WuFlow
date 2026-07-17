@@ -17,17 +17,20 @@ struct CreateActivityView: View {
     @State private var step: CreateActivityStep = .identity
     @State private var draft = ActivityDraft()
     @StateObject private var cameraManager = CameraManager()
-    let allSteps: [CreateActivityStep] = [
-        .identity,
-        .measurement,
-        .trackingType,
-        .intention,
-        .lifeArea,
-        .goal,
-        .meaning,
-        .visual,
-        .review
-    ]
+//    let allSteps: [CreateActivityStep] = [
+//        .identity,
+//        .measurement,
+//        .trackingType,
+//        .intention,
+//        .lifeArea,
+//        .goal,
+//        .meaning,
+//        .visual,
+//        .review
+//    ]
+    var steps: [CreateActivityStep] {
+        ActivityFlow.steps(for: draft.trackingType)
+    }
     
     init(mode: ActivityFlowMode) {
         self.mode = mode
@@ -82,6 +85,8 @@ struct CreateActivityView: View {
                 VisualStepView(draft: $draft, cameraManager: cameraManager)
             case .review:
                 ReviewStepView(draft: draft)
+            case .place:
+                LocationConfigurationView(draft: $draft)
             }
         }
     }
@@ -124,19 +129,21 @@ struct CreateActivityView: View {
         }
     }    
     func nextStep() -> CreateActivityStep {
-        guard let index = allSteps.firstIndex(of: step),
-              index < allSteps.count - 1 else {
+        let steps = steps
+        guard let index = steps.firstIndex(of: step),
+              index < steps.count - 1 else {
             return step
         }
-        return allSteps[index + 1]
+        return steps[index + 1]
     }
 
     func previousStep() -> CreateActivityStep {
-        guard let index = allSteps.firstIndex(of: step),
+        let steps = steps
+        guard let index = steps.firstIndex(of: step),
               index > 0 else {
             return step
         }
-        return allSteps[index - 1]
+        return steps[index - 1]
     }
     func handleNext() {
         if step == .review {
@@ -216,6 +223,7 @@ enum CreateActivityStep {
     case meaning
     case visual
     case review
+    case place
 }
 struct ActivityDraft {
     var id: UUID?
@@ -233,6 +241,7 @@ struct ActivityDraft {
     var measurementTypeRaw: String = MeasurementType.session.rawValue
     var goalPeriodRaw: String = GoalPeriod.daily.rawValue
     var defaultIncrement: Double = 1
+    var placeID: Place.ID?
     
     init() {
         
@@ -251,8 +260,9 @@ struct ActivityDraft {
         self.lifeArea = activity.lifeArea
         self.type = activity.type
         self.secondaryNote = activity.secondaryNote
-        self.measurement = activity.measurement
-        self.goalPeriod = activity.goalPeriod
+        self.measurementTypeRaw = activity.measurement.rawValue
+        self.goalPeriodRaw = activity.goalPeriod.rawValue
+        self.placeID = activity.place?.persistentModelID
     }
     
     var goalPeriod: GoalPeriod {
@@ -275,6 +285,65 @@ struct ActivityDraft {
             measurementTypeRaw = newValue.rawValue
         }
     }
+}
+struct ActivityFlow {
+
+    static func steps(for trackingType: TrackingType) -> [CreateActivityStep] {
+
+        switch trackingType {
+
+        case .manual:
+            return [
+                .identity,
+                .measurement,
+                .trackingType,
+                .intention,
+                .lifeArea,
+                .goal,
+                .meaning,
+                .visual,
+                .review
+            ]
+
+        case .location:
+            return [
+                .identity,
+                .measurement,
+                .trackingType,
+                .place,
+                .intention,
+                .lifeArea,
+                .goal,
+                .meaning,
+                .visual,
+                .review
+            ]
+
+        case .healthSteps:
+            // Future: simplify this flow once HealthKit configuration is implemented.
+            return defaultSteps
+
+        case .healthWorkout:
+            // Future: replace Measurement with workout-specific configuration.
+            return defaultSteps
+
+        case .reminder:
+            // Future: insert Reminder Configuration step.
+            return defaultSteps
+        }
+    }
+
+    static let defaultSteps: [CreateActivityStep] = [
+        .identity,
+        .measurement,
+        .trackingType,
+        .intention,
+        .lifeArea,
+        .goal,
+        .meaning,
+        .visual,
+        .review
+    ]
 }
 
 #Preview {

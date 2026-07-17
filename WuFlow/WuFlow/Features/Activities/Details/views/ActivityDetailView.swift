@@ -411,29 +411,57 @@ extension ActivityDetailView {
     }
     //tracking Section
     private var trackingSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
+
             Text("Tracking Method")
                 .font(.headline)
+
             HStack(spacing: 16) {
+
                 Image(systemName: activity.trackingType.icon)
                     .font(.title2)
                     .foregroundStyle(.green)
+
                 VStack(alignment: .leading, spacing: 4) {
+
                     Text(activity.trackingType.title)
                         .font(.headline)
+
                     Text(activity.trackingType.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+
                 Spacer()
             }
+
+            trackingDetails
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 28)
                 .fill(.regularMaterial)
         )
-        .cornerRadius(20)
+    }
+    @ViewBuilder
+    private var trackingDetails: some View {
+        switch activity.trackingType {
+        case .location:
+            if let place = activity.place {
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    LabeledContent("Place") {
+                        Text(place.name)
+                    }
+                    LabeledContent("Radius") {
+                        Text("\(Int(place.radius)) m")
+                    }
+                }
+                .font(.subheadline)
+            }
+        default:
+            EmptyView()
+        }
     }
     
     //Records section

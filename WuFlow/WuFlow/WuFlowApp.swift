@@ -39,7 +39,7 @@ struct WuFlowApp: App {
             guard phase == .active else {
                 return
             }
-//            container.healthKitSyncService.sync()
+            container.healthKitSyncService.sync()
         }
     }
 }

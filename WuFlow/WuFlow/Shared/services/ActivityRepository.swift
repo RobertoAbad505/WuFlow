@@ -18,7 +18,14 @@ actor ActivityRepository {
         )
         return try modelContext.fetch(descriptor).first
     }
-    
+    func activities(placeIdentifier: String) throws -> [Activity] {
+        let descriptor = FetchDescriptor<Activity>()
+        return try modelContext.fetch(descriptor)
+            .filter {
+                $0.trackingType == .location &&
+                $0.place?.identifier == placeIdentifier
+            }
+    }
     func createActivity(from draft: ActivityDraft) throws {
         let activity = Activity(
             name: "",
@@ -201,8 +208,13 @@ actor ActivityRepository {
         activity.type = draft.type
         activity.lifeArea = draft.lifeArea
         activity.secondaryNote = draft.secondaryNote
-        activity.measurement = draft.measurement
-        activity.goalPeriod = draft.goalPeriod
+        activity.measurementRaw = draft.measurementTypeRaw
+        activity.goalPeriodRaw = draft.goalPeriodRaw
+        if let id = draft.placeID, let place = try? place(id: id) {
+            activity.place = place
+        } else {
+            activity.place = nil
+        }
     }
 }
 extension ActivityRepository {
@@ -235,6 +247,13 @@ extension ActivityRepository {
             })
 
         return try modelContext.fetch(descriptor).first
+    }
+    func place(id: Place.ID) throws -> Place? {
+        let descriptor = FetchDescriptor<Place>()
+        return try modelContext.fetch(descriptor)
+            .first {
+                $0.id == id
+            }
     }
     func place(named name: String) throws -> Place? {
         let descriptor = FetchDescriptor<Place>(

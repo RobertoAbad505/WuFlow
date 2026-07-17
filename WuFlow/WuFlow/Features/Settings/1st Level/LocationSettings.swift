@@ -6,49 +6,57 @@
 //
 import CoreLocation
 import SwiftUI
+import SwiftData
 
 struct LocationSettings: View {
     
     @State var location: CLLocation?
     @Environment(LocationService.self)
     private var locationService
-    
     @Environment(\.repository) var repository
-    
-    //IRON GYM COORDENATES
-    var gym = Place(identifier: "🏋️ GYM",
-                    name: "🏋️ GYM",
-                    latitude: 20.586552,
-                    longitude: -100.375174)
-    // Dalia 2
-    var home = Place(identifier: "🏠 Home",
-                     name: "🏠 Home",
-                     latitude: 20.587466399192166,
-                     longitude: -100.36885007990087)
+    @Query(sort: \Place.name) private var places: [Place]
+    @State var placeId: Place.ID?
     
     var body: some View {
         VStack {
-            title
-            content
+            ScrollView {
+                title
+                content
+                debugConsole
+            }
         }
     }
     var content: some View {
         VStack(spacing: 25) {
-            ScrollView {
-                permissionSection
-                gpsDataSection
-                monitorRegions
-                debugConsole
-            }
+            permissionSection
+            gpsDataSection
+            monitorRegions
+            placesList
         }
         .padding()
     }
     var title: some View {
-        Text("Location Settings")
-            .font(Font.largeTitle.weight(.bold))
-            .foregroundColor(.primary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom)
+        VStack {
+            Text("Location Settings")
+                .font(Font.largeTitle.weight(.bold))
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom)
+        }
+        .padding()        
+    }
+    var placesList: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Places")
+                .font(.headline)
+            ForEach(places) { place in
+                PlaceRow(
+                    place: place,
+                    isSelected: place.id == placeId) {
+                    self.placeId = place.id
+                }
+            }
+        }
     }
     var permissionSection: some View {
         VStack {
@@ -112,31 +120,34 @@ struct LocationSettings: View {
                 
             }
             HStack {
-                Button("Determine state") {
-                    locationService.requestState(place: home)
-                    locationService.requestState(place: gym)
+                Button("Determine all states") {
+                    for place in places {
+                        locationService.requestState(place: place)
+                    }
                 }
                 .buttonStyle(.glass)
+                Button("Determine state") {
+                    places.first(where: { $0.id == placeId })
+                }
+                .buttonStyle(.glass)
+            }
+            HStack {
                 Button("Clear Logs") {
                     locationService.clearLogs()
                 }
                 .buttonStyle(.glass)
             }
-            
-            
         }
     }
     var debugConsole: some View {
-        Section("Developer Log") {
-            LazyVStack(alignment: .leading, spacing: 2) {
-                ForEach(locationService.debugEvents.reversed()) { event in
-                    DebugLogRow(event: event)
-                }
+        LazyVStack(alignment: .leading, spacing: 2) {
+            ForEach(locationService.debugEvents.reversed()) { event in
+                DebugLogRow(event: event)
             }
-            .padding(8)
-            .background(Color(.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .padding(5)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
     func getCoordenatesStringFormatt(_ location: CLLocation?) -> String {
         guard let location else { return "-" }
@@ -150,13 +161,6 @@ struct LocationSettings: View {
         Task {
             do {
                 var places = try await repository.monitoredPlaces()
-                if places.isEmpty {
-                    places.append(contentsOf: [
-                        gym, home
-                    ])
-                    print("No monitored places to monitor....")
-//                    return DELETE THIS LATER
-                }
                 for place in places {
                     locationService.startMonitoring(place: place)
                 }
@@ -175,7 +179,7 @@ struct DebugLogRow: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: event.level.icon)
                 .foregroundStyle(event.level.color)
-                .frame(width: 10)
+                .font(.system(size: 9))
             Text(
                 event.date.formatted(
                     date: .omitted,
@@ -184,12 +188,13 @@ struct DebugLogRow: View {
             )
             .foregroundStyle(.secondary)
             .frame(width: 70, alignment: .leading)
+            .font(.system(size: 10, design: .monospaced))
 
             Text(event.message)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .multilineTextAlignment(.leading)
+                .font(.system(size: 11, design: .monospaced))
         }
-        .font(.system(size: 11, design: .monospaced))
         .padding(.vertical, 2)
     }
 }
