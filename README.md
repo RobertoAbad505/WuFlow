@@ -1,169 +1,371 @@
-
 # 🌊 WuFlow
 
-**WuFlow** is a modern iOS productivity app inspired by the Taoist concept of **Wu Wei (無為)** — often translated as *effortless action* or *action without force*.
+<p align="center">
+  <img src="Screenshots/dashboard.png" alt="WuFlow Dashboard" width="300">
+</p>
 
-The idea behind WuFlow is simple: productivity tools should help people move forward naturally, without friction, pressure, or unnecessary complexity.
-
-Instead of overwhelming users with features, WuFlow focuses on **clarity, flow, and steady progress**.
-
-This project also serves as a **technical exploration of modern iOS development**, showcasing architecture, state management, and system design using the latest Apple technologies.
-
----
-
-# 🧠 Concept: Wu Wei (無為)
-
-In Taoist philosophy, **Wu Wei** describes a way of acting that is aligned with the natural flow of things.
-
-Rather than forcing outcomes, Wu Wei encourages:
-
-• simplicity  
-• natural progression  
-• minimal resistance  
-• harmony between intention and action  
-
-WuFlow explores how this idea could be applied to productivity software:
-
-> What if managing tasks felt natural instead of stressful?
-
-The goal is to design an experience where users can **progress through their tasks smoothly**, without the cognitive overload common in many productivity apps.
+<p align="center">
+A native iOS habit tracker that reduces friction through automation.<br>
+Built with <strong>SwiftUI</strong>, <strong>SwiftData</strong>, <strong>CoreLocation</strong>, <strong>HealthKit</strong>, and modern Apple frameworks.
+</p>
 
 ---
 
-# 📱 Project Goals
+# Overview
 
-WuFlow is designed to demonstrate:
+WuFlow is a native iOS application designed around a simple idea:
 
-- Modern **iOS architecture**
-- Clean separation of concerns
-- Scalable project structure
-- Thoughtful UI/UX design
-- Maintainable and testable code
+> **The easiest habit to maintain is the one you don't have to remember.**
 
-This project is part of my engineering portfolio and focuses on **building production-quality mobile architecture**.
+Rather than relying entirely on manual interaction, WuFlow integrates with Apple system frameworks to automate habit tracking whenever possible.
+
+Examples include:
+
+- 📍 Detecting when you arrive at the gym using geofencing
+- ❤️ Reading health data from HealthKit
+- 🔔 Triggering interactive notifications
+- ✅ Recording progress directly from a notification without opening the app
+
+The project is inspired by the Taoist concept of **Wu Wei (無為)**—often translated as *effortless action*—encouraging consistent progress while minimizing friction.
 
 ---
 
-# ⚙️ Tech Stack
+# Features
 
-WuFlow is built using modern Apple technologies.
+## Activity Management
 
-### Mobile Development
+- Create and organize activities
+- Multiple measurement types
+- Custom goals
+- Progress history
+- Statistics dashboard
+- Rich activity details
 
-- Swift
+---
+
+## Location Automation
+
+WuFlow supports background location automation using **CoreLocation Geofencing**.
+
+Users can:
+
+- Create reusable Places
+- Configure a geofence radius
+- Associate activities with locations
+- Receive notifications upon entering a region
+- Record progress directly from the notification
+
+### Automation Flow
+
+```
+Enter Gym
+
+      ↓
+
+CoreLocation Region Event
+
+      ↓
+
+LocationAutomationEngine
+
+      ↓
+
+ActivityRepository
+
+      ↓
+
+Interactive Notification
+
+      ↓
+
+User taps "Done"
+
+      ↓
+
+Progress saved
+
+      ↓
+
+Confirmation notification
+```
+
+No need to manually open the application.
+
+---
+
+## HealthKit Integration
+
+WuFlow can integrate with HealthKit to automate activities based on Apple Health data.
+
+Current integrations include:
+
+- Daily Steps
+- Workout tracking
+
+The architecture allows additional HealthKit metrics to be added with minimal changes.
+
+---
+
+## Statistics
+
+Track your consistency with:
+
+- Daily progress
+- Weekly summaries
+- Monthly trends
+- Goal completion
+- Activity history
+
+---
+
+# Screenshots
+
+## Dashboard
+
+<p align="center">
+<img src="Screenshots/dashboard.png" width="250">
+</p>
+
+---
+
+## Activity Detail
+
+<p align="center">
+<img src="Screenshots/activity-detail.png" width="250">
+</p>
+
+---
+
+## Location Automation
+
+<p align="center">
+<img src="Screenshots/location-map.png" width="250">
+<img src="Screenshots/location-notification.png" width="250">
+</p>
+
+---
+
+## Statistics
+
+<p align="center">
+<img src="Screenshots/statistics.png" width="250">
+</p>
+
+---
+
+# Architecture
+
+WuFlow follows a layered architecture focused on separation of concerns.
+
+```
+SwiftUI Views
+        │
+        ▼
+ ViewModels
+        │
+        ▼
+ ActivityRepository (@ModelActor)
+        │
+        ▼
+    SwiftData
+```
+
+Background automation is isolated from persistence through dedicated automation engines.
+
+```
+CoreLocation
+        │
+        ▼
+LocationService
+        │
+        ▼
+LocationAutomationEngine
+        │
+        ▼
+ActivityRepository
+        │
+        ▼
+NotificationManager
+        │
+        ▼
+NotificationActionHandler
+```
+
+This separation keeps system frameworks independent from business logic while making new automation providers easy to introduce.
+
+---
+
+# Technologies
+
+## Language
+
+- Swift 6
+
+---
+
+## UI
+
 - SwiftUI
-- MVVM Architecture
-- Swift Concurrency (async/await)
+- NavigationStack
+- Charts
+- Observation
+- SF Symbols
 
-### Data & Persistence
+---
 
-- SwiftData / CoreData
-- Local persistence
-- Offline-first design
+## Persistence
 
-### Architecture
+- SwiftData
+- ModelActor
+- Repository Pattern
 
-- Clean Architecture principles
+---
+
+## Apple Frameworks
+
+### CoreLocation
+
+Used for:
+
+- Region monitoring
+- Geofencing
+- Background location events
+
+---
+
+### HealthKit
+
+Used for:
+
+- Step counting
+- Workout synchronization
+- Health-based automations
+
+---
+
+### UserNotifications
+
+Used for:
+
+- Interactive notifications
+- Notification actions
+- Background progress recording
+
+---
+
+### MapKit
+
+Used to visualize Places and monitored regions.
+
+---
+
+### Swift Concurrency
+
+- async/await
+- Actors
+- Structured concurrency
+
+---
+
+# Engineering Highlights
+
+This project demonstrates:
+
+- Modern SwiftUI architecture
+- Feature-oriented design
 - Dependency Injection
-- Modular feature structure
-
-### Testing
-
-- Unit testing
-- Mock services
-- ViewModel testing
+- Repository Pattern
+- Background execution
+- Interactive notifications
+- SwiftData with @ModelActor
+- HealthKit integration
+- CoreLocation geofencing
+- Clean separation of concerns
+- Reusable SwiftUI components
+- Async/Await throughout the application
 
 ---
 
-# ✨ Planned Features
+# Project Structure
 
-### Core Task Management
+```
+WuFlow
 
-- Create tasks
-- Edit tasks
-- Mark tasks as completed
-- Task prioritization
+├── Features
+│   ├── Activities
+│   ├── Places
+│   ├── Statistics
+│   └── Settings
+│
+├── Components
+│
+├── Services
+│   ├── LocationService
+│   ├── NotificationManager
+│   └── HealthKitSyncService
+│
+├── Automation
+│   ├── LocationAutomationEngine
+│   └── NotificationActionHandler
+│
+├── Persistence
+│   ├── ActivityRepository
+│   └── SwiftData Models
+│
+└── Resources
+```
 
-### Productivity Flow
+---
 
-- Progress visualization
-- Categories / organization
-- Lightweight task tracking
+# Why WuFlow?
 
-### System Integration
+Most habit trackers depend on users remembering to record every activity.
 
+WuFlow explores a different approach.
+
+Instead of asking users to constantly interact with the application, it leverages Apple's native frameworks to reduce friction through automation.
+
+The goal isn't simply to track habits.
+
+The goal is to make maintaining them feel effortless.
+
+---
+
+# Future Ideas
+
+Some ideas currently being explored:
+
+- Apple Watch companion app
 - Widgets
-- Notifications
-- Dark mode
-- Accessibility support
+- Live Activities
+- Shortcuts integration
+- CloudKit synchronization
+- Additional automation providers
+- Motion-based activities
 
 ---
 
-# 🏗 Architecture Overview
-App
-│
-├── Presentation (SwiftUI Views)
-│
-├── ViewModels
-│
-├── Domain (Business Logic)
-│
-├── Data (Repositories / Persistence)
-│
-└── Infrastructure (Services)
+# Author
 
+**Roberto Abad**
 
-
-This structure helps ensure that the application remains **scalable, testable, and easy to maintain**.
-
----
-
-# 🎯 Purpose of This Project
-
-WuFlow is both:
-
-1. A **productivity app concept**
-2. A **technical portfolio project**
-
-It aims to demonstrate how modern iOS apps can be built with clean architecture, strong separation of concerns, and thoughtful user experience design.
-
----
-
-# 🚀 Future Improvements
-
-Potential future explorations include:
-
-- Gesture-based interactions
-- AI-assisted task suggestions
-- Cross-device synchronization
-- Apple Watch integration
-
----
-
-# 👨‍💻 Author
-
-Roberto Abad  
 Senior Software Engineer
 
-📱 iOS (Swift, SwiftUI)  
-🌐 Full-Stack (.NET, C#)
+- Native iOS Development
+- SwiftUI
+- SwiftData
+- CoreLocation
+- HealthKit
+- .NET
 
-🔗 GitHub  
-https://github.com/RobertoAbad505
+Portfolio
 
-🔗 LinkedIn  
+https://roberto-abad.web.app/
+
+LinkedIn
+
 https://www.linkedin.com/in/robertoabad95/
 
-🔗 Portfolio  
-https://roberto-abad.web.app
+GitHub
 
----
-
-# 📜 License
-
-This project is open for educational and portfolio purposes.
-
-
-
-
-WuFlow follows a **layered architecture** to keep business logic independent from UI and infrastructure.
+https://github.com/RobertoAbad505
