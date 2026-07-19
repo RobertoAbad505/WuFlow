@@ -436,6 +436,11 @@ extension ActivityDetailView {
             }
 
             trackingDetails
+            if let place = activity.place {
+                LocationMapView(place: place)
+                    .frame(height: 200)
+                    .frame(maxWidth: .infinity)
+            }
         }
         .padding()
         .background(

@@ -210,11 +210,20 @@ actor ActivityRepository {
         activity.secondaryNote = draft.secondaryNote
         activity.measurementRaw = draft.measurementTypeRaw
         activity.goalPeriodRaw = draft.goalPeriodRaw
-        if let id = draft.placeID, let place = try? place(id: id) {
-            activity.place = place
-        } else {
+        try? assignPlace(
+            withID: draft.placeID,
+            to: activity
+        )
+    }
+    func assignPlace(
+        withID id: Place.ID?,
+        to activity: Activity
+    ) throws {
+        guard let id else {
             activity.place = nil
+            return
         }
+        activity.place = try place(id: id)
     }
 }
 extension ActivityRepository {
