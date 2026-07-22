@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6F7BF20D30113A1D00BB71D7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F7BF20C30113A1D00BB71D7 /* WidgetKit.framework */; };
+		6F7BF20F30113A1D00BB71D7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F7BF20E30113A1D00BB71D7 /* SwiftUI.framework */; };
+		6F7BF22030113A1E00BB71D7 /* WuFlowWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6F7BF20A30113A1C00BB71D7 /* WuFlowWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		6F71211A2F75BBA3001CEF33 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +27,36 @@
 			remoteGlobalIDString = 6F7121092F75BBA1001CEF33;
 			remoteInfo = WuFlow;
 		};
+		6F7BF21E30113A1E00BB71D7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F7121022F75BBA1001CEF33 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F7BF20930113A1C00BB71D7;
+			remoteInfo = WuFlowWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6F7BF22530113A1F00BB71D7 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6F7BF22030113A1E00BB71D7 /* WuFlowWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		6F71210A2F75BBA1001CEF33 /* WuFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WuFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F7121192F75BBA3001CEF33 /* WuFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WuFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F7121232F75BBA3001CEF33 /* WuFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WuFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F7BF20A30113A1C00BB71D7 /* WuFlowWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WuFlowWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F7BF20C30113A1D00BB71D7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		6F7BF20E30113A1D00BB71D7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +66,22 @@
 				Info.plist,
 			);
 			target = 6F7121092F75BBA1001CEF33 /* WuFlow */;
+		};
+		6F7BF22430113A1F00BB71D7 /* Exceptions for "WuFlowWidget" folder in "WuFlowWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6F7BF20930113A1C00BB71D7 /* WuFlowWidgetExtension */;
+		};
+		6F7BF22B3011458D00BB71D7 /* Exceptions for "WuFlow" folder in "WuFlowWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/entities/PlaceSessionAttributes.swift,
+				"Shared/Extensions/Character+extensions.swift",
+				"Shared/Extensions/String+extensions.swift",
+			);
+			target = 6F7BF20930113A1C00BB71D7 /* WuFlowWidgetExtension */;
 		};
 		6FED74BE2F7C365D008C5A58 /* Exceptions for "WuFlow" folder in "WuFlowTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -65,6 +111,7 @@
 			exceptions = (
 				6F04CA982FB276A4000B57CE /* Exceptions for "WuFlow" folder in "WuFlow" target */,
 				6FED74BE2F7C365D008C5A58 /* Exceptions for "WuFlow" folder in "WuFlowTests" target */,
+				6F7BF22B3011458D00BB71D7 /* Exceptions for "WuFlow" folder in "WuFlowWidgetExtension" target */,
 			);
 			path = WuFlow;
 			sourceTree = "<group>";
@@ -77,6 +124,14 @@
 		6F7121262F75BBA3001CEF33 /* WuFlowUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = WuFlowUITests;
+			sourceTree = "<group>";
+		};
+		6F7BF21030113A1D00BB71D7 /* WuFlowWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6F7BF22430113A1F00BB71D7 /* Exceptions for "WuFlowWidget" folder in "WuFlowWidgetExtension" target */,
+			);
+			path = WuFlowWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -103,6 +158,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F7BF20730113A1C00BB71D7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F7BF20F30113A1D00BB71D7 /* SwiftUI.framework in Frameworks */,
+				6F7BF20D30113A1D00BB71D7 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -112,6 +176,8 @@
 				6F71210C2F75BBA1001CEF33 /* WuFlow */,
 				6F71211C2F75BBA3001CEF33 /* WuFlowTests */,
 				6F7121262F75BBA3001CEF33 /* WuFlowUITests */,
+				6F7BF21030113A1D00BB71D7 /* WuFlowWidget */,
+				6F7BF20B30113A1D00BB71D7 /* Frameworks */,
 				6F71210B2F75BBA1001CEF33 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -122,8 +188,18 @@
 				6F71210A2F75BBA1001CEF33 /* WuFlow.app */,
 				6F7121192F75BBA3001CEF33 /* WuFlowTests.xctest */,
 				6F7121232F75BBA3001CEF33 /* WuFlowUITests.xctest */,
+				6F7BF20A30113A1C00BB71D7 /* WuFlowWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		6F7BF20B30113A1D00BB71D7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6F7BF20C30113A1D00BB71D7 /* WidgetKit.framework */,
+				6F7BF20E30113A1D00BB71D7 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -136,10 +212,12 @@
 				6F7121062F75BBA1001CEF33 /* Sources */,
 				6F7121072F75BBA1001CEF33 /* Frameworks */,
 				6F7121082F75BBA1001CEF33 /* Resources */,
+				6F7BF22530113A1F00BB71D7 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				6F7BF21F30113A1E00BB71D7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6F71210C2F75BBA1001CEF33 /* WuFlow */,
@@ -197,6 +275,28 @@
 			productReference = 6F7121232F75BBA3001CEF33 /* WuFlowUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		6F7BF20930113A1C00BB71D7 /* WuFlowWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F7BF22130113A1F00BB71D7 /* Build configuration list for PBXNativeTarget "WuFlowWidgetExtension" */;
+			buildPhases = (
+				6F7BF20630113A1C00BB71D7 /* Sources */,
+				6F7BF20730113A1C00BB71D7 /* Frameworks */,
+				6F7BF20830113A1C00BB71D7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6F7BF21030113A1D00BB71D7 /* WuFlowWidget */,
+			);
+			name = WuFlowWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = WuFlowWidgetExtension;
+			productReference = 6F7BF20A30113A1C00BB71D7 /* WuFlowWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -204,7 +304,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
+				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					6F7121092F75BBA1001CEF33 = {
@@ -217,6 +317,9 @@
 					6F7121222F75BBA3001CEF33 = {
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = 6F7121092F75BBA1001CEF33;
+					};
+					6F7BF20930113A1C00BB71D7 = {
+						CreatedOnToolsVersion = 26.6;
 					};
 				};
 			};
@@ -237,6 +340,7 @@
 				6F7121092F75BBA1001CEF33 /* WuFlow */,
 				6F7121182F75BBA3001CEF33 /* WuFlowTests */,
 				6F7121222F75BBA3001CEF33 /* WuFlowUITests */,
+				6F7BF20930113A1C00BB71D7 /* WuFlowWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -257,6 +361,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		6F7121212F75BBA3001CEF33 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F7BF20830113A1C00BB71D7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -287,6 +398,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F7BF20630113A1C00BB71D7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -299,6 +417,11 @@
 			isa = PBXTargetDependency;
 			target = 6F7121092F75BBA1001CEF33 /* WuFlow */;
 			targetProxy = 6F7121242F75BBA3001CEF33 /* PBXContainerItemProxy */;
+		};
+		6F7BF21F30113A1E00BB71D7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F7BF20930113A1C00BB71D7 /* WuFlowWidgetExtension */;
+			targetProxy = 6F7BF21E30113A1E00BB71D7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -451,10 +574,14 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WuFlow/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSCameraUsageDescription = "WuFlow necesita tu permiso para capturar fotos";
 				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "WuFlow uses Health data to automatically track activities such as workouts, meditation sessions, and daily steps.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "WuFlow uses Health data to automatically track activities such as workouts, meditation sessions, and daily steps.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "WuFlow can write progress updates related to your activities when enabled.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "WuFlow requires your location to track your presence on your places";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "WuFlow requires your location to track your presence on your places";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -515,10 +642,14 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WuFlow/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSCameraUsageDescription = "WuFlow necesita tu permiso para capturar fotos";
 				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "WuFlow uses Health data to automatically track activities such as workouts, meditation sessions, and daily steps.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "WuFlow uses Health data to automatically track activities such as workouts, meditation sessions, and daily steps.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "WuFlow can write progress updates related to your activities when enabled.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "WuFlow requires your location to track your presence on your places";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "WuFlow requires your location to track your presence on your places";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -653,6 +784,75 @@
 			};
 			name = Release;
 		};
+		6F7BF22230113A1F00BB71D7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KK7484G74W;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WuFlowWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WuFlowWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.robertsoft.WuFlow.WuFlowWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6F7BF22330113A1F00BB71D7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KK7484G74W;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WuFlowWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WuFlowWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.robertsoft.WuFlow.WuFlowWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -688,6 +888,15 @@
 			buildConfigurations = (
 				6F7121342F75BBA3001CEF33 /* Debug */,
 				6F7121352F75BBA3001CEF33 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6F7BF22130113A1F00BB71D7 /* Build configuration list for PBXNativeTarget "WuFlowWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F7BF22230113A1F00BB71D7 /* Debug */,
+				6F7BF22330113A1F00BB71D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

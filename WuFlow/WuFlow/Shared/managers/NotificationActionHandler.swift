@@ -20,31 +20,23 @@ final class NotificationActionHandler {
         activityId: String?,
         sessionId: String?
     ) async {
-
         guard
             let activityId,
             let sessionId,
             let activityUUID = UUID(uuidString: activityId),
-            let sessionUUID = UUID(uuidString: sessionId)
-        else {
+            let sessionUUID = UUID(uuidString: sessionId) else {
             return
         }
-
         do {
-
             let activity = try await repository.completePlaceSession(
                 activityID: activityUUID,
                 sessionID: sessionUUID
             )
-
             NotificationManager.shared.sendSuccessNotification(
                 activityName: activity.name
             )
-
         } catch {
-
             print(error)
-
         }
     }
 
@@ -52,22 +44,17 @@ final class NotificationActionHandler {
         activityId: String?,
         sessionId: String?
     ) async {
-
         print("Later selected")
-
         // Future:
         // Reschedule notification
         // Snooze 15 minutes
-
     }
 
     func handleOpenNotification(
         activityId: String?,
         sessionId: String?
     ) async {
-
         print("Notification opened")
-
         // Future:
         // Deep link into Activity Detail
         // or Present Completion Sheet

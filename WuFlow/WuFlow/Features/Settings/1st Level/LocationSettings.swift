@@ -55,13 +55,6 @@ struct LocationSettings: View {
                     isSelected: place.id == placeId) {
                     self.placeId = place.id
                 }
-                .onTapGesture {
-                    print("Place: \(place.name)")
-                    print("lat: \(place.latitude)")
-                    print("long: \(place.longitude)")
-                    print("identifier: \(place.identifier)")
-                    print("------------------")
-                }
                 .onAppear {
                     print("Place: \(place.name)")
                     print("lat: \(place.latitude)")
@@ -147,11 +140,11 @@ struct LocationSettings: View {
             }
             HStack {
                 Button("Simulate Enter Gym") {
-                    simulateEnter(regionIdentifier: "🏋️ GYM")
+                    simulateEnter(regionIdentifier: "GYM")
                 }
                 .buttonStyle(.glass)
                 Button("Simulate exit Gym") {
-                    simulateExit(regionIdentifier: "🏋️ GYM")
+                    simulateExit(regionIdentifier: "GYM")
                 }
                 .buttonStyle(.glass)
             }
@@ -197,7 +190,7 @@ struct LocationSettings: View {
     func simulateEnter(regionIdentifier: String) {
         Task {
             await locationService.automationEngine.handle(
-                regionIdentifier: "🏋️ GYM",
+                regionIdentifier: regionIdentifier,
                 event: .entered
             )
         }
@@ -206,7 +199,7 @@ struct LocationSettings: View {
     func simulateExit(regionIdentifier: String) {
         Task {
             await locationService.automationEngine.handle(
-                regionIdentifier: "🏋️ GYM",
+                regionIdentifier: regionIdentifier,
                 event: .exited
             )
         }

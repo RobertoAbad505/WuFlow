@@ -20,23 +20,22 @@ actor SessionManager {
     func startSession(
         regionIdentifier: String,
         trigger: SessionTrigger
-    ) async {
+    ) async -> PlaceSession? {
         do {
-
-            if try await repository.activePlaceSession(regionIdentifier: regionIdentifier) != nil {
+            if let activeSession = try await repository.activePlaceSession(regionIdentifier: regionIdentifier) {
                 print("⚠️ Session already active.")
-                return
+                print("Returning existing session")
+                return activeSession
             }
-
             let session = try await repository.createPlaceSession(
                 regionIdentifier: regionIdentifier,
                 trigger: trigger
             )
             print("✅ Session started \(session.id) in \(session.place.name)")
+            return session
         } catch {
-
             print(error)
-
+            return nil
         }
     }
     func endSession(regionIdentifier: String) async -> PlaceSession? {

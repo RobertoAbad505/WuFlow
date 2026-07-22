@@ -9,13 +9,14 @@ import Observation
 
 @Observable
 final class LocationAutomationEngine {
-
+    let liveActivityManager: LiveActivityManager
     let sessionManager: SessionManager
     private let repository: ActivityRepository
 
-    init(repository: ActivityRepository, sessionManager: SessionManager) {
+    init(repository: ActivityRepository, sessionManager: SessionManager, liveActivityManager: LiveActivityManager) {
         self.repository = repository
         self.sessionManager = sessionManager
+        self.liveActivityManager = liveActivityManager
     }
 
     func handle(
@@ -43,34 +44,80 @@ final class LocationAutomationEngine {
     ) async {
 
         switch event {
-
         case .entered:
-            print("Entered region-identifier:\(regionIdentifier)")
-            await sessionManager.startSession(
-                regionIdentifier: regionIdentifier,
-                trigger: .location
-            )
-
-            NotificationManager.shared
-                .sendPlaceSessionStarted(activity: activity)
-
-        case .exited:
-            print("Exited region-identifier:\(regionIdentifier)")
-            guard let session = await sessionManager.endSession(
+            print("Entered region-identifier: \(regionIdentifier)")
+            await handleSessionStarted(
+                activity: activity,
                 regionIdentifier: regionIdentifier
-            ) else {
-                return
-            }
-
-            NotificationManager.shared
-                .sendPlaceSessionCompleted(
-                    activity: activity,
-                    session: session
-                )
-
+            )
+        case .exited:
+            print("Exited region-identifier: \(regionIdentifier)")
+            await handleSessionEnded(
+                activity: activity,
+                regionIdentifier: regionIdentifier
+            )
         default:
             break
         }
+    }
+    private func handleSessionStarted(
+        activity: Activity,
+        regionIdentifier: String
+    ) async {
+
+        guard let session = await sessionManager.startSession(
+            regionIdentifier: regionIdentifier,
+            trigger: .location
+        ) else {
+            return
+        }
+
+        do {
+            try await liveActivityManager.start(
+                makeLiveSession(
+                    activity: activity,
+                    session: session
+                )
+            )
+        } catch {
+            print("Failed to start Live Activity:", error)
+        }
+
+        NotificationManager.shared
+            .sendPlaceSessionStarted(activity: activity)
+    }
+    private func handleSessionEnded(
+        activity: Activity,
+        regionIdentifier: String
+    ) async {
+
+        guard let session = await sessionManager.endSession(
+            regionIdentifier: regionIdentifier
+        ) else {
+            return
+        }
+
+        await liveActivityManager.end(
+            sessionID: session.id
+        )
+
+        NotificationManager.shared.sendPlaceSessionCompleted(
+            activity: activity,
+            session: session
+        )
+    }
+    private func makeLiveSession(
+        activity: Activity,
+        session: PlaceSession
+    ) -> LiveSession {
+
+        LiveSession(
+            sessionID: session.id,
+            activityName: activity.name,
+            placeName: session.place.name,
+            startedAt: session.startedAt
+        )
+
     }
 }
 

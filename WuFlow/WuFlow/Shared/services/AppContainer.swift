@@ -21,6 +21,8 @@ final class AppContainer {
     
     let locationAutomationEngine: LocationAutomationEngine
     
+    let liveActivityManager: LiveActivityManager
+    
     let sessionManager: SessionManager
 
     init() {
@@ -34,7 +36,11 @@ final class AppContainer {
         
         self.sessionManager = SessionManager(repository: repository)
         
-        self.locationAutomationEngine = LocationAutomationEngine(repository: repository, sessionManager: sessionManager)
+        self.liveActivityManager = LiveActivityManager()
+        
+        self.locationAutomationEngine = LocationAutomationEngine(repository: repository,
+                                                                 sessionManager: sessionManager,
+                                                                 liveActivityManager: liveActivityManager)
 
         self.locationService = LocationService(automationEngine: locationAutomationEngine)
     }

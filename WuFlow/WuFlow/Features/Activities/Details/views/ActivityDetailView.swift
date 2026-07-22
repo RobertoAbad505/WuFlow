@@ -447,6 +447,13 @@ extension ActivityDetailView {
             RoundedRectangle(cornerRadius: 28)
                 .fill(.regularMaterial)
         )
+        .onAppear {
+            print("Place: \(activity.place?.name)")
+            print("lat: \(activity.place?.latitude)")
+            print("long: \(activity.place?.longitude)")
+            print("identifier: \(activity.place?.identifier)")
+            print("------------------")
+        }
     }
     @ViewBuilder
     private var trackingDetails: some View {
