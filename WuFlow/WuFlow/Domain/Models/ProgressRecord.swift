@@ -22,6 +22,9 @@ final class ProgressRecord {
     
     var activity: Activity?
     
+    @Relationship
+    var placeSession: PlaceSession?
+    
     init(
         id: UUID = UUID(),
         value: Double,

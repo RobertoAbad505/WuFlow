@@ -18,7 +18,8 @@ final class DataStore {
 
         let schema = Schema([
             Activity.self,
-            ProgressRecord.self
+            ProgressRecord.self,
+            PlaceSession.self
         ])
 
         let configuration = ModelConfiguration(

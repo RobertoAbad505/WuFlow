@@ -55,6 +55,20 @@ struct LocationSettings: View {
                     isSelected: place.id == placeId) {
                     self.placeId = place.id
                 }
+                .onTapGesture {
+                    print("Place: \(place.name)")
+                    print("lat: \(place.latitude)")
+                    print("long: \(place.longitude)")
+                    print("identifier: \(place.identifier)")
+                    print("------------------")
+                }
+                .onAppear {
+                    print("Place: \(place.name)")
+                    print("lat: \(place.latitude)")
+                    print("long: \(place.longitude)")
+                    print("identifier: \(place.identifier)")
+                    print("------------------")
+                }
             }
         }
     }
@@ -132,6 +146,16 @@ struct LocationSettings: View {
                 .buttonStyle(.glass)
             }
             HStack {
+                Button("Simulate Enter Gym") {
+                    simulateEnter(regionIdentifier: "🏋️ GYM")
+                }
+                .buttonStyle(.glass)
+                Button("Simulate exit Gym") {
+                    simulateExit(regionIdentifier: "🏋️ GYM")
+                }
+                .buttonStyle(.glass)
+            }
+            HStack {
                 Button("Clear Logs") {
                     locationService.clearLogs()
                 }
@@ -168,6 +192,23 @@ struct LocationSettings: View {
                 print("Error starting monitoring places")
                 print(error.localizedDescription)
             }
+        }
+    }
+    func simulateEnter(regionIdentifier: String) {
+        Task {
+            await locationService.automationEngine.handle(
+                regionIdentifier: "🏋️ GYM",
+                event: .entered
+            )
+        }
+    }
+
+    func simulateExit(regionIdentifier: String) {
+        Task {
+            await locationService.automationEngine.handle(
+                regionIdentifier: "🏋️ GYM",
+                event: .exited
+            )
         }
     }
 }

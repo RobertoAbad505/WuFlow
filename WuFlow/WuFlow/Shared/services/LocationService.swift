@@ -27,7 +27,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         manager.monitoredRegions.map(\.identifier)
     }
     
-    private let automationEngine: LocationAutomationEngine
+    let automationEngine: LocationAutomationEngine
 
     init(automationEngine: LocationAutomationEngine) {
         self.automationEngine = automationEngine
@@ -154,12 +154,12 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         log("Exited: \(region.identifier)")
         lastRegionEvent = "Exited \(region.identifier)"
-//        Task {
-//            await automationEngine.handle(
-//                regionIdentifier: region.identifier,
-//                event: .exited
-//            )
-//        }
+        Task {
+            await automationEngine.handle(
+                regionIdentifier: region.identifier,
+                event: .exited
+            )
+        }
     }
     func printMonitoredRegions() {
         log("──---── Monitored Regions ────")

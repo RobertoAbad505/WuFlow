@@ -16,23 +16,71 @@ final class NotificationActionHandler {
         self.repository = repository
     }
 
-    func handleDone(activityId: String) {
-        Task {
-            guard let activityId = UUID(uuidString: activityId) else {
-                print("Handle done: Invalid UUID")
-                return
-            }
-            do {
-                guard let activity = try await repository.completeReminder(activityId: activityId) else {
-                    print("Handle done: Duplication prevention ON - Activity already completed")
-                    return
-                }
-                NotificationManager.shared.sendSuccessNotification(activityName: activity.name)
-                print("Handle done: confirmation notification sent 📩 ")
-            } catch let error {
-                print(error)
+    func handleDone(
+        activityId: String?,
+        sessionId: String?
+    ) async {
 
-            }
+        guard
+            let activityId,
+            let sessionId,
+            let activityUUID = UUID(uuidString: activityId),
+            let sessionUUID = UUID(uuidString: sessionId)
+        else {
+            return
         }
+
+        do {
+
+            let activity = try await repository.completePlaceSession(
+                activityID: activityUUID,
+                sessionID: sessionUUID
+            )
+
+            NotificationManager.shared.sendSuccessNotification(
+                activityName: activity.name
+            )
+
+        } catch {
+
+            print(error)
+
+        }
+    }
+
+    func handleLater(
+        activityId: String?,
+        sessionId: String?
+    ) async {
+
+        print("Later selected")
+
+        // Future:
+        // Reschedule notification
+        // Snooze 15 minutes
+
+    }
+
+    func handleOpenNotification(
+        activityId: String?,
+        sessionId: String?
+    ) async {
+
+        print("Notification opened")
+
+        // Future:
+        // Deep link into Activity Detail
+        // or Present Completion Sheet
+
+    }
+}
+struct NotificationContext {
+
+    let activityID: UUID?
+    let sessionID: UUID?
+
+    init(userInfo: [AnyHashable: Any]) {
+        activityID = UUID(uuidString: userInfo["activityId"] as? String ?? "")
+        sessionID = UUID(uuidString: userInfo["sessionId"] as? String ?? "")
     }
 }

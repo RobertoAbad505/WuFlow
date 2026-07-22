@@ -10,48 +10,63 @@ import UserNotifications
 import UIKit
 
 final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
-    
+
     private let actionHandler: NotificationActionHandler
 
-   init(actionHandler: NotificationActionHandler) {
-       self.actionHandler = actionHandler
-       super.init()
-   }
-    
+    init(actionHandler: NotificationActionHandler) {
+        self.actionHandler = actionHandler
+        super.init()
+    }
+
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
-        
+
         print("🔥 Foreground notification received")
         return [.banner, .sound]
     }
-    
+
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
-        let userInfo =
-            response.notification.request.content.userInfo
-        
-        let activityId =
-            userInfo["activityId"] as? String ?? "Unknown"
-        
+
+        let userInfo = response.notification.request.content.userInfo
+
+        let activityId = userInfo["activityId"] as? String
+        let sessionId = userInfo["sessionId"] as? String
+
         switch response.actionIdentifier {
-            
-        case "DONE_ACTION":
-            actionHandler.handleDone(activityId: activityId)
-            print("✅ DONE pressed")
-            print("Activity ID:", activityId)
-            
-        case "LATER_ACTION":
-            print("⏰ LATER pressed")
-            print("Activity ID:", activityId)
-            
+
+        case NotificationAction.done:
+
+            await actionHandler.handleDone(
+                activityId: activityId,
+                sessionId: sessionId
+            )
+
+        case NotificationAction.later:
+
+            await actionHandler.handleLater(
+                activityId: activityId,
+                sessionId: sessionId
+            )
+
+        case UNNotificationDefaultActionIdentifier:
+
+            await actionHandler.handleOpenNotification(
+                activityId: activityId,
+                sessionId: sessionId
+            )
+
+        case UNNotificationDismissActionIdentifier:
+
+            print("Notification dismissed")
+
         default:
-            print("📲 Notification opened")
-            print("Action identifier:", response.actionIdentifier)
-            print("Activity ID:", activityId)
+
+            print("Unhandled notification action: \(response.actionIdentifier)")
         }
     }
 }
@@ -64,11 +79,7 @@ final class NotificationManager {
     
     
     func openSystemSettings() {
-        
-        guard let url = URL(
-            string: UIApplication.openSettingsURLString
-        ) else { return }
-        
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }
     
@@ -111,81 +122,103 @@ final class NotificationManager {
     func sendTestNotification(_ title: String = "WuFlow 🌿", _ body: String) {
         UNUserNotificationCenter.current()
             .removeAllPendingNotificationRequests()
-        sendNotification(title, body, "B8516AD4-3C7E-40E9-AC77-0BF8E015022E")
-        
+        sendNotification(title: title,
+                         body: body,
+                         identifier: "B8516AD4-3C7E-40E9-AC77-0BF8E015022E",
+                         category: NotificationCategory.activityReminder,
+                         userInfo: [:])
     }
-    func sendGeoFenceNotification(activity: Activity, event: RegionEvent) {
-        // 2. Make sure reminders enabled
-        guard activity.remindersEnabled else {
-            print("⚠️ Reminders DISABLED")
-            return
-        }
-        sendNotification("WuFlow 🌿 - GeoFence crossed",
-                         event.notificationBody(for: activity),
-                         activity.id.uuidString)
+    func sendPlaceSessionStarted(
+        activity: Activity
+    ) {
+
+        guard activity.remindersEnabled else { return }
+
+        sendNotification(
+            title: "🏃 Session Started",
+            body: "Tracking your \(activity.name) session.",
+            identifier: "session_start_\(activity.id)",
+            category: NotificationCategory.sessionStarted,
+            userInfo: [
+                "activityId": activity.id.uuidString
+            ]
+        )
+    }
+    func sendPlaceSessionCompleted(
+        activity: Activity,
+        session: PlaceSession
+    ) {
+
+        guard activity.remindersEnabled else { return }
+
+        sendNotification(
+            title: "🏁 Session Complete",
+            body: "You spent \(session.formattedDuration) at \(session.place.name). Record today's \(activity.name)?",
+            identifier: "session_end_\(session.id)",
+            category: NotificationCategory.sessionCompleted,
+            userInfo: [
+                "activityId": activity.id.uuidString,
+                "sessionId": session.id.uuidString
+            ]
+        )
     }
     
     func scheduleReminder(for activity: Activity) {
-        
-        // 1. Remove old reminder first
+
         cancelReminder(for: activity)
-        
-        // 2. Make sure reminders enabled
+
         guard activity.remindersEnabled else {
-            print("⚠️ Reminders DISABLED")
             return
         }
-        
-        //5. Create repeating trigger
-        let trigger = UNCalendarNotificationTrigger (
+
+        let trigger = UNCalendarNotificationTrigger(
             dateMatching: reminderDateComponents(for: activity),
             repeats: true
         )
-        sendNotification("WuFlow 🌿",
-                         reminderBody(for: activity),
-                         activity.id.uuidString,
-                         trigger,
-                         NotificationAction.activityReminder
+
+        sendNotification(
+            title: "WuFlow 🌿",
+            body: reminderBody(for: activity),
+            identifier: "activity_\(activity.id)",
+            trigger: trigger,
+            category: NotificationCategory.activityReminder,
+            userInfo: [
+                "activityId": activity.id.uuidString
+            ]
         )
     }
-    func sendNotification(_ title: String,
-                          _ body: String,
-                          _ activityId: String,
-                          _ scheduled: UNCalendarNotificationTrigger? = nil,
-                          _ category: String? = NotificationAction.activityReminder) {
-        
+    private func sendNotification(
+        title: String,
+        body: String,
+        identifier: String,
+        trigger: UNNotificationTrigger = UNTimeIntervalNotificationTrigger(
+            timeInterval: 4,
+            repeats: false
+        ),
+        category: String,
+        userInfo: [AnyHashable: Any] = [:]
+    ) {
         let content = UNMutableNotificationContent()
-        
+
         content.title = title
         content.body = body
         content.sound = .default
-        
-        content.categoryIdentifier = category ?? NotificationAction.activityReminder
-        content.userInfo = [
-            "activityId": "\(activityId)"
-        ]
-        
-        // Trigger after 4 seconds
-        let trigger =  UNTimeIntervalNotificationTrigger(
-            timeInterval: 4,
-            repeats: false
-        )
-        // 6. Stable identifier
-        let identifier = "activity_\(activityId)"
+        content.categoryIdentifier = category
+        content.userInfo = userInfo
+
         let request = UNNotificationRequest(
             identifier: identifier,
             content: content,
-            trigger: scheduled ?? trigger
+            trigger: trigger
         )
-        
-        UNUserNotificationCenter.current()
-            .add(request) { error in
-                if let error {
-                    print("❌ Failed to schedule notification:", error)
-                } else {
-                    print("✅ Notification scheduled")
-                }
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                print("❌ Failed to schedule notification:", error)
+            } else {
+                print("✅ Notification scheduled")
             }
+        }
     }
     private func reminderDateComponents(for activity: Activity) -> DateComponents {
         
@@ -291,35 +324,7 @@ final class NotificationManager {
                 print("🗑 Removed \(identifiers.count) reminders")
             }
     }
-    func registerNotificationCategories() {
-        
-        let doneAction = UNNotificationAction(
-            identifier: NotificationAction.done,
-            title: "Done ✅",
-            options: []
-        )
-        
-        let laterAction = UNNotificationAction(
-            identifier: NotificationAction.later,
-            title: "Later ⏰",
-            options: []
-        )
-        
-        let category = UNNotificationCategory(
-            identifier: NotificationAction.activityReminder,
-            actions: [
-                doneAction,
-                laterAction
-            ],
-            intentIdentifiers: [],
-            options: []
-        )
-        
-        UNUserNotificationCenter.current()
-            .setNotificationCategories([category])
-        
-        print("✅ Notification categories registered")
-    }
+    
     func sendSuccessNotification(
         activityName: String
     ) {
@@ -352,17 +357,61 @@ final class NotificationManager {
         UNUserNotificationCenter.current()
             .add(request)
     }
+    func registerNotificationCategories() {
+        let doneAction = UNNotificationAction(
+            identifier: NotificationAction.done,
+            title: "Done ✅",
+            options: []
+        )
+        
+        let laterAction = UNNotificationAction(
+            identifier: NotificationAction.later,
+            title: "Later ⏰",
+            options: []
+        )
+        let enterSessionPlace = UNNotificationCategory(
+            identifier: NotificationCategory.sessionStarted,
+            actions: [],
+            intentIdentifiers: [],
+            options: []
+        )
+        let placeSessionCompletedCategory = UNNotificationCategory(
+            identifier: NotificationCategory.sessionCompleted,
+            actions: [
+                doneAction,
+                laterAction
+            ],
+            intentIdentifiers: [],
+            options: []
+        )
+        let remindersCategory = UNNotificationCategory(
+            identifier: NotificationCategory.activityReminder,
+            actions: [
+                doneAction,
+                laterAction
+            ],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        UNUserNotificationCenter.current()
+            .setNotificationCategories([remindersCategory, placeSessionCompletedCategory, enterSessionPlace])
+        
+        print("✅ Notification categories registered")
+    }
 }
-
+enum NotificationCategory {
+    static let activityReminder = "ACTIVITY_REMINDER"
+    static let sessionStarted = "SESSION_STARTED"
+    static let sessionCompleted = "SESSION_COMPLETED"
+}
 enum NotificationPermissionStatus {
     case notDetermined
     case denied
     case authorized
 }
-private enum NotificationAction {
-    
+enum NotificationAction {
     static let done = "DONE_ACTION"
     static let later = "LATER_ACTION"
-    
-    static let activityReminder = "ACTIVITY_REMINDER"
+    static let dismiss = "DISMISS_ACTION"
 }

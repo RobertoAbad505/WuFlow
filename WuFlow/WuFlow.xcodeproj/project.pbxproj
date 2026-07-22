@@ -50,6 +50,7 @@
 				Domain/Models/AutomationConfiguration.swift,
 				Domain/Models/LifeArea.swift,
 				Domain/Models/Place.swift,
+				Domain/Models/PlaceSession.swift,
 				Domain/Models/ProgressRecord.swift,
 				Domain/Models/TrackingType.swift,
 				Domain/Models/UnitType.swift,

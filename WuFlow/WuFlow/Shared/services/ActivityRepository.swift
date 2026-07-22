@@ -314,3 +314,116 @@ extension ActivityRepository {
         try modelContext.save()
     }
 }
+//Place persistance endpoints
+extension ActivityRepository {
+    func activePlaceSession(regionIdentifier: String) throws -> PlaceSession? {
+
+        let sessions = try modelContext.fetch(
+            FetchDescriptor<PlaceSession>()
+        )
+
+        print("================================")
+        print("PlaceSessions found: \(sessions.count)")
+
+        for session in sessions {
+            print("""
+            id: \(session.id)
+            place: \(session.place.name)
+            identifier: \(session.place.identifier)
+            active: \(session.isActive)
+            """)
+        }
+
+        print("================================")
+
+        return sessions.first(where: \.isActive)
+    }
+
+    func createPlaceSession(regionIdentifier: String, trigger: SessionTrigger) throws -> PlaceSession {
+        
+        let descriptor = FetchDescriptor<Place>(
+            predicate: #Predicate {
+                $0.identifier == regionIdentifier
+            }
+        )
+
+        guard let place = try modelContext.fetch(descriptor).first else {
+            throw RepositoryError.placeNotFound(regionIdentifier)
+        }
+
+        let session = PlaceSession(
+            place: place,
+            trigger: trigger
+        )
+
+        modelContext.insert(session)
+
+        try modelContext.save()
+        let sessions = try modelContext.fetch(
+            FetchDescriptor<PlaceSession>()
+        )
+        print("Sessions count After save: \(sessions.count)")
+        return session
+    }
+
+    func endPlaceSession(
+        regionIdentifier: String
+    ) throws -> PlaceSession {
+        guard let session = try activePlaceSession(regionIdentifier: regionIdentifier) else {
+            throw RepositoryError.activeSessionNotFound(regionIdentifier)
+        }
+        session.end()
+        do {
+            try modelContext.save()
+            return session
+        } catch {
+            throw RepositoryError.saveFailed(error)
+        }
+    }
+    func placeSession(id: UUID) throws -> PlaceSession? {
+        let descriptor = FetchDescriptor<PlaceSession>(
+            predicate: #Predicate {
+                $0.id == id
+            }
+        )
+
+        return try modelContext.fetch(descriptor).first
+    }
+    func completePlaceSession(
+        activityID: UUID,
+        sessionID: UUID
+    ) throws -> Activity {
+        
+        guard let activity = try activity(id: activityID) else {
+            throw RepositoryError.activityNotFound(activityID)
+        }
+        
+        let existing = activity.progressRecords.contains {
+            $0.placeSession?.id == sessionID
+        }
+
+        guard !existing else {
+            return activity
+        }
+
+        guard let session = try placeSession(id: sessionID) else {
+            throw RepositoryError.placeSessionNotFound(sessionID)
+        }
+
+        guard session.endedAt != nil else {
+            throw RepositoryError.activeSessionNotFinished(sessionID)
+        }
+
+        let record = ProgressRecord(
+            value: activity.defaultIncrement,
+            source: .location,
+            activity: activity
+        )
+        record.placeSession = session
+        modelContext.insert(record)
+
+        try modelContext.save()
+
+        return activity
+    }
+}

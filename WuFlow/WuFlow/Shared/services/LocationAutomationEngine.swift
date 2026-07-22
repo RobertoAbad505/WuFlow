@@ -10,18 +10,67 @@ import Observation
 @Observable
 final class LocationAutomationEngine {
 
+    let sessionManager: SessionManager
     private let repository: ActivityRepository
 
-    init(repository: ActivityRepository) {
+    init(repository: ActivityRepository, sessionManager: SessionManager) {
         self.repository = repository
+        self.sessionManager = sessionManager
     }
 
-    func handle(regionIdentifier: String, event: RegionEvent) async {
-        guard let activities = try? await repository.activities(placeIdentifier: regionIdentifier).first else {
-            print("No activities found for \(regionIdentifier)")
+    func handle(
+        regionIdentifier: String,
+        event: RegionEvent
+    ) async {
+
+        guard let activity = try? await repository
+            .activities(placeIdentifier: regionIdentifier)
+            .first
+        else {
             return
         }
-        NotificationManager.shared.sendGeoFenceNotification(activity: activities, event: event)
+
+        await activitySessionCheck(
+            activity: activity,
+            regionIdentifier: regionIdentifier,
+            event: event
+        )
+    }
+    private func activitySessionCheck(
+        activity: Activity,
+        regionIdentifier: String,
+        event: RegionEvent
+    ) async {
+
+        switch event {
+
+        case .entered:
+            print("Entered region-identifier:\(regionIdentifier)")
+            await sessionManager.startSession(
+                regionIdentifier: regionIdentifier,
+                trigger: .location
+            )
+
+            NotificationManager.shared
+                .sendPlaceSessionStarted(activity: activity)
+
+        case .exited:
+            print("Exited region-identifier:\(regionIdentifier)")
+            guard let session = await sessionManager.endSession(
+                regionIdentifier: regionIdentifier
+            ) else {
+                return
+            }
+
+            NotificationManager.shared
+                .sendPlaceSessionCompleted(
+                    activity: activity,
+                    session: session
+                )
+
+        default:
+            break
+        }
     }
 }
 
@@ -42,14 +91,12 @@ extension RegionEvent {
         case .entered:
             return """
             You arrived at \(activity.place?.name ?? "your destination").
-
             Ready to complete "\(activity.name)"?
             """
 
         case .exited:
             return """
             You left \(activity.place?.name ?? "your destination").
-
             Did you complete "\(activity.name)"?
             """
 
@@ -61,7 +108,6 @@ extension RegionEvent {
         case .dwell:
             return """
             You've been at \(activity.place?.name ?? "this place") for a while.
-
             Would you like to record "\(activity.name)"?
             """
         }
