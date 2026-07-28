@@ -10,7 +10,7 @@ import Foundation
 import HealthKit
 
 final class HealthKitService {
-
+    
     static let shared = HealthKitService()
 
     private let healthStore = HKHealthStore()
@@ -256,6 +256,62 @@ final class HealthKitService {
 
             print("✅ Mindfulness session created")
             print("Duration: 10 minutes")
+        }
+    }
+    func stepCount(for day: Date) async throws -> Int {
+
+        guard HKHealthStore.isHealthDataAvailable() else {
+            throw HealthKitError.unavailable
+        }
+
+        guard let stepType = HKQuantityType.quantityType(
+            forIdentifier: .stepCount
+        ) else {
+            throw HealthKitError.quantityTypeUnavailable
+        }
+
+        let calendar = Calendar.current
+
+        let start = calendar.startOfDay(for: day)
+
+        guard let end = calendar.date(
+            byAdding: .day,
+            value: 1,
+            to: start
+        ) else {
+            throw HealthKitError.invalidDate
+        }
+
+        let predicate = HKQuery.predicateForSamples(
+            withStart: start,
+            end: end,
+            options: .strictStartDate
+        )
+
+        return try await withCheckedThrowingContinuation { continuation in
+
+            let query = HKStatisticsQuery(
+                quantityType: stepType,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum
+            ) { _, result, error in
+
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                let steps = Int(
+                    result?
+                        .sumQuantity()?
+                        .doubleValue(for: .count())
+                    ?? 0
+                )
+
+                continuation.resume(returning: steps)
+            }
+
+            self.healthStore.execute(query)
         }
     }
 }

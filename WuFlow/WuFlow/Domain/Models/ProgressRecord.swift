@@ -20,7 +20,7 @@ final class ProgressRecord {
     
     var source: TrackingType
     
-    var activity: Activity?
+    var activity: Activity
     
     @Relationship
     var placeSession: PlaceSession?

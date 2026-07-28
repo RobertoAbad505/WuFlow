@@ -14,19 +14,32 @@ struct WuFlowWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PlaceSessionAttributes.self) { context in
             // Lock screen/banner UI goes here
-            VStack(alignment: .leading, spacing: 12) {
+            VStack {
                 HStack {
-                    Image(systemName: "circle.dotted")
-                        .symbolEffect(.rotate)
-                    Text(context.attributes.activityName.removingEmojis)
-                        .font(.headline)
+                    VStack {
+                        Text(context.attributes.activityName.removingEmojis)
+                            .font(.title3)
+                        Text("📍\(context.attributes.placeName.removingEmojis)")
+                    }
                 }
-                Text("📍\(context.attributes.placeName.removingEmojis)")
-                .foregroundStyle(.secondary)
-                Text(context.state.startedAt,
-                     style: .timer)
-                    .font(.title)
-                    .monospacedDigit()
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Temps:")
+                            .font(.footnote)
+                        Text(context.state.startedAt, style: .timer)
+                            .font(.title)
+                            .monospacedDigit()
+                    }
+                    VStack(alignment: .center) {
+                        Text("Started time:")
+                            .font(.footnote)
+                        Text(context.state.startedAt, style: .time)
+                            .font(.body)
+                            .monospacedDigit()
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.horizontal)
             }
             .padding()
             .activityBackgroundTint(Color.cyan.opacity(0.3))
@@ -43,14 +56,32 @@ struct WuFlowWidgetLiveActivity: Widget {
                     Text("💚 On live")
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    VStack(alignment: .leading) {
-                        Text(context.attributes.activityName.removingEmojis)
-                            .font(.title3)
-                        Text("📍\(context.attributes.placeName.removingEmojis)")
-                        Text(context.state.startedAt,
-                             style: .timer)
-                            .font(.title)
-                            .monospacedDigit()
+                    VStack {
+                        HStack {
+                            VStack {
+                                Text(context.attributes.activityName.removingEmojis)
+                                    .font(.title3)
+                                Text("📍\(context.attributes.placeName.removingEmojis)")
+                            }
+                        }
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Temps:")
+                                    .font(.footnote)
+                                Text(context.state.startedAt, style: .timer)
+                                    .font(.title3)
+                                    .monospacedDigit()
+                            }
+                            VStack(alignment: .center) {
+                                Text("Started time:")
+                                    .font(.footnote)
+                                Text(context.state.startedAt, style: .time)
+                                    .font(.body)
+                                    .monospacedDigit()
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.horizontal)
                     }
                 }
             } compactLeading: {

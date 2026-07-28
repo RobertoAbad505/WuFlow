@@ -80,7 +80,6 @@ actor ActivityRepository {
         }
         
         guard let activity = try automatedActivity(trackingType: .healthSteps) else {
-            print("No healt activity found for \(TrackingType.healthSteps.title)")
             return
         }
         let imported = importedSteps(activity)
@@ -94,38 +93,45 @@ actor ActivityRepository {
             value: difference,
             source: .healthSteps
         )
+
+    }
+    func syncHealthSteps(
+        totalSteps: Int,
+        day: Date
+    ) throws {
+
+        guard let activity = try automatedActivity(
+            trackingType: .healthSteps
+        ) else {
+            return
+        }
+        print("Requested sync day:", day)
+        
+        if let record = try progressRecord(activity: activity, day: day) {
+            //UPDATE value
+            record.value = Double(totalSteps)
+            print("Record date:", record.date)
+        } else {
+            //set up value and create new record
+            guard let record = try addProgress(
+                activity: activity,
+                value: Double(totalSteps),
+                source: .healthSteps,
+                date: day
+            ) else {
+                return
+            }
+            activity.progressRecords.append(record)
+            print("Updating record:", record.date)
+        }
+        print(activity.progressRecords.count)
         print("🔄 HealthKit Synchronization ─────────────────────────")
         print("Activity:", activity.name)
         print("Provider:", activity.trackingType.rawValue)
-        print("HealthKit total steps:", totalSteps)
-        print("Already imported steps:", imported)
-        print("Total new steps:", difference)
-
-    }
-    func addProgress(
-        activityId: UUID,
-        value: Double,
-        source: TrackingType
-    ) throws {
-        guard let activity = try activity(id: activityId) else {
-            return
-        }
-        try addProgress(
-            activity: activity,
-            value: value,
-            source: source
-        )
-    }
-
-    private func addProgress(activity: Activity, value: Double, source: TrackingType) throws {
-        let record = ProgressRecord(
-            value: value,
-            source: source,
-            activity: activity
-        )
-        modelContext.insert(record)
+        print("Total new steps:", totalSteps)
         try modelContext.save()
     }
+    
     
     func automatedActivity(trackingType: TrackingType) throws -> Activity? {
         let type = trackingType.rawValue
@@ -155,17 +161,19 @@ actor ActivityRepository {
     }
     
     func resetTodayHealthStepSync(_ activity: Activity) throws {
-        let calendar = Calendar.current
 
-        let records = activity.progressRecords.filter {
-            calendar.isDateInToday($0.date) && $0.source == .healthSteps
+        guard let record = try progressRecord(
+            activity: activity,
+            day: .now
+        ) else {
+            print("⚠️ No HealthKit record found for today.")
+            return
         }
 
-        records.forEach {
-            modelContext.delete($0)
-        }
+        modelContext.delete(record)
         try modelContext.save()
-        print("✅ Today's imported HealthKit steps removed. Total affected: \(records.count)")
+
+        print("✅ Today's imported HealthKit steps removed.")
     }
     func completeReminder(activityId: UUID) throws -> Activity? {
         guard let activity = try activity(id: activityId) else {
@@ -362,7 +370,7 @@ extension ActivityRepository {
         let sessions = try modelContext.fetch(
             FetchDescriptor<PlaceSession>()
         )
-        print("Sessions count After save: \(sessions.count)")
+        print("Sessions created After save: \(sessions.count)")
         return session
     }
 
@@ -425,5 +433,68 @@ extension ActivityRepository {
         try modelContext.save()
 
         return activity
+    }
+}
+
+extension ActivityRepository {
+    //Progress records extension
+    func progressRecord(
+        activity: Activity,
+        day: Date
+    ) throws -> ProgressRecord? {
+
+        let calendar = Calendar.current
+
+        let start = calendar.startOfDay(for: day)
+
+        guard let end = calendar.date(
+            byAdding: .day,
+            value: 1,
+            to: start
+        ) else {
+            return nil
+        }
+        let activity = activity
+
+        let descriptor = FetchDescriptor<ProgressRecord>(
+            predicate: #Predicate { record in
+                record.date >= start &&
+                record.date < end
+            }
+        )
+
+        return try modelContext
+            .fetch(descriptor)
+            .first { $0.activity.id == activity.id }
+    }
+    
+    func addProgress(
+        activityId: UUID,
+        value: Double,
+        source: TrackingType
+    ) throws {
+        guard let activity = try activity(id: activityId) else {
+            return
+        }
+        try addProgress(
+            activity: activity,
+            value: value,
+            source: source
+        )
+    }
+    private func addProgress(
+        activity: Activity,
+        value: Double,
+        source: TrackingType,
+        date: Date = .now
+    ) throws -> ProgressRecord? {
+        let record = ProgressRecord(
+            value: value,
+            date: date,
+            source: source,
+            activity: activity
+        )
+        modelContext.insert(record)
+        return record
     }
 }

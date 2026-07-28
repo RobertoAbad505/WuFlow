@@ -19,22 +19,26 @@ final class HealthKitSyncService {
     }
     
     func sync() {
-        self.syncHealthSteps()
+        Task {
+             await self.syncHealthSteps(for: Date.now)
+        }
+    }
+    
+    
+    
+    func syncHealthSteps(for day: Date) async {
         //sync any automation progress
         //sync mindfulness sessions
         //sync workouts
-    }
-    
-    func syncHealthSteps() {
-        HealthKitService.shared.fetchTodayStepCount { todaySteps in
-            Task {
-                do {
-                    try await self.repository.syncHealthSteps(totalSteps: todaySteps)
-                }  catch let error {
-                    print("❌❌❌❌ Error:")
-                    print(error.localizedDescription)
-                }
-            }
+        do {
+            let totalSteps = try await HealthKitService.shared.stepCount(for: day)
+            
+            try await repository.syncHealthSteps(
+                totalSteps: totalSteps,
+                day: day
+            )
+        } catch {
+            print(error)
         }
     }
     
@@ -45,6 +49,12 @@ final class HealthKitSyncService {
             }
             
             do {
+                let calendar = Calendar.current
+                for record in activity.progressRecords {
+
+                    print(record.date)
+                    print(calendar.isDateInToday(record.date))
+                }
                 try await self.repository.resetTodayHealthStepSync(activity)
                 print("✅ Today's imported HealthKit steps removed.")
             } catch {
@@ -52,4 +62,21 @@ final class HealthKitSyncService {
             }
         }
     }
+}
+
+struct HealthMetricValue {
+    let metric: HealthMetric
+    let day: Date
+    let value: Double
+}
+enum HealthMetric {
+    case steps
+    case walkingDistance
+    case activeEnergy
+    case exerciseMinutes
+}
+enum HealthKitError: Error {
+    case unavailable
+    case invalidDate
+    case quantityTypeUnavailable
 }

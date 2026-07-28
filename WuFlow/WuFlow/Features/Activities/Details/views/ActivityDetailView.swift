@@ -71,7 +71,7 @@ struct ActivityDetailView: View {
         
         _records = Query(
             filter: #Predicate<ProgressRecord> { record in
-                record.activity?.id == activityID
+                record.activity.id == activityID
             },
             sort: \.date,
             order: .reverse

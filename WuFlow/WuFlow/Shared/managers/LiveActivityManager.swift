@@ -37,7 +37,6 @@ final class LiveActivityManager: LiveActivityManaging {
     }
 
     func end(sessionID: UUID) async {
-
         guard let activity = ActivityKit.Activity<PlaceSessionAttributes>
             .activities
             .first(where: {
@@ -47,9 +46,7 @@ final class LiveActivityManager: LiveActivityManaging {
             print("No Live Activity found.")
             return
         }
-
         await activity.end(nil, dismissalPolicy: .immediate)
-
         print("🔴 Live Activity ended")
     }
 }

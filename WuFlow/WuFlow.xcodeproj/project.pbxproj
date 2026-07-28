@@ -64,6 +64,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				"Shared/Extensions/Calendar+extensions.swift",
 			);
 			target = 6F7121092F75BBA1001CEF33 /* WuFlow */;
 		};
@@ -105,11 +106,22 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		6FD25B8730171A9300DD7574 /* Exceptions for "WuFlow" folder in "Copy Bundle Resources" phase from "WuFlow" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 6F7121082F75BBA1001CEF33 /* Resources */;
+			membershipExceptions = (
+				"Shared/Extensions/Calendar+extensions.swift",
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6F71210C2F75BBA1001CEF33 /* WuFlow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				6F04CA982FB276A4000B57CE /* Exceptions for "WuFlow" folder in "WuFlow" target */,
+				6FD25B8730171A9300DD7574 /* Exceptions for "WuFlow" folder in "Copy Bundle Resources" phase from "WuFlow" target */,
 				6FED74BE2F7C365D008C5A58 /* Exceptions for "WuFlow" folder in "WuFlowTests" target */,
 				6F7BF22B3011458D00BB71D7 /* Exceptions for "WuFlow" folder in "WuFlowWidgetExtension" target */,
 			);
