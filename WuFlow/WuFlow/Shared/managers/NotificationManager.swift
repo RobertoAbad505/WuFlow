@@ -188,7 +188,7 @@ final class NotificationManager {
         )
     }
     private func sendNotification(
-        title: String,
+        title: String? = nil,
         body: String,
         identifier: String,
         trigger: UNNotificationTrigger = UNTimeIntervalNotificationTrigger(
@@ -200,7 +200,7 @@ final class NotificationManager {
     ) {
         let content = UNMutableNotificationContent()
 
-        content.title = title
+        content.title = title ?? "WuFlow 🌿"
         content.body = body
         content.sound = .default
         content.categoryIdentifier = category
@@ -357,6 +357,9 @@ final class NotificationManager {
         UNUserNotificationCenter.current()
             .add(request)
     }
+    func sendErrorNotification(message: String) {
+        sendNotification(title: nil, body: message, identifier: "", category: NotificationCategory.activityReminder)
+    }
     func registerNotificationCategories() {
         let doneAction = UNNotificationAction(
             identifier: NotificationAction.done,
@@ -399,6 +402,9 @@ final class NotificationManager {
         
         print("✅ Notification categories registered")
     }
+    
+    //DEV TOOLS
+    
 }
 enum NotificationCategory {
     static let activityReminder = "ACTIVITY_REMINDER"

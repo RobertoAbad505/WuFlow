@@ -32,9 +32,7 @@ final class NotificationActionHandler {
                 activityID: activityUUID,
                 sessionID: sessionUUID
             )
-            NotificationManager.shared.sendSuccessNotification(
-                activityName: activity.name
-            )
+            NotificationManager.shared.sendSuccessNotification(activityName: activity.name)
         } catch {
             print(error)
         }
@@ -55,10 +53,11 @@ final class NotificationActionHandler {
         sessionId: String?
     ) async {
         print("Notification opened")
-        // Future:
-        // Deep link into Activity Detail
-        // or Present Completion Sheet
-
+        guard let id = UUID(uuidString: activityId ?? ""),
+              let activity = try? await repository.activity(id: id) else {
+            return
+        }
+        Router().navigate(to: ActivitiesRoute.detail(activity))
     }
 }
 struct NotificationContext {

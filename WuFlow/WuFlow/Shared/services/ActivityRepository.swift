@@ -100,36 +100,31 @@ actor ActivityRepository {
         day: Date
     ) throws {
 
-        guard let activity = try automatedActivity(
-            trackingType: .healthSteps
-        ) else {
+        guard let activity = try automatedActivity(trackingType: .healthSteps) else {
             return
         }
-        print("Requested sync day:", day)
-        
         if let record = try progressRecord(activity: activity, day: day) {
             //UPDATE value
             record.value = Double(totalSteps)
+            try modelContext.save()
             print("Record date:", record.date)
         } else {
             //set up value and create new record
-            guard let record = try addProgress(
-                activity: activity,
-                value: Double(totalSteps),
-                source: .healthSteps,
-                date: day
-            ) else {
+            guard let record = try addProgress(activity: activity,
+                                               value: Double(totalSteps),
+                                               source: .healthSteps,
+                                               date: day) else {
                 return
             }
             activity.progressRecords.append(record)
+            try modelContext.save()
             print("Updating record:", record.date)
         }
-        print(activity.progressRecords.count)
         print("🔄 HealthKit Synchronization ─────────────────────────")
         print("Activity:", activity.name)
         print("Provider:", activity.trackingType.rawValue)
         print("Total new steps:", totalSteps)
-        try modelContext.save()
+        print("Requested sync day:", day)
     }
     
     
@@ -324,53 +319,41 @@ extension ActivityRepository {
 }
 //Place persistance endpoints
 extension ActivityRepository {
-    func activePlaceSession(regionIdentifier: String) throws -> PlaceSession? {
+    func activePlaceSession() throws -> ActivePlaceSession? {
 
-        let sessions = try modelContext.fetch(
-            FetchDescriptor<PlaceSession>()
+        var descriptor = FetchDescriptor<PlaceSession>(
+            predicate: #Predicate<PlaceSession> {
+                $0.endedAt == nil
+            }
         )
 
-        print("================================")
-        print("PlaceSessions found: \(sessions.count)")
+        descriptor.fetchLimit = 1
 
-        for session in sessions {
-            print("""
-            id: \(session.id)
-            place: \(session.place.name)
-            identifier: \(session.place.identifier)
-            active: \(session.isActive)
-            """)
-        }
-
-        print("================================")
-
+        return try modelContext
+            .fetch(descriptor)
+            .first?
+            .activePlaceSession
+    }
+    func activePlaceSession(regionIdentifier: String) throws -> PlaceSession? {
+        let sessions = try modelContext.fetch(FetchDescriptor<PlaceSession>())
         return sessions.first(where: \.isActive)
     }
 
-    func createPlaceSession(regionIdentifier: String, trigger: SessionTrigger) throws -> PlaceSession {
-        
+    func createPlaceSession(regionIdentifier: String, trigger: SessionTrigger) throws -> PlaceSession {        
         let descriptor = FetchDescriptor<Place>(
             predicate: #Predicate {
                 $0.identifier == regionIdentifier
             }
         )
-
         guard let place = try modelContext.fetch(descriptor).first else {
             throw RepositoryError.placeNotFound(regionIdentifier)
         }
-
         let session = PlaceSession(
             place: place,
             trigger: trigger
         )
-
         modelContext.insert(session)
-
         try modelContext.save()
-        let sessions = try modelContext.fetch(
-            FetchDescriptor<PlaceSession>()
-        )
-        print("Sessions created After save: \(sessions.count)")
         return session
     }
 
@@ -406,13 +389,11 @@ extension ActivityRepository {
             throw RepositoryError.activityNotFound(activityID)
         }
         
-        let existing = activity.progressRecords.contains {
-            $0.placeSession?.id == sessionID
-        }
-
-        guard !existing else {
-            return activity
-        }
+//        let existing = activity.progressRecords.contains { $0.placeSession?.id == sessionID }
+//
+//        guard !existing else {
+//            return activity
+//        }
 
         guard let session = try placeSession(id: sessionID) else {
             throw RepositoryError.placeSessionNotFound(sessionID)
@@ -429,9 +410,7 @@ extension ActivityRepository {
         )
         record.placeSession = session
         modelContext.insert(record)
-
         try modelContext.save()
-
         return activity
     }
 }
@@ -495,6 +474,7 @@ extension ActivityRepository {
             activity: activity
         )
         modelContext.insert(record)
+        try modelContext.save()
         return record
     }
 }

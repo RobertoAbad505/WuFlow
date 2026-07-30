@@ -15,7 +15,7 @@ struct LocationSettings: View {
     private var locationService
     @Environment(\.repository) var repository
     @Query(sort: \Place.name) private var places: [Place]
-    @State var placeId: Place.ID?
+    @State var placeId: String?
     
     var body: some View {
         VStack {
@@ -52,8 +52,8 @@ struct LocationSettings: View {
             ForEach(places) { place in
                 PlaceRow(
                     place: place,
-                    isSelected: place.id == placeId) {
-                    self.placeId = place.id
+                    isSelected: place.identifier == placeId) {
+                    self.placeId = place.identifier
                 }
                 .onAppear {
                     print("Place: \(place.name)")
@@ -134,19 +134,23 @@ struct LocationSettings: View {
                 }
                 .buttonStyle(.glass)
                 Button("Determine state") {
-                    places.first(where: { $0.id == placeId })
+                    places.first(where: { $0.identifier == placeId })
                 }
                 .buttonStyle(.glass)
             }
-            HStack {
-                Button("Simulate Enter Gym") {
-                    simulateEnter(regionIdentifier: "GYM")
+            if let id = placeId {
+                HStack {
+                    Button("Simulate Enter \(id)") {
+                        print("simulate enter \(id)")
+                        
+                        simulateEnter(regionIdentifier: id)
+                    }
+                    .buttonStyle(.glass)
+                    Button("Simulate exit \(id)") {
+                        simulateExit(regionIdentifier: id)
+                    }
+                    .buttonStyle(.glass)
                 }
-                .buttonStyle(.glass)
-                Button("Simulate exit Gym") {
-                    simulateExit(regionIdentifier: "GYM")
-                }
-                .buttonStyle(.glass)
             }
             HStack {
                 Button("Clear Logs") {

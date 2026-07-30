@@ -191,7 +191,7 @@ extension ActivityDetailView {
     }
     var heroButtons: some View {
         VStack {
-            if activity.allowsManualProgress {
+            if activity.allowsManualProgress || true {
                 // CTA (important positioning)
                 Button {
                     presentAddProgress.toggle()

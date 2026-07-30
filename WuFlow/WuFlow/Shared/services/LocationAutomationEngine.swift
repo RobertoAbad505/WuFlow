@@ -23,7 +23,7 @@ final class LocationAutomationEngine {
         regionIdentifier: String,
         event: RegionEvent
     ) async {
-
+        print("🌍 GeoFence GPS event triggered: \(event.rawValue), region-identifier: \(regionIdentifier)")
         guard let activity = try? await repository
             .activities(placeIdentifier: regionIdentifier)
             .first
@@ -36,6 +36,7 @@ final class LocationAutomationEngine {
             regionIdentifier: regionIdentifier,
             event: event
         )
+        print("🌍 GeoFence GPS event handled successfully")
     }
     private func activitySessionCheck(
         activity: Activity,
@@ -45,13 +46,13 @@ final class LocationAutomationEngine {
 
         switch event {
         case .entered:
-            print("Entered region-identifier: \(regionIdentifier)")
+            print("🌍 Starting session for \(regionIdentifier)")
             await handleSessionStarted(
                 activity: activity,
                 regionIdentifier: regionIdentifier
             )
         case .exited:
-            print("Exited region-identifier: \(regionIdentifier)")
+            print("🌍 Exited activity session for \(regionIdentifier)")
             await handleSessionEnded(
                 activity: activity,
                 regionIdentifier: regionIdentifier
@@ -73,7 +74,7 @@ final class LocationAutomationEngine {
         }
 
         do {
-            try await liveActivityManager.start(
+            try await liveActivityManager.ensureLiveActivity(for:
                 makeLiveSession(
                     activity: activity,
                     session: session
@@ -109,11 +110,10 @@ final class LocationAutomationEngine {
     private func makeLiveSession(
         activity: Activity,
         session: PlaceSession
-    ) -> LiveSession {
+    ) -> ActivePlaceSession {
 
-        LiveSession(
+        ActivePlaceSession(
             sessionID: session.id,
-            activityName: activity.name,
             placeName: session.place.name,
             startedAt: session.startedAt
         )

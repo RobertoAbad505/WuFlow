@@ -65,3 +65,14 @@ extension PlaceSession {
         return formatter.string(from: duration) ?? "-"
     }
 }
+extension PlaceSession {
+
+    var activePlaceSession: ActivePlaceSession {
+
+        ActivePlaceSession(
+            sessionID: id,
+            placeName: place.name,
+            startedAt: startedAt
+        )
+    }
+}
