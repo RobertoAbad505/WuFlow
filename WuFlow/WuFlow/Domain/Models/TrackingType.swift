@@ -72,4 +72,12 @@ extension TrackingType {
             return "bell.badge.fill"
         }
     }
+    var aggregation: ProgressAggregation {
+        switch self {
+        case .healthSteps:
+            return .latest
+        default:
+            return .sum
+        }
+    }
 }

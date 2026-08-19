@@ -61,7 +61,13 @@ struct ActivityDetailView: View {
     var isPresentingImage: Bool {
         return !(activity.imagePath == nil || (activity.imagePath ?? "").isEmpty)
     }
-    
+    private var progress: ProgressSummary {
+        progressCalculator.progress(
+            for: activity,
+            records: records
+        )
+    }
+    let progressCalculator: ProgressCalculator = .init()
     // MARK: - Init
     
     init(activity: Activity) {
@@ -129,6 +135,13 @@ struct ActivityDetailView: View {
                 }
             }
         })
+//        .onAppear {
+//            let records = try? repository?.progressRecords(for: activity)
+//            print("🔥 DIRECT QUERY:", records?.count ?? 0)
+//            records?.forEach {
+//                print("DIRECT:", $0.date, $0.value)
+//            }
+//        }
         .sheet(isPresented: $presentAddProgress) {
             AddActivityProgressView(activity: activity)
         }
@@ -168,13 +181,13 @@ extension ActivityDetailView {
             
             // Progress value
             VStack(spacing: 15) {
-                ProgressView(value: activity.progressRatio)
+                ProgressView(value: progress.ratio)
                     .tint(Color.colorForActivity(activity))
-                    .animation(.easeInOut, value: activity.progressRatio)
-                Text(activity.progressDescription)
+                    .animation(.easeInOut, value: progress.ratio)
+                Text(progress.description(activity.measurement))
                     .font(.headline)
                 // Feedback (THIS is the key)
-                Text(activity.feedbackMessage)
+                Text(feedbackMessage())
                     .font(.subheadline)
                     .foregroundColor(colorForStatus)
                     .multilineTextAlignment(.center)
@@ -243,7 +256,7 @@ extension ActivityDetailView {
             Text(activity.goalDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(activity.periodDescription)
+            Text(activity.goalPeriod.displayName)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -494,6 +507,11 @@ extension ActivityDetailView {
                             unit: activity.unitType.rawValue
                         )
                     }
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .frame(width: 10, height: 10)
+                        Text("\(groupedRecordsByDay.count) records found")
+                    }
                 }
             }
         }
@@ -648,10 +666,29 @@ extension ActivityDetailView {
         }
     }
     var colorForStatus: Color {
-        switch activity.goalStatus {
+        switch progress.status {
         case .inProgress: return .green
         case .completed: return .blue
         case .exceeded: return .purple
+        case .notStarted: return .gray
+        }
+    }
+    func feedbackMessage() -> String {
+        switch progress.status {
+        case .inProgress:
+            if progress.ratio == 0 {
+                return "Start small today 🌱"
+            } else if progress.ratio < 0.5 {
+                return "You're building momentum"
+            } else {
+                return "You're almost there"
+            }
+        case .completed:
+            return "Goal reached 🎉"
+        case .exceeded:
+            return "You exceeded your goal 🚀"
+        case .notStarted:
+            return "Not started"
         }
     }
 }

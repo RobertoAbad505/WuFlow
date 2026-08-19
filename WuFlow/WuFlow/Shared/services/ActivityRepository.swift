@@ -478,3 +478,37 @@ extension ActivityRepository {
         return record
     }
 }
+extension ActivityRepository {
+    func progressRecords(
+        for activity: Activity
+    ) throws -> [ProgressRecord] {
+
+        let activityID = activity.id
+
+        let descriptor = FetchDescriptor<ProgressRecord>(
+            predicate: #Predicate { record in
+                record.activity.id == activityID
+            },
+            sortBy: [
+                SortDescriptor(\.date)
+            ]
+        )
+
+        return try modelContext.fetch(descriptor)
+    }
+    func progressRecords(
+        for activityID: UUID
+    ) throws -> [ProgressRecord] {
+
+        let descriptor = FetchDescriptor<ProgressRecord>(
+            predicate: #Predicate { record in
+                record.activity.id == activityID
+            },
+            sortBy: [
+                SortDescriptor(\.date, order: .reverse)
+            ]
+        )
+
+        return try modelContext.fetch(descriptor)
+    }
+}

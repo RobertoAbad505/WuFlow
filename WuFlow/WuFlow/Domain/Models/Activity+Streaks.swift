@@ -40,41 +40,41 @@ extension Activity {
         return streak
     }
     
-    var longestStreak: Int {
-        let calendar = Calendar.current
-        
-        let days = dailyTotals
-        
-        var longest = 0
-        var current = 0
-        var previousDay: Date?
-        
-        for day in days {
-            
-            if isDayCompleted(total: day.total) {
-                
-                if let prev = previousDay,
-                   calendar.isDate(
-                       day.date,
-                       inSameDayAs: calendar.date(byAdding: .day, value: 1, to: prev)!
-                   ) {
-                    
-                    current += 1
-                } else {
-                    current = 1
-                }
-                
-                longest = max(longest, current)
-                previousDay = day.date
-                
-            } else {
-                current = 0
-                previousDay = nil
-            }
-        }
-        
-        return longest
-    }
+//    var longestStreak: Int {
+//        let calendar = Calendar.current
+//        
+//        let days = dailyTotals
+//        
+//        var longest = 0
+//        var current = 0
+//        var previousDay: Date?
+//        
+//        for day in days {
+//            
+//            if isDayCompleted(total: day.total) {
+//                
+//                if let prev = previousDay,
+//                   calendar.isDate(
+//                       day.date,
+//                       inSameDayAs: calendar.date(byAdding: .day, value: 1, to: prev)!
+//                   ) {
+//                    
+//                    current += 1
+//                } else {
+//                    current = 1
+//                }
+//                
+//                longest = max(longest, current)
+//                previousDay = day.date
+//                
+//            } else {
+//                current = 0
+//                previousDay = nil
+//            }
+//        }
+//        
+//        return longest
+//    }
     
     func isDayCompleted(total: Double) -> Bool {
         total >= goalValue

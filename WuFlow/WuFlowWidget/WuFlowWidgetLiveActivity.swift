@@ -42,7 +42,7 @@ struct WuFlowWidgetLiveActivity: Widget {
                 .padding(.horizontal)
             }
             .padding()
-            .activityBackgroundTint(Color.cyan.opacity(0.3))
+            .activityBackgroundTint(.green.opacity(0.1))
             .activitySystemActionForegroundColor(Color.black)
 
         } dynamicIsland: { context in

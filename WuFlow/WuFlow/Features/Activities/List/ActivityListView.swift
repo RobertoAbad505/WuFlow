@@ -23,6 +23,7 @@ struct ActivityListView: View {
     @State private var selectedToDelete: Activity?
     @State private var showDeleteDialog = false
     
+    private let progressCalculator = ProgressCalculator()
     private let columns = [
         GridItem(.flexible())
     ]
@@ -38,11 +39,9 @@ struct ActivityListView: View {
                     .ignoresSafeArea()
                 content
             }
-//            .onAppear {
-//                NotificationManager.shared.syncReminders(
-//                    for: items
-//                )
-//            }
+            .onAppear {
+                NotificationManager.shared.syncReminders(for: items)
+            }
             .fullScreenCover(isPresented: $toggleCreateActivity, content: {
                 CreateActivityView(mode: .create)
             })
@@ -84,7 +83,7 @@ struct ActivityListView: View {
         LazyVGrid(columns: columns, spacing: 40) {
             ForEach(items) { item in
                 NavigationLink(value: item) {
-                    ActivityRowCard(activity: item)
+                    ActivityRowCard(activity: item, progress: progressCalculator.progress(for: item, records: item.progressRecords))
                         .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
                 }
                 .contextMenu {

@@ -22,6 +22,7 @@ struct AddActivityProgressView: View {
     @State private var providedActivity: Bool = false
     
     private let entryFromSelectedActivity: Bool
+    private let progressCalculator: ProgressCalculator = .init()
     
     let columns = [
         GridItem(.flexible()),
@@ -38,6 +39,13 @@ struct AddActivityProgressView: View {
         case .pages:
             return [5,10,20,30,40]
         }
+    }
+    private var progress: ProgressSummary? {
+        guard let activity = selectedActivity else {
+            return nil
+        }
+
+        return progressCalculator.progress(for: activity, records: activity.progressRecords)
     }
     
     init(activity: Activity? = nil) {
@@ -106,19 +114,13 @@ struct AddActivityProgressView: View {
         .frame(maxWidth: .infinity)
     }
     private var progressSummary: some View {
-
         VStack(spacing: 12) {
-
-            if let activity = selectedActivity {
-
-                ProgressView(
-                    value: activity.progressRatio
-                )
-
-                Text(activity.progressDescription)
+            if let activity = selectedActivity, let progress = progress {
+                ProgressView(value: progress.ratio ?? 0)
+                Text(progress.description(activity.measurement))
                     .font(.headline)
 
-                Text(activity.periodDescription)
+                Text(activity.goalPeriod.displayName)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

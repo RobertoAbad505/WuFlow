@@ -9,7 +9,7 @@ import SwiftUI
 struct ActivityRowCard: View {
     
     private var color: Color {
-        switch self.activity.status {
+        switch self.progress.status {
         case .notStarted: return .gray
         case .inProgress: return .blue
         case .completed: return .green
@@ -17,7 +17,7 @@ struct ActivityRowCard: View {
         }
     }
     private var strokeColor: Color {
-        switch self.activity.status {
+        switch self.progress.status {
         case .notStarted: return .gray
         case .inProgress: return .blue
         case .completed: return .green
@@ -25,6 +25,7 @@ struct ActivityRowCard: View {
         }
     }
     let activity: Activity
+    let progress: ProgressSummary
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
@@ -48,8 +49,8 @@ struct ActivityRowCard: View {
                             .padding(.bottom, 5)
                     }
                     VStack(alignment: .center, spacing: 5) {
-                        ProgressView(value: activity.progressRatio)
-                        Text("\(activity.progressPercentage)%")
+                        ProgressView(value: progress.ratio)
+                        Text("\(progress.percentage)%")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -86,7 +87,7 @@ struct ActivityRowCard: View {
             if activity.currentStreak > 1 {
                 StreakBadge(streak: activity.currentStreak)
             }
-            ActivityStatusBadge(status: activity.status)
+            ActivityStatusBadge(status: progress.status)
         }
         .frame(maxWidth: 100, alignment: .leading)
         .padding(.bottom, 30)
@@ -97,7 +98,7 @@ struct ActivityRowCard: View {
                 Image(systemName: activity.unitType.iconName())
                     .font(.system(size: 18).bold())
                 VStack {
-                    Text(activity.progressDescription)
+                    Text(progress.description(activity.measurement))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Text(activity.unitType.rawValue)
@@ -116,29 +117,21 @@ struct ActivityRowCard: View {
 
 
 #Preview {
+    let activity = Activity(name: "Missing Kaomi so much that I can't take it anymore",
+                            unitType: .pages,
+                            goalValue: 3,
+                            trackingType: .manual,
+                            isPinned: true
+                           )
     ZStack {
         Image("zengarden")
             .resizable()
             .ignoresSafeArea()
         VStack(alignment: .center, spacing: 20) {
-            ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
-                                               unitType: .pages,
-                                               goalValue: 3,
-                                               trackingType: .manual,
-                                               isPinned: true
-                                              ))
-            ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
-                                               unitType: .pages,
-                                               goalValue: 3,
-                                               trackingType: .manual))
-            ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
-                                               unitType: .pages,
-                                               goalValue: 3,
-                                               trackingType: .manual))
-            ActivityRowCard(activity: Activity(name: "Missing Kaomi so much that I can't take it anymore",
-                                               unitType: .pages,
-                                               goalValue: 3,
-                                               trackingType: .manual))
+            ActivityRowCard(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords))
+            ActivityRowCard(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords))
+            ActivityRowCard(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords))
+            ActivityRowCard(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords))
         }
         .padding()
     }

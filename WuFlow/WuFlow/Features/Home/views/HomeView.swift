@@ -11,6 +11,9 @@ import SwiftData
 struct HomeView: View {
     @EnvironmentObject var router: Router
     @Environment(\.modelContext) var modelContext
+    @State private var isPresentedAddProgress: Bool = false
+    let progressCalculator: ProgressCalculator = .init()
+    
     @Query(
         sort: [
             SortDescriptor(\Activity.pinPriority, order: .reverse),
@@ -18,22 +21,63 @@ struct HomeView: View {
         ]
     )
     private var activities: [Activity]
-    @State private var isPresentedAddProgress: Bool = false
+
+    @Query(
+        sort: \ProgressRecord.date,
+        order: .reverse
+    )
+    private var progressRecords: [ProgressRecord]
     
-    var totalActivities: Int {
-        activities.count
+    var focusCards: [ActivitySummary] {
+        Array(activitySummaries.prefix(5))
+    }
+    private var activitySummaries: [ActivitySummary] {
+        activities.map { activity in
+
+            let records = progressRecords.filter {
+                $0.activity.id == activity.id
+            }
+
+            let progress = progressCalculator.progress(
+                for: activity,
+                records: records
+            )
+
+            return ActivitySummary(
+                activity: activity,
+                progress: progress
+            )
+        }
+    }
+    
+    private var totalActivities: Int {
+        activitySummaries.count
     }
 
-    var completedToday: Int {
-        activities.filter { $0.isCompletedToday }.count
+    private var completedActivities: Int {
+        activitySummaries.count(where: \.progress.completed)
     }
 
-    var progressRatio: Double {
-        guard totalActivities > 0 else { return 0 }
-        return Double(completedToday) / Double(totalActivities)
+    private var progressRatio: Double {
+        guard totalActivities > 0 else {
+            return 0
+        }
+
+        return Double(completedActivities)
+            / Double(totalActivities)
     }
-    var focusActivities: [Activity] {
-        Array(activities.prefix(5))
+    
+    var progressMessage: String {
+        switch progressRatio {
+        case 0:
+            return "Start your day with a small action"
+        case 0..<0.5:
+            return "You're getting started"
+        case 0..<1:
+            return "You're building momentum"
+        default:
+            return "Great job — you're on fire 🔥"
+        }
     }
     
     var body: some View {
@@ -80,7 +124,7 @@ struct HomeView: View {
     }
     var dailySummarySection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Today")
+            Text("Overview")
                 .font(.headline)
             
             VStack(alignment: .leading, spacing: 16) {
@@ -90,7 +134,7 @@ struct HomeView: View {
                     Text("Build your momentum")
                         .font(.title3.bold())
                     
-                    Text(summaryMessage)
+                    Text(progressMessage)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -98,9 +142,9 @@ struct HomeView: View {
                 // Progress + ring
                 HStack {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("\(completedToday) / \(totalActivities)")
+                        Text("\(completedActivities) / \(totalActivities)")
                             .font(.title2.bold())
-                        Text("Activities completed today")
+                        Text("Goals completed!")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Button {
@@ -128,18 +172,6 @@ struct HomeView: View {
         .padding(15)
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24))
     }
-    var summaryMessage: String {
-        switch progressRatio {
-        case 0:
-            return "Start your day with a small action"
-        case 0..<0.5:
-            return "You're getting started"
-        case 0..<1:
-            return "You're building momentum"
-        default:
-            return "Great job — you're on fire 🔥"
-        }
-    }
     var focusSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -156,10 +188,10 @@ struct HomeView: View {
             }
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(focusActivities) { activity in
-                        FocusCardView(activity: activity) {
-                            router.homePath.append(ActivitiesRoute.detail(activity))
+                HStack(spacing: 5) {
+                    ForEach(focusCards) { item in
+                        FocusCardView(item: item) {
+                            router.homePath.append(ActivitiesRoute.detail(item.activity))
                         }
                     }
                 }
@@ -170,32 +202,27 @@ struct HomeView: View {
     }
     var quickActionsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            
             Text("Quick Actions")
                 .font(.headline)
-            
             HStack(spacing: 12) {
-                
                 QuickActionButton(
                     title: "Add",
                     systemImage: "plus",
                     tint: .green) {
                     isPresentedAddProgress = true
                 }
-                
                 QuickActionButton(
                     title: "New",
                     systemImage: "square.and.pencil",
                     tint: .blue) {
                     print("Navigate to add activity view!!🚀 ")
                     router.homePath.append(ActivitiesRoute.addActivity)
-                    print("Navigation complete!")
                 }
-                
                 QuickActionButton(
                     title: "Insights",
                     systemImage: "chart.bar",
                     tint: .purple) {
+                        print("Navigate to activity insights view!!🚀 ")
                     router.homePath.append(ActivitiesRoute.insights(nil))
                 }
             }
