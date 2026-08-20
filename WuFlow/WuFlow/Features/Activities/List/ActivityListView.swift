@@ -42,6 +42,8 @@ struct ActivityListView: View {
         }
     }
     
+    let calendar: Calendar = .current
+    @State var streakMessage: String = ""
     @State var toggleCreateActivity: Bool = false
     
     //ON DELETE
@@ -191,8 +193,8 @@ struct ActivityListView: View {
                                         tint: .blue
                 )
                 ActivitiesHighlightView(systemNameImage: "flame",
-                                        count: calculateGlobalStreak().description,
-                                        description: getStreakMessage(),
+                                        count: globalStreak().description,
+                                        description: streakMessage,
                                         footnote: "Strike",
                                         tint: .red
                 )
@@ -245,38 +247,41 @@ struct ActivityListView: View {
         .padding(.vertical)
         .padding(.bottom, 50)
     }
-    func calculateGlobalStreak() -> Int {
-        let calendar = Calendar.current
-        
+    func globalStreak() -> Int {
+        let records = progressRecords
+
+        let grouped = Dictionary(grouping: records) {
+            calendar.startOfDay(for: $0.date)
+        }
+
         var streak = 0
         var date = Date()
-        
+
         while true {
-            let hasProgress = self.items.contains { activity in
-                activity.progressRecords.contains {
-                    calendar.isDate($0.date, inSameDayAs: date)
-                }
-            }
-            
-            if hasProgress {
-                streak += 1
-                date = calendar.date(byAdding: .day, value: -1, to: date)!
-            } else {
+
+            let day = calendar.startOfDay(for: date)
+
+            guard grouped[day] != nil else {
                 break
             }
+
+            streak += 1
+
+            date = calendar.date(
+                byAdding: .day,
+                value: -1,
+                to: date
+            )!
         }
-        
-        return streak
-    }
-    func getStreakMessage() -> String {
-        switch calculateGlobalStreak() {
+        switch streak {
         case 0:
-            return "streaks yet"
+            streakMessage = "streaks yet"
         case 1:
-            return "day streak!"
+            streakMessage = "day streak!"
         default:
-            return "streak days!"
+            streakMessage = "streak days!"
         }
+        return streak
     }
 
     private func delete(_ activity: Activity) {

@@ -210,3 +210,25 @@ struct ActivitySummary: Identifiable {
         activity.id
     }
 }
+extension ActivitySummary {
+
+    static var preview: ActivitySummary {
+        let activity = Activity(
+            name: "Gym 💪",
+            unitType: .sessions,
+            goalValue: 3,
+            trackingType: .manual,
+            isPinned: true
+        )
+
+        let progress = ProgressCalculator().progress(
+            for: activity,
+            records: []
+        )
+
+        return ActivitySummary(
+            activity: activity,
+            progress: progress
+        )
+    }
+}

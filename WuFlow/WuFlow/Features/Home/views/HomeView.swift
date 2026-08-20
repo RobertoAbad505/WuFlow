@@ -62,9 +62,7 @@ struct HomeView: View {
         guard totalActivities > 0 else {
             return 0
         }
-
-        return Double(completedActivities)
-            / Double(totalActivities)
+        return Double(completedActivities) / Double(totalActivities)
     }
     
     var progressMessage: String {

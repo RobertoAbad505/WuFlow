@@ -32,6 +32,11 @@ struct ActivityRowCard: View {
     private var progress: ProgressSummary {
         summary.progress
     }
+    var streakCount: Int {
+        let streakCalc = StreakCalculator()
+        return streakCalc.activityStreak(summary.activity,
+                                         records: summary.progress.records)
+    }
     
     let summary: ActivitySummary
     
@@ -92,13 +97,12 @@ struct ActivityRowCard: View {
     }
     var badgesItems: some View {
         VStack(alignment: .trailing, spacing: 5) {
-            if activity.currentStreak > 1 {
-                StreakBadge(streak: activity.currentStreak)
+            if streakCount > 1 {
+                StreakBadge(streak: streakCount)
             }
+
             ActivityStatusBadge(status: progress.status)
         }
-        .frame(maxWidth: 100, alignment: .leading)
-        .padding(.bottom, 30)
     }
     var unitTypeView: some View {
         VStack {
@@ -125,23 +129,36 @@ struct ActivityRowCard: View {
 
 
 #Preview {
-    let activity = Activity(name: "Missing Kaomi so much that I can't take it anymore",
-                            unitType: .pages,
-                            goalValue: 3,
-                            trackingType: .manual,
-                            isPinned: true
-                           )
+    let activity = Activity(
+        name: "Missing Kaomi so much that I can't take it anymore",
+        unitType: .pages,
+        goalValue: 3,
+        trackingType: .manual,
+        isPinned: true
+    )
+
+    let progress = ProgressCalculator().progress(
+        for: activity,
+        records: []
+    )
+
+    let summary = ActivitySummary(
+        activity: activity,
+        progress: progress
+    )
+
     ZStack {
         Image("zengarden")
             .resizable()
             .ignoresSafeArea()
+
         VStack(alignment: .center, spacing: 20) {
-            ActivityRowCard(summary: ActivitySummary(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords)))
-            ActivityRowCard(summary: ActivitySummary(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords)))
-            ActivityRowCard(summary: ActivitySummary(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords)))
-            ActivityRowCard(summary: ActivitySummary(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords)))
+            ActivityRowCard(summary: .preview)
+            ActivityRowCard(summary: .preview)
+            ActivityRowCard(summary: summary)
+            ActivityRowCard(summary: summary)
+            ActivityRowCard(summary: summary)
         }
         .padding()
     }
-    
 }

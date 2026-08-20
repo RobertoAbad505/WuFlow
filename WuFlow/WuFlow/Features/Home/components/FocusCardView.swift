@@ -14,29 +14,31 @@ struct FocusCardView: View {
     var body: some View {
 
         Button(action: action) {
-            VStack(spacing: 10) {
+            VStack(spacing: 5) {
                 activityImage
                 VStack {
                     Text(item.activity.name)
                         .font(.headline)
+                        .fixedSize(horizontal: false, vertical: true)
                         .multilineTextAlignment(.center)
-
+                        .lineLimit(5)
                     Text(progressDescription)
                         .font(.caption)
-
                     ProgressView(value: item.progress.ratio)
                         .tint(progressColor)
                 }
                 .padding()
             }
             .foregroundStyle(.black)
+            .background(.ultraThinMaterial)
+            .frame(maxWidth: 120, maxHeight: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
         }
     }
     var activityImage: some View {
-        VStack {
-            ActivityImageView(path: item.activity.imagePath, icon: item.activity.iconName)
-                .frame(maxWidth: 50, maxHeight: 50)
-        }
+        ActivityImageView(path: item.activity.imagePath, icon: item.activity.iconName)
+            .frame(maxWidth: 60, maxHeight: 80)
+            .padding(.top, item.activity.imagePath == nil ? 20:0)
     }
 }
 

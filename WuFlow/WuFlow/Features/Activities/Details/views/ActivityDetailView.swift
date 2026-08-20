@@ -315,8 +315,8 @@ extension ActivityDetailView {
                 InsightRow(
                     icon: "flame.fill",
                     color: .red,
-                    title: "\(activity.currentStreak) day streak",
-                    subtitle: activity.streakMessage
+                    title: "\(streakCount) day streak",
+                    subtitle: streakMessage(streakCount)
                 )
                 
                 InsightRow(
@@ -339,6 +339,23 @@ extension ActivityDetailView {
             RoundedRectangle(cornerRadius: 28)
                 .fill(.regularMaterial)
         )
+    }
+    var streakCount: Int {
+        let streakCalc = StreakCalculator()
+        return streakCalc.activityStreak(activity,
+                                         records: activity.progressRecords)
+    }
+    func streakMessage(_ streakCount: Int) -> String {
+        switch streakCount {
+        case 0:
+            return "Start your streak today"
+        case 1...2:
+            return "You're getting started"
+        case 3...6:
+            return "You're building consistency"
+        default:
+            return "You're on fire 🔥"
+        }
     }
     var averageText: String {
         let totals = groupedData.values
