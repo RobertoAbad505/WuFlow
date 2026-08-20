@@ -12,10 +12,36 @@ struct ActivityListView: View {
     @Query(
         sort: [
             SortDescriptor(\Activity.pinPriority, order: .reverse),
-            SortDescriptor(\Activity.createdAt, order: .forward)
+            SortDescriptor(\Activity.createdAt)
         ]
     )
     private var items: [Activity]
+
+    @Query(
+        sort: \ProgressRecord.date,
+        order: .reverse
+    )
+    private var progressRecords: [ProgressRecord]
+    
+    private var activitySummaries: [ActivitySummary] {
+        items.map { activity in
+
+            let records = progressRecords.filter {
+                $0.activity.id == activity.id
+            }
+
+            let progress = progressCalculator.progress(
+                for: activity,
+                records: records
+            )
+
+            return ActivitySummary(
+                activity: activity,
+                progress: progress
+            )
+        }
+    }
+    
     @State var toggleCreateActivity: Bool = false
     
     //ON DELETE
@@ -81,22 +107,23 @@ struct ActivityListView: View {
     }
     var activityList: some View {
         LazyVGrid(columns: columns, spacing: 40) {
-            ForEach(items) { item in
-                NavigationLink(value: item) {
-                    ActivityRowCard(activity: item, progress: progressCalculator.progress(for: item, records: item.progressRecords))
+            ForEach(activitySummaries) { summary in
+                NavigationLink(value: summary.activity) {
+                    ActivityRowCard(summary: summary)
                         .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
                 }
                 .contextMenu {
                     Button(role: .destructive) {
-                        selectedToDelete = item
+                        selectedToDelete = summary.activity
                         showDeleteDialog = true
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
                     Button(role: .confirm) {
-                        pinActivity(item)
+                        pinActivity(summary.activity)
                     } label: {
-                        Label(item.isPinned ? "Unpin" :"Pin", systemImage: item.isPinned ? "pin":"pin.fill")
+                        Label(summary.activity.isPinned ? "Unpin" :"Pin",
+                              systemImage: summary.activity.isPinned ? "pin":"pin.fill")
                     }
                 }
             }

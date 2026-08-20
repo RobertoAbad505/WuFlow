@@ -24,8 +24,16 @@ struct ActivityRowCard: View {
         case .exceeded: return .green
         }
     }
-    let activity: Activity
-    let progress: ProgressSummary
+    
+    private var activity: Activity {
+        summary.activity
+    }
+
+    private var progress: ProgressSummary {
+        summary.progress
+    }
+    
+    let summary: ActivitySummary
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
@@ -128,10 +136,10 @@ struct ActivityRowCard: View {
             .resizable()
             .ignoresSafeArea()
         VStack(alignment: .center, spacing: 20) {
-            ActivityRowCard(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords))
-            ActivityRowCard(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords))
-            ActivityRowCard(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords))
-            ActivityRowCard(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords))
+            ActivityRowCard(summary: ActivitySummary(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords)))
+            ActivityRowCard(summary: ActivitySummary(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords)))
+            ActivityRowCard(summary: ActivitySummary(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords)))
+            ActivityRowCard(summary: ActivitySummary(activity: activity, progress: ProgressCalculator().progress(for: activity, records: activity.progressRecords)))
         }
         .padding()
     }
