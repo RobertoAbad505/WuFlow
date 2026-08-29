@@ -40,27 +40,36 @@ struct AddPlaceView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        VStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
                     header
                     nameSection
                     locationSection
                     radiusSection
-                    saveButton
+                    formControls
                 }
                 .padding()
             }
-            .navigationTitle(isEditing ? "New Place":"Edit Place")
-            .navigationBarTitleDisplayMode(.inline)            
+            .navigationBarTitleDisplayMode(.inline)
         }
+        .task {
+            if verifyGPSAuthorization() {
+                locationService.requestCurrentLocation()
+            }
+        }
+    }
+    
+    func verifyGPSAuthorization() -> Bool {
+        return locationService.authorizationStatus == .authorizedAlways ||
+        locationService.authorizationStatus == .authorizedWhenInUse
     }
 }
 private extension AddPlaceView {
 
     var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Create a Place")
+            Text(isEditing ? "Edit Place":"Create a Place")
                 .font(.largeTitle.bold())
             Text("""
                 This place can be assigned to activities and used for \
@@ -136,6 +145,12 @@ private extension AddPlaceView {
         .padding()
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
     }
+    var formControls: some View {
+        VStack(spacing: 5) {
+            saveButton
+            cancelButton
+        }
+    }
     var saveButton: some View {
         Button {
             if isEditing {
@@ -159,18 +174,34 @@ private extension AddPlaceView {
             longitude == nil
         )
     }
+    var cancelButton: some View {
+        Button {
+            self.dismiss()
+        } label: {
+            Text("Cancel")
+                .frame(maxWidth: .infinity)
+        }
+        .tint(.secondary.opacity(0.5))
+        .buttonStyle(.borderedProminent)
+    }
 }
 private extension AddPlaceView {
 
     func captureCurrentLocation() {
         locationService.requestCurrentLocation()
-
-        guard let location = locationService.currentLocation else {
-            return
+        
+        Task {
+            isSaving = true
+            guard let location = locationService.currentLocation else {
+                return
+            }
+            
+            await MainActor.run {
+                latitude = location.coordinate.latitude
+                longitude = location.coordinate.longitude
+                isSaving = false
+            }
         }
-
-        latitude = location.coordinate.latitude
-        longitude = location.coordinate.longitude
     }
 
     func save() {

@@ -63,13 +63,13 @@ struct PlaceDetailsView: View {
         Image("activityImg")
             .resizable()
             .scaledToFill()
-            .frame(maxWidth: 170, maxHeight: 190)
+            .frame(maxWidth: 170, maxHeight: 200)
             .clipShape(RoundedRectangle(cornerRadius: 30))
     }
     var heroDetails: some View {
         VStack(spacing: 10) {
             Text("📍\(place.name)")
-                .font(Font.largeTitle.bold())
+                .font(Font.title.bold())
             Text("GeoFence radius")
                 .font(.headline.bold())
             Text("\(Int(place.radius)) mts")
@@ -83,7 +83,7 @@ struct PlaceDetailsView: View {
     }
     var mapSection: some View {
         LocationMapView(place: place)
-            .frame(height: 300)
+            .frame(height: 280)
             .frame(maxWidth: .infinity)
     }
 }

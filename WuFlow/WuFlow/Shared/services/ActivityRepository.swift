@@ -326,10 +326,10 @@ extension ActivityRepository {
 
         try modelContext.save()
     }
-    func deletePlace(_ place: Place) throws {
-        modelContext.delete(place)
-        try modelContext.save()
-    }
+//    func deletePlace(_ place: Place) throws {
+//        modelContext.delete(place)
+//        try modelContext.save()
+//    }
 }
 //Place persistance endpoints
 extension ActivityRepository {
@@ -402,12 +402,6 @@ extension ActivityRepository {
         guard let activity = try activity(id: activityID) else {
             throw RepositoryError.activityNotFound(activityID)
         }
-        
-//        let existing = activity.progressRecords.contains { $0.placeSession?.id == sessionID }
-//
-//        guard !existing else {
-//            return activity
-//        }
 
         guard let session = try placeSession(id: sessionID) else {
             throw RepositoryError.placeSessionNotFound(sessionID)
@@ -426,6 +420,14 @@ extension ActivityRepository {
         modelContext.insert(record)
         try modelContext.save()
         return activity
+    }
+    
+    func deletePlace(id: Place.ID) throws {
+        guard let place = try place(id: id) else {
+            return
+        }
+        modelContext.delete(place)
+        try modelContext.save()
     }
 }
 
