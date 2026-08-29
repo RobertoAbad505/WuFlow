@@ -17,6 +17,7 @@ enum ActivitiesRoute: Hashable {
     case addActivity
     case addProgress(Activity?)
     case insights(Activity?)
+    case places
 }
 enum SettingsRoute: Hashable {
 //    case settingsLanding

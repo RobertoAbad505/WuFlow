@@ -25,20 +25,14 @@ struct ActivityListView: View {
     
     private var activitySummaries: [ActivitySummary] {
         items.map { activity in
-
             let records = progressRecords.filter {
                 $0.activity.id == activity.id
             }
-
             let progress = progressCalculator.progress(
                 for: activity,
                 records: records
             )
-
-            return ActivitySummary(
-                activity: activity,
-                progress: progress
-            )
+            return ActivitySummary(activity: activity, progress: progress)
         }
     }
     
@@ -273,13 +267,15 @@ struct ActivityListView: View {
                 to: date
             )!
         }
-        switch streak {
-        case 0:
-            streakMessage = "streaks yet"
-        case 1:
-            streakMessage = "day streak!"
-        default:
-            streakMessage = "streak days!"
+        DispatchQueue.main.async {
+            switch streak {
+            case 0:
+                streakMessage = "streaks yet"
+            case 1:
+                streakMessage = "day streak!"
+            default:
+                streakMessage = "streak days!"
+            }
         }
         return streak
     }

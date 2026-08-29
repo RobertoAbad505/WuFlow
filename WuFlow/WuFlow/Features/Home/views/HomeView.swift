@@ -101,6 +101,8 @@ struct HomeView: View {
                     AddActivityProgressView(activity: activity)
                 case .insights(_):
                     Text("Insights still in development")
+                case .places:
+                    PlacesListView()
                 }
             }
             .sheet(isPresented: $isPresentedAddProgress) {
@@ -186,7 +188,7 @@ struct HomeView: View {
             }
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 5) {
+                HStack(spacing: 10) {
                     ForEach(focusCards) { item in
                         FocusCardView(item: item) {
                             router.homePath.append(ActivitiesRoute.detail(item.activity))
@@ -222,6 +224,13 @@ struct HomeView: View {
                     tint: .purple) {
                         print("Navigate to activity insights view!!🚀 ")
                     router.homePath.append(ActivitiesRoute.insights(nil))
+                }
+                QuickActionButton(
+                    title: "Places",
+                    systemImage: "pin",
+                    tint: .purple) {
+                        print("Navigate to Places view!!🚀 ")
+                    router.homePath.append(ActivitiesRoute.places)
                 }
             }
         }

@@ -59,3 +59,29 @@ extension Place {
         return region
     }
 }
+struct PlaceDraft {
+    var identifier: String
+    var name: String
+    var latitude: Double
+    var longitude: Double
+    var radius: Double
+    var isMonitored: Bool
+    
+    init(place: Place) {
+        self.identifier = place.identifier
+        self.name = place.name
+        self.latitude = place.latitude
+        self.longitude = place.longitude
+        self.radius = place.radius
+        self.isMonitored = place.isMonitored
+    }
+    
+    init(identifier: String, name: String, latitude: Double, longitude: Double, radius: Double, isMonitored: Bool) {
+        self.identifier = identifier
+        self.name = name
+        self.latitude = latitude
+        self.longitude = longitude
+        self.radius = radius
+        self.isMonitored = isMonitored
+    }
+}

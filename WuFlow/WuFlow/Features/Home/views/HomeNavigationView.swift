@@ -28,8 +28,12 @@ struct HomeNavigationView: View {
 
                     case .addProgress(let activity):
                         AddActivityProgressView(activity: activity)
+                        
                     case .insights(_):
-                        Text("Insights still in development")
+                        InsightsView()
+                        
+                    case .places:
+                        PlacesListView()
                     }
                 }
         }

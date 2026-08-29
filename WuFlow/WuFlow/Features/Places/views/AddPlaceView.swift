@@ -21,7 +21,23 @@ struct AddPlaceView: View {
     @State private var latitude: Double?
     @State private var longitude: Double?
     @State private var isSaving = false
+    @State private var isMonitored = false
     
+    @State private var identifier: String?
+    @State private var isEditing: Bool = false
+    
+    
+    init(_ updatePlace: Place? = nil) {
+        if let updatePlace {
+            _identifier = State(initialValue: updatePlace.identifier)
+            _name = State(initialValue: updatePlace.name)
+            _radius = State(initialValue: updatePlace.radius)
+            _latitude = State(initialValue: updatePlace.latitude)
+            _longitude = State(initialValue: updatePlace.longitude)
+            _isEditing = State(initialValue: true)
+            _isMonitored = State(initialValue: updatePlace.isMonitored)
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -35,35 +51,29 @@ struct AddPlaceView: View {
                 }
                 .padding()
             }
-            .navigationTitle("New Place")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(isEditing ? "New Place":"Edit Place")
+            .navigationBarTitleDisplayMode(.inline)            
         }
     }
 }
 private extension AddPlaceView {
 
     var header: some View {
-
         VStack(alignment: .leading, spacing: 8) {
-
             Text("Create a Place")
                 .font(.largeTitle.bold())
-
             Text("""
-This place can be assigned to activities and used for \
-location automations.
-""")
+                This place can be assigned to activities and used for \
+                location automations.
+                """)
             .foregroundStyle(.secondary)
         }
     }
     
     var nameSection: some View {
-
         VStack(alignment: .leading, spacing: 12) {
-
             Text("Name")
                 .font(.headline)
-
             TextField("Gym", text: $name)
                 .textFieldStyle(.roundedBorder)
         }
@@ -71,47 +81,33 @@ location automations.
     var locationSection: some View {
 
         VStack(alignment: .leading, spacing: 16) {
-
             Text("Current Location")
                 .font(.headline)
-
             Group {
 
                 if let latitude,
                    let longitude {
 
                     VStack(alignment: .leading, spacing: 8) {
-
                         Label(
                             "Location Captured",
                             systemImage: "checkmark.circle.fill"
                         )
                         .foregroundStyle(.green)
-
                         Text(String(format: "%.5f, %.5f",
                                     latitude,
                                     longitude))
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
-
                     }
 
                 } else {
-
-                    Label(
-                        "Location not captured",
-                        systemImage: "location.slash"
-                    )
-                    .foregroundStyle(.secondary)
-
+                    Label("Location not captured", systemImage: "location.slash")
+                        .foregroundStyle(.secondary)
                 }
-
             }
-
             Button {
-
                 captureCurrentLocation()
-
             } label: {
                 Label("Use Current Location", systemImage: "location.fill")
                     .frame(maxWidth: .infinity)
@@ -119,7 +115,7 @@ location automations.
             .buttonStyle(.borderedProminent)
         }
         .padding()
-        .glassEffect()
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
 
     }
     var radiusSection: some View {
@@ -138,17 +134,21 @@ location automations.
             )
         }
         .padding()
-        .glassEffect()
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
     }
     var saveButton: some View {
         Button {
-            save()
+            if isEditing {
+                edit()
+            } else {
+                save()
+            }
         } label: {
 
             if isSaving {
                 ProgressView()
             } else {
-                Text("Save Place")
+                Text(isEditing ? "Update Place":"Create new Place")
                     .frame(maxWidth: .infinity)
             }
         }
@@ -201,5 +201,41 @@ private extension AddPlaceView {
             }
         }
     }
+    func edit() {
 
+        guard let repository, let latitude, let longitude, let identifier else {
+            return
+        }
+        isSaving = true
+        Task {
+
+            do {
+                let draft = PlaceDraft(
+                    identifier: identifier,
+                    name: name,
+                    latitude: latitude,
+                    longitude: longitude,
+                    radius: radius,
+                    isMonitored: isMonitored
+                )
+                try await repository.editPlace(id: identifier,
+                                               draft: draft)
+
+                await MainActor.run {
+                    dismiss()
+                }
+            } catch {
+                print(error)
+            }
+
+            await MainActor.run {
+                isSaving = false
+            }
+        }
+    }
+
+}
+
+#Preview {
+    AddPlaceView(Place(identifier: "12345", name: "GYM", latitude: 1655465, longitude: 654654))
 }

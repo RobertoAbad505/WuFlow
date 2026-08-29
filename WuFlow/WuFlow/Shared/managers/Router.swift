@@ -42,6 +42,8 @@ final class Router: ObservableObject {
         case .insights:
             selectedTab = .insights
             insightsPath.append(route)
+        case .places:
+            activitiesPath.append(route)
         }
     }
     //navigate to settings destinations

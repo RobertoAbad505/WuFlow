@@ -223,7 +223,11 @@ extension ActivitySummary {
 
         let progress = ProgressCalculator().progress(
             for: activity,
-            records: []
+            records: [
+                ProgressRecord(value: 10, source: .healthSteps, activity: activity),
+                ProgressRecord(value: 10, source: .healthSteps, activity: activity),
+                ProgressRecord(value: 10, source: .healthSteps, activity: activity)
+            ]
         )
 
         return ActivitySummary(

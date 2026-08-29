@@ -252,6 +252,20 @@ extension ActivityRepository {
         return place
     }
     
+    func editPlace(id identifier: String,
+                   draft placeDraft: PlaceDraft) throws {
+        guard let place = try place(identifier: identifier) else {
+            return
+        }
+        place.name = placeDraft.name
+        place.latitude = placeDraft.latitude
+        place.longitude = placeDraft.longitude
+        place.isMonitored = placeDraft.isMonitored
+        place.radius = placeDraft.radius
+        try modelContext.save()
+//        try modelContext.save()
+    }
+    
     func place(identifier: String) throws -> Place? {
         let descriptor = FetchDescriptor<Place>(
             predicate: #Predicate {
