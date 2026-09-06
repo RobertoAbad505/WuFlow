@@ -34,7 +34,7 @@ final class AppContainer {
 
         self.notificationActionHandler = NotificationActionHandler(repository: repository)
         
-        self.sessionManager = SessionManager(repository: repository)
+        self.sessionManager = SessionManager(repository: repository, durationCalculator: SessionDurationCalculator())
         
         self.liveActivityManager = LiveActivityManager()
         

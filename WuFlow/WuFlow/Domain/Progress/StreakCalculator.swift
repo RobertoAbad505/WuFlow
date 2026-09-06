@@ -14,67 +14,139 @@ final class StreakCalculator {
         self.calendar = calendar
     }
     
-    func activityStreak(
-        _ activity: Activity,
-        records: [ProgressRecord]
-    ) -> Int {
+    private func periodInterval(
+        for period: GoalPeriod,
+        containing date: Date
+    ) -> DateInterval? {
 
-        guard activity.goalPeriod == .daily else {
+        switch period {
+        case .daily:
+            return calendar.dateInterval(
+                of: .day,
+                for: date
+            )
+
+        case .weekly:
+            return calendar.dateInterval(
+                of: .weekOfYear,
+                for: date
+            )
+
+        case .monthly:
+            return calendar.dateInterval(
+                of: .month,
+                for: date
+            )
+        }
+    }
+    private func periodCompleted(
+        activity: Activity,
+        date: Date,
+        records: [ProgressRecord]
+    ) -> Bool {
+
+        let total = total(
+            for: activity.goalPeriod,
+            date: date,
+            records: records
+        )
+
+        return total >= activity.goalValue
+    }
+    private func total(
+        for period: GoalPeriod,
+        date: Date,
+        records: [ProgressRecord]
+    ) -> Double {
+
+        guard let interval = periodInterval(
+            for: period,
+            containing: date
+        ) else {
             return 0
         }
 
-        return activityStreak(
-            goalValue: activity.goalValue,
-            records: records
-        )
+        return records
+            .filter {
+                interval.contains($0.date)
+            }
+            .reduce(0) {
+                $0 + $1.value
+            }
     }
-
-    private func activityStreak(
-        goalValue: Double,
-        records: [ProgressRecord]
+    func activityStreak(
+        _ activity: Activity,
+        records: [ProgressRecord],
+        now: Date = .now
     ) -> Int {
 
-        let grouped = Dictionary(grouping: records) {
-            calendar.startOfDay(for: $0.date)
-        }
-
-        var date = Date()
-
-        let todayTotal = total(
-            for: date,
-            grouped: grouped
-        )
-
-        if todayTotal < goalValue {
-            date = calendar.date(
-                byAdding: .day,
-                value: -1,
-                to: date
-            )!
-        }
-
         var streak = 0
+        var date = now
 
-        while true {
-            let total = total(
-                for: date,
-                grouped: grouped
-            )
-
-            guard total >= goalValue else {
-                break
+        // If the current period isn't complete yet,
+        // start checking from the previous period.
+        if !periodCompleted(
+            activity: activity,
+            date: date,
+            records: records
+        ) {
+            guard let previous = previousPeriod(
+                activity.goalPeriod,
+                from: date
+            ) else {
+                return 0
             }
+
+            date = previous
+        }
+
+        while periodCompleted(
+            activity: activity,
+            date: date,
+            records: records
+        ) {
 
             streak += 1
 
-            date = calendar.date(
-                byAdding: .day,
-                value: -1,
-                to: date
-            )!
+            guard let previous = previousPeriod(
+                activity.goalPeriod,
+                from: date
+            ) else {
+                break
+            }
+
+            date = previous
         }
 
         return streak
+    }
+    private func previousPeriod(
+        _ period: GoalPeriod,
+        from date: Date
+    ) -> Date? {
+
+        switch period {
+        case .daily:
+            return calendar.date(
+                byAdding: .day,
+                value: -1,
+                to: date
+            )
+
+        case .weekly:
+            return calendar.date(
+                byAdding: .weekOfYear,
+                value: -1,
+                to: date
+            )
+
+        case .monthly:
+            return calendar.date(
+                byAdding: .month,
+                value: -1,
+                to: date
+            )
+        }
     }
 
     private func total(
@@ -86,5 +158,36 @@ final class StreakCalculator {
             calendar.startOfDay(for: date)
         ]?
         .reduce(0) { $0 + $1.value } ?? 0
+    }
+    
+    func globalStreak(records: [ProgressRecord]) -> Int {
+        let grouped = Dictionary(grouping: records) {
+            calendar.startOfDay(for: $0.date)
+        }
+
+        var streak = 0
+        var date = Date()
+
+        while true {
+            let day = calendar.startOfDay(for: date)
+
+            guard grouped[day] != nil else {
+                break
+            }
+
+            streak += 1
+
+            guard let previousDay = calendar.date(
+                byAdding: .day,
+                value: -1,
+                to: date
+            ) else {
+                break
+            }
+
+            date = previousDay
+        }
+
+        return streak
     }
 }

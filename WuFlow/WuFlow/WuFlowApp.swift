@@ -46,12 +46,10 @@ struct WuFlowApp: App {
     
     private func restoreState() {
         Task {
-            do {
-                if let session = try container.repository.activePlaceSession() {
-                    await container.liveActivityManager.ensureLiveActivity(for: session)
-                }
-            } catch {
-                print(error)
+            if let session = await container.sessionManager.activePlaceSession() {
+                await container.liveActivityManager.ensureLiveActivity(
+                    for: session
+                )
             }
         }
     }

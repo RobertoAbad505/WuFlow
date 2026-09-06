@@ -15,4 +15,6 @@ struct PlaceSessionAttributes: ActivityAttributes {
     let sessionID: UUID
     let activityName: String
     let placeName: String
+    let icon: String
+    let expectedDuration: TimeInterval?
 }

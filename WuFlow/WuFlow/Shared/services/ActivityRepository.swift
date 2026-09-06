@@ -333,8 +333,8 @@ extension ActivityRepository {
 }
 //Place persistance endpoints
 extension ActivityRepository {
-    func activePlaceSession() throws -> ActivePlaceSession? {
-
+    
+    func activePlaceSession() throws -> PlaceSession? {
         var descriptor = FetchDescriptor<PlaceSession>(
             predicate: #Predicate<PlaceSession> {
                 $0.endedAt == nil
@@ -343,17 +343,19 @@ extension ActivityRepository {
 
         descriptor.fetchLimit = 1
 
-        return try modelContext
-            .fetch(descriptor)
-            .first?
-            .activePlaceSession
+        return try modelContext.fetch(descriptor).first
     }
     func activePlaceSession(regionIdentifier: String) throws -> PlaceSession? {
         let sessions = try modelContext.fetch(FetchDescriptor<PlaceSession>())
         return sessions.first(where: \.isActive)
     }
 
-    func createPlaceSession(regionIdentifier: String, trigger: SessionTrigger) throws -> PlaceSession {        
+    func createPlaceSession(
+        activity: Activity,
+        regionIdentifier: String,
+        trigger: SessionTrigger,
+        icon: String? = nil
+    ) throws -> PlaceSession {
         let descriptor = FetchDescriptor<Place>(
             predicate: #Predicate {
                 $0.identifier == regionIdentifier
@@ -363,8 +365,10 @@ extension ActivityRepository {
             throw RepositoryError.placeNotFound(regionIdentifier)
         }
         let session = PlaceSession(
+            activity: activity,
             place: place,
-            trigger: trigger
+            trigger: trigger,
+            icon: icon
         )
         modelContext.insert(session)
         try modelContext.save()
@@ -393,6 +397,21 @@ extension ActivityRepository {
         )
 
         return try modelContext.fetch(descriptor).first
+    }
+    func placeSessions(
+        for activityID: UUID
+    ) async throws -> [PlaceSession] {
+
+        let descriptor = FetchDescriptor<PlaceSession>(
+            predicate: #Predicate<PlaceSession> { session in
+                session.activity?.id == activityID
+            },
+            sortBy: [
+                SortDescriptor(\.startedAt, order: .reverse)
+            ]
+        )
+
+        return try modelContext.fetch(descriptor)
     }
     func completePlaceSession(
         activityID: UUID,

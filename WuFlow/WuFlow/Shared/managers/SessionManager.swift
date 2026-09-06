@@ -12,15 +12,23 @@ import SwiftData
 actor SessionManager {
     
     private let repository: ActivityRepository
+    private let durationCalculator: SessionDurationCalculator
 
-    init(repository: ActivityRepository) {
+    init(
+        repository: ActivityRepository,
+        durationCalculator: SessionDurationCalculator
+    ) {
         self.repository = repository
+        self.durationCalculator = durationCalculator
     }
 
+
     func startSession(
+        activity: Activity,
         regionIdentifier: String,
-        trigger: SessionTrigger
-    ) async -> PlaceSession? {
+        trigger: SessionTrigger,
+        icon: String? = nil
+    ) async -> PlaceSession?{
         do {
             if let activeSession = try await repository.activePlaceSession(regionIdentifier: regionIdentifier) {
                 print("⚠️ Session already active.")
@@ -28,8 +36,10 @@ actor SessionManager {
                 return activeSession
             }
             let session = try await repository.createPlaceSession(
+                activity: activity,
                 regionIdentifier: regionIdentifier,
-                trigger: trigger
+                trigger: trigger,
+                icon: icon
             )
             print("✅ Session started \(session.id) in \(session.place.name)")
             return session
@@ -48,6 +58,51 @@ actor SessionManager {
             ❌ Failed to end session for '\(regionIdentifier)'
             \(error.localizedDescription)
             """)
+            return nil
+        }
+    }
+    
+    func expectedDuration(
+        for activity: Activity
+    ) async -> TimeInterval? {
+
+        do {
+            let sessions = try await repository.placeSessions(
+                for: activity.id
+            )
+
+            return durationCalculator.expectedDuration(
+                from: sessions
+            )
+
+        } catch {
+            print("Failed to calculate expected session duration:", error)
+            return nil
+        }
+    }
+    
+    func activePlaceSession() async -> ActivePlaceSession? {
+        do {
+            guard let session = try await repository.activePlaceSession(),
+                  let activity = session.activity
+            else {
+                return nil
+            }
+
+            let sessions = try await repository.placeSessions(
+                for: activity.id
+            )
+
+            let expectedDuration = durationCalculator.expectedDuration(
+                from: sessions
+            )
+
+            return session.activePlaceSession(
+                expectedDuration: expectedDuration
+            )
+
+        } catch {
+            print(error)
             return nil
         }
     }

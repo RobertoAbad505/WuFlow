@@ -68,6 +68,17 @@ struct ActivityDetailView: View {
         )
     }
     let progressCalculator: ProgressCalculator = .init()
+    
+    //Streak
+    private let streakCalculator = StreakCalculator()
+
+    private var streakCount: Int {
+        streakCalculator.activityStreak(
+            activity,
+            records: records
+        )
+    }
+    
     // MARK: - Init
     
     init(activity: Activity) {
@@ -315,8 +326,11 @@ extension ActivityDetailView {
                 InsightRow(
                     icon: "flame.fill",
                     color: .red,
-                    title: "\(streakCount) day streak",
-                    subtitle: streakMessage(streakCount)
+                    title: StreakFormatter.title(
+                        count: streakCount,
+                        period: activity.goalPeriod
+                    ),
+                    subtitle: StreakFormatter.message(for: streakCount)
                 )
                 
                 InsightRow(
@@ -340,11 +354,7 @@ extension ActivityDetailView {
                 .fill(.regularMaterial)
         )
     }
-    var streakCount: Int {
-        let streakCalc = StreakCalculator()
-        return streakCalc.activityStreak(activity,
-                                         records: activity.progressRecords)
-    }
+    
     func streakMessage(_ streakCount: Int) -> String {
         switch streakCount {
         case 0:

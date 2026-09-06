@@ -67,17 +67,22 @@ final class LocationAutomationEngine {
     ) async {
 
         guard let session = await sessionManager.startSession(
+            activity: activity,
             regionIdentifier: regionIdentifier,
-            trigger: .location
-        ) else {
+            trigger: .location,
+            icon: activity.iconName) else {
             return
         }
 
+        let expectedDuration = await sessionManager.expectedDuration(
+            for: activity
+        )
         do {
-            try await liveActivityManager.ensureLiveActivity(for:
-                makeLiveSession(
+            await liveActivityManager.ensureLiveActivity(
+                for: makeLiveSession(
                     activity: activity,
-                    session: session
+                    session: session,
+                    expectedDuration: expectedDuration
                 )
             )
         } catch {
@@ -109,13 +114,16 @@ final class LocationAutomationEngine {
     }
     private func makeLiveSession(
         activity: Activity,
-        session: PlaceSession
+        session: PlaceSession,
+        expectedDuration: TimeInterval?
     ) -> ActivePlaceSession {
-
+                
         ActivePlaceSession(
             sessionID: session.id,
             placeName: session.place.name,
-            startedAt: session.startedAt
+            startedAt: session.startedAt,
+            icon: activity.iconName,
+            expectedDuration: nil
         )
 
     }

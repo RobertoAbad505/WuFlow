@@ -37,7 +37,6 @@ struct ActivityListView: View {
     }
     
     let calendar: Calendar = .current
-    @State var streakMessage: String = ""
     @State var toggleCreateActivity: Bool = false
     
     //ON DELETE
@@ -49,6 +48,24 @@ struct ActivityListView: View {
     private let columns = [
         GridItem(.flexible())
     ]
+    
+    //streak
+    private let streakCalculator = StreakCalculator()
+    private var globalStreak: Int {
+        streakCalculator.globalStreak(
+            records: progressRecords
+        )
+    }
+    private var globalStreakMessage: String {
+        switch globalStreak {
+        case 0:
+            return "No streaks yet"
+        case 1:
+            return "day streak!"
+        default:
+            return "days streak!"
+        }
+    }
     
     var body: some View {
         VStack {
@@ -187,9 +204,9 @@ struct ActivityListView: View {
                                         tint: .blue
                 )
                 ActivitiesHighlightView(systemNameImage: "flame",
-                                        count: globalStreak().description,
-                                        description: streakMessage,
-                                        footnote: "Strike",
+                                        count: globalStreak.description,
+                                        description: globalStreakMessage,
+                                        footnote: "Streak",
                                         tint: .red
                 )
             }
@@ -240,44 +257,6 @@ struct ActivityListView: View {
         }
         .padding(.vertical)
         .padding(.bottom, 50)
-    }
-    func globalStreak() -> Int {
-        let records = progressRecords
-
-        let grouped = Dictionary(grouping: records) {
-            calendar.startOfDay(for: $0.date)
-        }
-
-        var streak = 0
-        var date = Date()
-
-        while true {
-
-            let day = calendar.startOfDay(for: date)
-
-            guard grouped[day] != nil else {
-                break
-            }
-
-            streak += 1
-
-            date = calendar.date(
-                byAdding: .day,
-                value: -1,
-                to: date
-            )!
-        }
-        DispatchQueue.main.async {
-            switch streak {
-            case 0:
-                streakMessage = "streaks yet"
-            case 1:
-                streakMessage = "day streak!"
-            default:
-                streakMessage = "streak days!"
-            }
-        }
-        return streak
     }
 
     private func delete(_ activity: Activity) {
