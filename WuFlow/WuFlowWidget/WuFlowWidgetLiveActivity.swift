@@ -66,7 +66,7 @@ struct WuFlowWidgetLiveActivity: Widget {
                 SessionProgressView(context: context)
             }
             .padding()
-            .activityBackgroundTint(.black.opacity(0.5))
+            .activityBackgroundTint(.black.opacity(0.7))
             .activitySystemActionForegroundColor(Color.white)
 
         } dynamicIsland: { context in
@@ -74,33 +74,29 @@ struct WuFlowWidgetLiveActivity: Widget {
                 // Expanded UI goes here.  Compose the expanded UI through
                 // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("🌿 WuFlow")
+                    Text("🌿\(context.attributes.activityName.removingEmojis)")
+                        .font(.title3.bold())
+                        .padding(2)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("💚 On live")
+                    Text("📍\(context.attributes.placeName.removingEmojis)")
+                        .padding(2)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    VStack {
+                    VStack(spacing: 0) {
                         HStack {
                             Image(systemName: context.attributes.icon)
-                                .font(.system(size: 35))
+                                .font(.system(size: 25))
                                 .symbolEffect(.rotate)
-                            VStack {
-                                Text(context.attributes.activityName.removingEmojis)
-                                    .font(.title3)
-                                Text("📍\(context.attributes.placeName.removingEmojis)")
-                            }
-                        }
-                        HStack {
                             VStack(alignment: .leading) {
-                                Text("Temps:")
+                                Text("Temps")
                                     .font(.footnote)
                                 Text(context.state.startedAt, style: .timer)
                                     .font(.title3)
                                     .monospacedDigit()
                             }
                             VStack(alignment: .center) {
-                                Text("Started time:")
+                                Text("Started time")
                                     .font(.footnote)
                                 Text(context.state.startedAt, style: .time)
                                     .font(.body)
@@ -108,7 +104,7 @@ struct WuFlowWidgetLiveActivity: Widget {
                                     .foregroundColor(.secondary)
                             }
                         }
-                        .padding(.horizontal)
+                        SessionProgressView(context: context)
                     }
                 }
             } compactLeading: {
@@ -121,7 +117,7 @@ struct WuFlowWidgetLiveActivity: Widget {
                 )
                 .monospacedDigit()
             } minimal: {
-                Text("🏋️")
+                Text("🌿")
             }
         }
     }
@@ -195,7 +191,7 @@ struct WuFlowWidgetLiveActivity: Widget {
 } contentStates: {
     .oneHour
 }
-#Preview("Compact", as: .dynamicIsland(.minimal), using: PlaceSessionAttributes.preview) {
+#Preview("Minimal", as: .dynamicIsland(.minimal), using: PlaceSessionAttributes.preview) {
     WuFlowWidgetLiveActivity()
 } contentStates: {
     .oneHour

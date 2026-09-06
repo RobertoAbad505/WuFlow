@@ -70,20 +70,14 @@ final class LocationAutomationEngine {
             activity: activity,
             regionIdentifier: regionIdentifier,
             trigger: .location,
-            icon: activity.iconName) else {
+            icon: activity.iconName
+        ) else {
             return
         }
 
-        let expectedDuration = await sessionManager.expectedDuration(
-            for: activity
-        )
         do {
             await liveActivityManager.ensureLiveActivity(
-                for: makeLiveSession(
-                    activity: activity,
-                    session: session,
-                    expectedDuration: expectedDuration
-                )
+                for: session
             )
         } catch {
             print("Failed to start Live Activity:", error)

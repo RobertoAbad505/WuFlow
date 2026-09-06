@@ -28,23 +28,43 @@ actor SessionManager {
         regionIdentifier: String,
         trigger: SessionTrigger,
         icon: String? = nil
-    ) async -> PlaceSession?{
+    ) async -> ActivePlaceSession? {
+
         do {
-            if let activeSession = try await repository.activePlaceSession(regionIdentifier: regionIdentifier) {
+            if let activeSession = try await repository.activePlaceSession(
+                regionIdentifier: regionIdentifier
+            ) {
                 print("⚠️ Session already active.")
-                print("Returning existing session")
-                return activeSession
+                
+                return activeSession.activePlaceSession(
+                    expectedDuration: nil
+                )
             }
+
             let session = try await repository.createPlaceSession(
                 activity: activity,
                 regionIdentifier: regionIdentifier,
                 trigger: trigger,
                 icon: icon
             )
-            print("✅ Session started \(session.id) in \(session.place.name)")
-            return session
+
+            let historicalSessions = try await repository.placeSessions(
+                for: activity.id
+            )
+
+            let expectedDuration = await durationCalculator.expectedDuration(
+                from: historicalSessions
+            )
+
+            print("✅ Session started")
+            print("Expected duration:", expectedDuration ?? 0)
+
+            return session.activePlaceSession(
+                expectedDuration: expectedDuration
+            )
+
         } catch {
-            print(error)
+            print("❌ Failed to start session:", error)
             return nil
         }
     }
