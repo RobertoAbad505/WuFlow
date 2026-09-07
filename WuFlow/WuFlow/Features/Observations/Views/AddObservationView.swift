@@ -28,12 +28,15 @@ struct AddObservationView: View {
         ImageStore.shared.load(from: imagePath, category: .activity)
     }
     
+    let onDismiss: ((ObservationRecord?) -> Void)
+    
     var body: some View {
         VStack(alignment: .leading){
             content
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
         .background(.ultraThinMaterial)
         .fullScreenCover(isPresented: $cameraManager.showImagePicker) {
             ImagePicker(
@@ -85,28 +88,35 @@ struct AddObservationView: View {
         }
     }
     var content: some View {
-        VStack{
-            Text("What is your observation for \(activity.name)?👀")
+        VStack {
+            titleHeader
+            textInputView
             preview
-            TextEditor(text: $note)
-                .textFieldStyle(.roundedBorder)
-                .frame(height: 120)
-                .padding(8)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(.ultraThinMaterial)
-                )
             actions
-            Button(action: {
-                dismiss()
-            }, label: {
-                Image(systemName: "clear")
-                    .font(.system(size: 15))
-                Text("Cancel")
-            })
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: 40)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 25))
+        }
+    }
+    private var titleHeader: some View {
+        VStack {
+            Text("What is your observation for \(activity.name)?\n👀")
+                .font(.title2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+    private var textInputView: some View {
+        VStack {
+            ZStack {
+                if note.isEmpty {
+                    Text("I want to feel more focused, calm, and in control...")
+                        .foregroundColor(.secondary.opacity(0.6))
+                        .padding(.horizontal, 8)
+                        .padding(.top, 12)
+                }
+                TextEditor(text: $note)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(height: 120)
+                    .textEditorStyle(.plain)
+            }
+            TextField("Emotion", text: $emotion, prompt: Text("Pick an emoji for this feeling"))
         }
     }
     private var actions: some View {
@@ -155,6 +165,19 @@ struct AddObservationView: View {
                 Text("Add Observation")
                 Image(systemName: "plus")
             })
+            .frame(maxWidth: .infinity, maxHeight: 40)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 25))
+            
+            Button(action: {
+                dismiss()
+            }, label: {
+                Image(systemName: "clear")
+                    .font(.system(size: 15))
+                Text("Cancel")
+            })
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: 40)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 25))
         }
         
     }
@@ -165,7 +188,7 @@ struct AddObservationView: View {
                     .resizable()
                     .scaledToFill()
                     .frame(height: 150)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: 150)
                     .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .symbolEffect(.pulse)
@@ -175,18 +198,25 @@ struct AddObservationView: View {
     }
     
     func save() {
-        let newObservation = ObservationRecord(date: .now,
-                                               note: note,
-                                               emotion: emotion,
-                                               imagePath: nil,
-                                               activity: self.activity
+        let newObservation = ObservationRecord(
+            date: .now,
+            note: note,
+            emotion: emotion,
+            imagePath: self.imagePath,
+            activity: self.activity
         )
+        onDismiss(newObservation)
+        dismiss()
     }
 }
 
 #Preview {
+    
     AddObservationView(activity: .init(name: "Gym",
                                        unitType: .count,
-                                       goalValue: 2), cameraManager: .init()
+                                       goalValue: 2), cameraManager: .init(), onDismiss: { new in
+        print("dismissed")
+        print("\(new?.note ?? "no note")")
+    }
     )
 }

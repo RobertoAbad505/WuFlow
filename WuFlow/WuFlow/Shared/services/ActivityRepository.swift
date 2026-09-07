@@ -326,10 +326,6 @@ extension ActivityRepository {
 
         try modelContext.save()
     }
-//    func deletePlace(_ place: Place) throws {
-//        modelContext.delete(place)
-//        try modelContext.save()
-//    }
 }
 //Place persistance endpoints
 extension ActivityRepository {
@@ -545,5 +541,29 @@ extension ActivityRepository {
         )
 
         return try modelContext.fetch(descriptor)
+    }
+}
+
+//Observation persistance
+extension ActivityRepository {
+    func createObservation( _ observation: ObservationRecord, _ activity: Activity) throws -> ObservationRecord {
+        activity.observations.append(observation)
+        observation.activity = activity
+        modelContext.insert(observation)
+        try modelContext.save()
+        return observation
+    }
+    func deleteAllObservations() throws {
+        let descriptor = FetchDescriptor<ObservationRecord>()
+
+        let observations = try modelContext.fetch(descriptor)
+
+        for observation in observations {
+            modelContext.delete(observation)
+        }
+
+        try modelContext.save()
+
+        print("🗑️ Deleted \(observations.count) observations")
     }
 }

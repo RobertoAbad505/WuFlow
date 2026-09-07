@@ -17,6 +17,7 @@ struct ActivityDetailView: View {
     @Environment(HealthKitSyncService.self)
     private var healthKit
     @Query var records: [ProgressRecord] = []
+    @Query var observations: [ObservationRecord] = []
     
     @State var presentAddProgress: Bool = false
     @State var presentEditProcess: Bool = false
@@ -84,12 +85,20 @@ struct ActivityDetailView: View {
     
     init(activity: Activity) {
         self.activity = activity
-        
+
         let activityID = activity.id
-        
+
         _records = Query(
             filter: #Predicate<ProgressRecord> { record in
                 record.activity.id == activityID
+            },
+            sort: \.date,
+            order: .reverse
+        )
+
+        _observations = Query(
+            filter: #Predicate<ObservationRecord> { observation in
+                observation.activity.id == activityID
             },
             sort: \.date,
             order: .reverse
@@ -161,7 +170,23 @@ struct ActivityDetailView: View {
             ReminderSettingsView(activity: activity)
         }
         .sheet(isPresented: $presentCreateObservation) {
-            AddObservationView(activity: activity)
+            AddObservationView(activity: activity) { newObservation in
+                
+                guard let repository, let newObservation else {
+                    return
+                }
+                Task {
+                    do{
+                        let observation = try await repository.createObservation(newObservation, activity)
+                        print("✅ Observation saved:", observation.id)
+                        print("Activity:", observation.activity.name)
+                        print("New observation👀 created!")
+                    } catch let error {
+                        print("Error creating observation: \(error.localizedDescription)")
+                    }
+                    
+                }
+            }
         }
         .fullScreenCover(isPresented: $presentEditProcess) {
             CreateActivityView(mode: .edit(self.activity))
@@ -173,6 +198,7 @@ struct ActivityDetailView: View {
             VStack {
                 VStack(spacing: 24) {
                     heroSection
+                    observationsSection
                     trackingSection
                     meaningSection
                     insightsSection
@@ -190,16 +216,27 @@ struct ActivityDetailView: View {
 extension ActivityDetailView {
     var observationsSection: some View {
         VStack {
-            if activity.observations.count > 0 {
-                Text("Observations")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                ForEach(activity.observations) { observation in
-                    ActivityObservationView(observation: observation)
+            if self.observations.count > 0 {
+                VStack {
+                    Text("Observations")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    ForEach(self.observations) { observation in
+                        ActivityObservationView(observation: observation)
+                    }
+                    
+                    Button(action: {
+                        Task {
+                            try? await repository?.deleteAllObservations()
+                        }
+                    }, label: {
+                        Text("Delete all observations")
+                    })
                 }
+                .padding()
+                
             }
         }
-        .padding()
         .background(
             RoundedRectangle(cornerRadius: 28)
                 .fill(.regularMaterial)

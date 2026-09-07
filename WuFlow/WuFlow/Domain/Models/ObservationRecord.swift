@@ -25,14 +25,14 @@ final class ObservationRecord {
     /// Local path managed by ImageStore.
     var imagePath: String?
 
-    var activity: Activity?
+    var activity: Activity
 
     init(
         date: Date = .now,
         note: String,
         emotion: String? = nil,
         imagePath: String? = nil,
-        activity: Activity? = nil
+        activity: Activity
     ) {
         self.id = UUID()
         self.date = date
