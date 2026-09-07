@@ -21,6 +21,7 @@ struct ActivityDetailView: View {
     @State var presentAddProgress: Bool = false
     @State var presentEditProcess: Bool = false
     @State var presentRemindersProcess: Bool = false
+    @State var presentCreateObservation: Bool = false
     
     let activity: Activity
     @State private var selectedFilter: TimeFilter = .last7Days
@@ -159,6 +160,9 @@ struct ActivityDetailView: View {
         .sheet(isPresented: $presentRemindersProcess) {
             ReminderSettingsView(activity: activity)
         }
+        .sheet(isPresented: $presentCreateObservation) {
+            AddObservationView(activity: activity)
+        }
         .fullScreenCover(isPresented: $presentEditProcess) {
             CreateActivityView(mode: .edit(self.activity))
         }
@@ -184,7 +188,24 @@ struct ActivityDetailView: View {
     }
 }
 extension ActivityDetailView {
-    
+    var observationsSection: some View {
+        VStack {
+            if activity.observations.count > 0 {
+                Text("Observations")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                ForEach(activity.observations) { observation in
+                    ActivityObservationView(observation: observation)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+        )
+        .cornerRadius(20)
+    }
     var heroSection: some View {
         VStack(spacing: 15) {
             // Identity
@@ -257,6 +278,17 @@ extension ActivityDetailView {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
             }
+            Button {
+                presentCreateObservation.toggle()
+            } label: {
+                Label("Add observation ☯️👀",
+                      systemImage: "plus.circle")
+                    .font(.headline)
+            }
+            .tint(.black)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
         }
     }
     var identity: some View {

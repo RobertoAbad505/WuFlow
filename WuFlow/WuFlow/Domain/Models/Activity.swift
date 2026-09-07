@@ -68,6 +68,10 @@ final class Activity {
     // Relationship
     @Relationship(deleteRule: .cascade)
     var progressRecords: [ProgressRecord] = []
+    
+    @Relationship(deleteRule: .cascade)
+    var observations: [ObservationRecord] = []
+    
     var place: Place?
     
     init(

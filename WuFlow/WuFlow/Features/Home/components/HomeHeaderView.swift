@@ -39,7 +39,7 @@ private extension HomeHeaderView {
             Image(imageName)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 120, height: 120)
+                .frame(width: 130, height: 140)
                 .clipShape(Circle())
                 .overlay {
                     Circle().stroke(.white, lineWidth: 5)

@@ -94,6 +94,7 @@
 				"Domain/Models/Activity+Properties.swift",
 				Domain/Models/AutomationConfiguration.swift,
 				Domain/Models/LifeArea.swift,
+				Domain/Models/ObservationRecord.swift,
 				Domain/Models/Place.swift,
 				Domain/Models/PlaceSession.swift,
 				Domain/Models/ProgressRecord.swift,
