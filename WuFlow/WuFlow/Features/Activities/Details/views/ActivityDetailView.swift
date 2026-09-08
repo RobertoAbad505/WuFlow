@@ -18,12 +18,14 @@ struct ActivityDetailView: View {
     private var healthKit
     @Query var records: [ProgressRecord] = []
     @Query var observations: [ObservationRecord] = []
+    @Query var sessions: [PlaceSession]
     
     @State var presentAddProgress: Bool = false
     @State var presentEditProcess: Bool = false
     @State var presentRemindersProcess: Bool = false
     @State var presentCreateObservation: Bool = false
     
+    private let insightEngine = InsightEngine()
     let activity: Activity
     @State private var selectedFilter: TimeFilter = .last7Days
     @State private var showDeleteDialog = false
@@ -80,7 +82,12 @@ struct ActivityDetailView: View {
             records: records
         )
     }
-    
+    private var typicalSessionInsight: Insight? {
+        insightEngine.typicalSessionInsight(
+            for: activity,
+            sessions: sessions
+        )
+    }
     // MARK: - Init
     
     init(activity: Activity) {
@@ -103,6 +110,13 @@ struct ActivityDetailView: View {
             sort: \.date,
             order: .reverse
         )
+        _sessions = Query(
+                filter: #Predicate<PlaceSession> { session in
+                    session.activity?.id == activityID
+                },
+                sort: \.startedAt,
+                order: .reverse
+            )
     }
     
     var body: some View {
@@ -391,7 +405,10 @@ extension ActivityDetailView {
             
             Text("Your patterns")
                 .font(.headline)
-            VStack(spacing: 12) {                
+            if let typicalSessionInsight {
+                InsightCard(insight: typicalSessionInsight)
+            }
+            VStack(spacing: 12) {
                 InsightRow(
                     icon: "flame.fill",
                     color: .red,

@@ -30,7 +30,7 @@ final class PlaceSession {
     var icon: String?
 
     @Relationship
-    var place: Place
+    var place: Place?
     
     @Relationship
     var activity: Activity?
@@ -47,6 +47,13 @@ final class PlaceSession {
         self.activity = activity
         self.triggerValue = trigger.rawValue
         self.icon = icon
+    }
+    
+    init(startedAt: Date, endedAt: Date) {
+        self.id = UUID()
+        self.startedAt = startedAt
+        self.endedAt = endedAt
+        self.triggerValue = "manual"
     }
 
     func end() {
@@ -81,7 +88,7 @@ extension PlaceSession {
     ) -> ActivePlaceSession {
         ActivePlaceSession(
             sessionID: id,
-            placeName: place.name,
+            placeName: place?.name ?? "place unkown",
             startedAt: startedAt,
             icon: icon ?? "circle.dotted",
             expectedDuration: expectedDuration

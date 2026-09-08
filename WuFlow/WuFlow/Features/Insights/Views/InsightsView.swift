@@ -7,8 +7,12 @@
 import SwiftUI
 
 struct InsightsView: View {
+    var engine: InsightEngine = .init()
+    
     var body: some View {
-        Text("Insights starting soon")
+        Text("Insights")
+            .font(.title2)
+        
     }
 }
 #Preview {

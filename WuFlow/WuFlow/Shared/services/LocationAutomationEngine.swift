@@ -114,7 +114,7 @@ final class LocationAutomationEngine {
                 
         ActivePlaceSession(
             sessionID: session.id,
-            placeName: session.place.name,
+            placeName: session.place?.name ?? "",
             startedAt: session.startedAt,
             icon: activity.iconName,
             expectedDuration: nil

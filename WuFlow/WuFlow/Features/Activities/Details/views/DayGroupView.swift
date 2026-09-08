@@ -82,7 +82,7 @@ struct ProgressRecordRow: View {
                 if let session = record.placeSession {
                     HStack(spacing: 5) {
                         Image(systemName: "location.fill")
-                        Text(session.place.name)
+                        Text(session.place?.name ?? "")
                         if let duration = session.duration {
                             Text("·")
                             Text(session.formattedDuration)

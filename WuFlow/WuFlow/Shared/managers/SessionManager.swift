@@ -71,7 +71,7 @@ actor SessionManager {
     func endSession(regionIdentifier: String) async -> PlaceSession? {
         do {
             let sessionEnded = try await repository.endPlaceSession(regionIdentifier: regionIdentifier)
-            print("Session at \(sessionEnded.place.name) ended; active:", sessionEnded.isActive)
+            print("Session at \(sessionEnded.place?.name) ended; active:", sessionEnded.isActive)
             return sessionEnded
         } catch {
             print("""

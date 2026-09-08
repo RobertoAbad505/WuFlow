@@ -153,7 +153,7 @@ final class NotificationManager {
 
         sendNotification(
             title: "🏁 Session Complete",
-            body: "You spent \(session.formattedDuration) at \(session.place.name). Record today's \(activity.name)?",
+            body: "You spent \(session.formattedDuration) at \(session.place?.name). Record today's \(activity.name)?",
             identifier: "session_end_\(session.id)",
             category: NotificationCategory.sessionCompleted,
             userInfo: [
