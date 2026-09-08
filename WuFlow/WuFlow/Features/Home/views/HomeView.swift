@@ -263,11 +263,6 @@ struct QuickActionButton: View {
         .buttonStyle(.plain)
     }
 }
-struct InsightsView: View {
-    var body: some View {
-        Text("Insights coming soon")
-    }
-}
 struct ProgressRingView: View {
     
     let progress: Double

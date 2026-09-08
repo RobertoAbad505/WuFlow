@@ -14,6 +14,7 @@ final class SessionDurationCalculator {
 
         let durations = sessions
             .compactMap(\.duration)
+            .filter { $0 > 0 }
             .sorted()
 
         guard durations.count >= 3 else {

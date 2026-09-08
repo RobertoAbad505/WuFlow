@@ -44,6 +44,41 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
+      <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "6F70F883304F843B007F7931"
+               BuildableName = "WuFlowTests.xctest"
+               BlueprintName = "WuFlowTests"
+               ReferencedContainer = "container:WuFlow.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "6F7121182F75BBA3001CEF33"
+               BuildableName = "WuFlowTests.xctest"
+               BlueprintName = "WuFlowTests"
+               ReferencedContainer = "container:WuFlow.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "6F7121222F75BBA3001CEF33"
+               BuildableName = "WuFlowUITests.xctest"
+               BlueprintName = "WuFlowUITests"
+               ReferencedContainer = "container:WuFlow.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

@@ -2,10 +2,11 @@
 //  WuFlowTests.swift
 //  WuFlowTests
 //
-//  Created by Roberto Ramirez on 3/26/26.
+//  Created by Roberto Ramirez on 9/7/26.
 //
 
 import XCTest
+@testable import WuFlow
 
 final class WuFlowTests: XCTestCase {
 
@@ -23,6 +24,8 @@ final class WuFlowTests: XCTestCase {
         // Any test you write for XCTest can be annotated as throws and async.
         // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
         // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+        // XCTest Documentation
+        // https://developer.apple.com/documentation/xctest
     }
 
     func testPerformanceExample() throws {
