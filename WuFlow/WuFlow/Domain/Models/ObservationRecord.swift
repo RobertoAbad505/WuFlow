@@ -26,13 +26,15 @@ final class ObservationRecord {
     var imagePath: String?
 
     var activity: Activity
+    var kindRaw: String?
 
     init(
         date: Date = .now,
         note: String,
         emotion: String? = nil,
         imagePath: String? = nil,
-        activity: Activity
+        activity: Activity,
+        kind: ObservationKind = .note
     ) {
         self.id = UUID()
         self.date = date
@@ -40,5 +42,24 @@ final class ObservationRecord {
         self.emotion = emotion
         self.imagePath = imagePath
         self.activity = activity
+        self.kindRaw = kind.rawValue
     }
+}
+extension ObservationRecord {
+    var kind: ObservationKind {
+        get {
+            guard let kindRaw else {
+                return .note
+            }
+
+            return ObservationKind(rawValue: kindRaw) ?? .note
+        }
+        set {
+            kindRaw = newValue.rawValue
+        }
+    }
+}
+enum ObservationKind: String, Codable {
+    case note
+    case incident
 }

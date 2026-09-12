@@ -73,7 +73,16 @@ struct ActivityDetailView: View {
     }
     let progressCalculator: ProgressCalculator = .init()
     
-    //Streak
+    //Decrease calculator
+    private let decreaseActivityCalculator = DecreaseActivityCalculator()
+
+    private var decreaseSummary: DecreaseActivitySummary {
+        decreaseActivityCalculator.calculate(
+            activity: activity,
+            observations: observations
+        )
+    }
+    //Streak calc
     private let streakCalculator = StreakCalculator()
 
     private var streakCount: Int {
@@ -82,8 +91,8 @@ struct ActivityDetailView: View {
             records: records
         )
     }
-    private var typicalSessionInsight: Insight? {
-        insightEngine.typicalSessionInsight(
+    private var insights: [Insight] {
+        insightEngine.insights(
             for: activity,
             sessions: sessions
         )
@@ -170,13 +179,6 @@ struct ActivityDetailView: View {
                 }
             }
         })
-//        .onAppear {
-//            let records = try? repository?.progressRecords(for: activity)
-//            print("🔥 DIRECT QUERY:", records?.count ?? 0)
-//            records?.forEach {
-//                print("DIRECT:", $0.date, $0.value)
-//            }
-//        }
         .sheet(isPresented: $presentAddProgress) {
             AddActivityProgressView(activity: activity)
         }
@@ -287,6 +289,10 @@ extension ActivityDetailView {
     }
     var heroButtons: some View {
         VStack {
+            if activity.type == .decrease {
+                Text("Incidents: \(decreaseSummary.incidentCount)")
+            }
+            
             if activity.allowsManualProgress || true {
                 // CTA (important positioning)
                 Button {
@@ -405,10 +411,28 @@ extension ActivityDetailView {
             
             Text("Your patterns")
                 .font(.headline)
-            if let typicalSessionInsight {
-                InsightCard(insight: typicalSessionInsight)
+            ForEach(insights) { insight in
+                InsightRow(icon: "lightbulb.fill",
+                           color: .black,
+                           title: insight.title,
+                           subtitle: insight.message)
             }
+//            if let sessionConsistencyInsight {
+//                InsightRow(icon: "lightbulb.fill",
+//                           color: .black,
+//                           title: sessionConsistencyInsight.title,
+//                           subtitle: sessionConsistencyInsight.message)
+//            }
+//            if let typicalSessionInsight {
+////                InsightCard(insight: typicalSessionInsight)
+////                    .frame(maxWidth: .infinity)
+//                InsightRow(icon: "lightbulb.fill",
+//                           color: .black,
+//                           title: typicalSessionInsight.title,
+//                           subtitle: typicalSessionInsight.message)
+//            }
             VStack(spacing: 12) {
+                
                 InsightRow(
                     icon: "flame.fill",
                     color: .red,

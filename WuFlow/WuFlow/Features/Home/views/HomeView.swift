@@ -14,6 +14,21 @@ struct HomeView: View {
     @State private var isPresentedAddProgress: Bool = false
     let progressCalculator: ProgressCalculator = .init()
     
+    let insightEngine: InsightEngine = .init()
+    private var insightStartDate: Date {
+        Calendar.current.date(
+            byAdding: .day,
+            value: -30,
+            to: .now
+        ) ?? .distantPast
+    }
+    private var generalInsights: [Insight] {
+        insightEngine.generalInsights(
+            from: progressRecords,
+            endingAt: insightStartDate
+        )
+    }
+    
     @Query(
         sort: [
             SortDescriptor(\Activity.pinPriority, order: .reverse),
@@ -117,6 +132,7 @@ struct HomeView: View {
                 dailySummarySection
                 focusSection
                 quickActionsSection
+                insightSection
             }
             .padding()
         }
@@ -193,6 +209,9 @@ struct HomeView: View {
                         FocusCardView(item: item) {
                             router.homePath.append(ActivitiesRoute.detail(item.activity))
                         }
+                        .onAppear {
+                            print("Rendering: \(item.activity.name)")
+                        }
                     }
                 }
             }
@@ -232,6 +251,21 @@ struct HomeView: View {
                         print("Navigate to Places view!!🚀 ")
                     router.homePath.append(ActivitiesRoute.places)
                 }
+            }
+        }
+        .padding()
+        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24))
+    }
+    var insightSection: some View {
+        VStack {
+            Text("Insights")
+                .font(.headline)
+                .bold(true)
+            ForEach(generalInsights) { insight in
+                InsightRow(icon: "lightbulb.fill",
+                           color: .yellow,
+                           title: insight.title,
+                           subtitle: insight.message)
             }
         }
         .padding()

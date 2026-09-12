@@ -125,6 +125,9 @@ struct ActivityListView: View {
                     ActivityRowCard(summary: summary)
                         .shadow(color: .black.opacity(0.2), radius: 5, x: 5, y: 10)
                 }
+                .onAppear {
+                    print("Rendering: \(summary.activity.name)")
+                }
                 .contextMenu {
                     Button(role: .destructive) {
                         selectedToDelete = summary.activity

@@ -46,7 +46,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6F7121182F75BBA3001CEF33"
+               BlueprintIdentifier = "6F70F883304F843B007F7931"
                BuildableName = "WuFlowTests.xctest"
                BlueprintName = "WuFlowTests"
                ReferencedContainer = "container:WuFlow.xcodeproj">

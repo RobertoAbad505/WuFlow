@@ -83,6 +83,13 @@
 			);
 			target = 6F7BF20930113A1C00BB71D7 /* WuFlowWidgetExtension */;
 		};
+		6FF7362E30510BD100FF48EA /* Exceptions for "WuFlow" folder in "WuFlowTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/services/GeneralInsightEngine.swift,
+			);
+			target = 6F70F883304F843B007F7931 /* WuFlowTests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -96,6 +103,7 @@
 			exceptions = (
 				6F04CA982FB276A4000B57CE /* Exceptions for "WuFlow" folder in "WuFlow" target */,
 				6F7BF22B3011458D00BB71D7 /* Exceptions for "WuFlow" folder in "WuFlowWidgetExtension" target */,
+				6FF7362E30510BD100FF48EA /* Exceptions for "WuFlow" folder in "WuFlowTests" target */,
 			);
 			path = WuFlow;
 			sourceTree = "<group>";

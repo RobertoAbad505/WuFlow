@@ -15,6 +15,7 @@ enum LifeArea: String, CaseIterable, Codable {
     case work          // career, productivity, projects
     case social        // relationships, friends, family
     case leisure       // hobbies, fun, rest
+    case undefined
 }
 
 extension LifeArea {
@@ -27,6 +28,7 @@ extension LifeArea {
         case .work: return "Work"
         case .social: return "Social"
         case .leisure: return "Leisure"
+        case .undefined: return "Undefined"
         }
     }
     
@@ -38,6 +40,7 @@ extension LifeArea {
         case .work: return "briefcase.fill"
         case .social: return "person.2.fill"
         case .leisure: return "leaf.fill"
+        case .undefined: return "question"
         }
     }
     var color: Color {
@@ -48,6 +51,7 @@ extension LifeArea {
         case .work: return .orange
         case .social: return .green
         case .leisure: return .teal
+        case .undefined: return .gray
         }
     }
 }

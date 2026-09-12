@@ -53,7 +53,7 @@ extension Activity {
     }
     var lifeArea: LifeArea {
         get {
-            LifeArea(rawValue: lifeAreaRaw ?? "") ?? .social
+            LifeArea(rawValue: lifeAreaRaw ?? "") ?? .undefined
         }
         set {
             lifeAreaRaw = newValue.rawValue
