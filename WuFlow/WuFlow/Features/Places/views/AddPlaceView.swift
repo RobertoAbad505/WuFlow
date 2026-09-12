@@ -18,6 +18,9 @@ struct AddPlaceView: View {
     @State private var name = ""
     @State private var radius: CLLocationDistance = 100
 
+    @State private var latitudeText: String = ""
+    @State private var longitudeText: String = ""
+    
     @State private var latitude: Double?
     @State private var longitude: Double?
     @State private var isSaving = false
@@ -34,6 +37,8 @@ struct AddPlaceView: View {
             _radius = State(initialValue: updatePlace.radius)
             _latitude = State(initialValue: updatePlace.latitude)
             _longitude = State(initialValue: updatePlace.longitude)
+            _latitudeText = State(initialValue: updatePlace.latitude.description)
+            _longitudeText = State(initialValue: updatePlace.longitude.description)
             _isEditing = State(initialValue: true)
             _isMonitored = State(initialValue: updatePlace.isMonitored)
         }
@@ -90,13 +95,67 @@ private extension AddPlaceView {
     var locationSection: some View {
 
         VStack(alignment: .leading, spacing: 16) {
-            Text("Current Location")
+            Text("Stored Location")
                 .font(.headline)
-            Group {
+            if isEditing {
+                locationEditionView
+            } else {
+                locationDataInfo
+            }
+            Button {
+                captureCurrentLocation()
+            } label: {
+                Label("Use Current Location", systemImage: "location.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
 
+    }
+    private func coordinateField(
+        title: String,
+        placeholder: String,
+        text: Binding<String>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            TextField(placeholder, text: text)
+                .keyboardType(.numbersAndPunctuation)
+                .textFieldStyle(.roundedBorder)
+        }
+    }
+    var locationEditionView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+
+            Text("Enter coordinates manually")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 12) {
+                coordinateField(
+                    title: "Latitude",
+                    placeholder: "19.4326",
+                    text: $latitudeText
+                )
+
+                coordinateField(
+                    title: "Longitude",
+                    placeholder: "-99.1332",
+                    text: $longitudeText
+                )
+            }
+        }
+    }
+    var locationDataInfo: some View {
+        VStack {
+            Group {
                 if let latitude,
                    let longitude {
-
                     VStack(alignment: .leading, spacing: 8) {
                         Label(
                             "Location Captured",
@@ -115,17 +174,7 @@ private extension AddPlaceView {
                         .foregroundStyle(.secondary)
                 }
             }
-            Button {
-                captureCurrentLocation()
-            } label: {
-                Label("Use Current Location", systemImage: "location.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
         }
-        .padding()
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
-
     }
     var radiusSection: some View {
 
@@ -199,6 +248,8 @@ private extension AddPlaceView {
             await MainActor.run {
                 latitude = location.coordinate.latitude
                 longitude = location.coordinate.longitude
+                latitudeText = "\(location.coordinate.latitude)"
+                longitudeText = "\(location.coordinate.longitude)"
                 isSaving = false
             }
         }
@@ -206,7 +257,9 @@ private extension AddPlaceView {
 
     func save() {
 
-        guard let repository, let latitude, let longitude else {
+        guard let repository,
+              let latitude = Double(latitudeText),
+              let longitude = Double(longitudeText) else {
             return
         }
         isSaving = true

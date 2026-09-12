@@ -58,6 +58,23 @@ actor ActivityRepository {
         modelContext.delete(activity)
         try modelContext.save()
     }
+    func deleteMostRecentlyCreatedActivity() throws -> Bool {
+        var descriptor = FetchDescriptor<Activity>(
+            sortBy: [
+                SortDescriptor(\Activity.createdAt, order: .reverse)
+            ]
+        )
+
+        descriptor.fetchLimit = 1
+
+        guard let activity = try modelContext.fetch(descriptor).first else {
+            return false
+        }
+        
+        modelContext.delete(activity)
+        try modelContext.save()
+        return true
+    }
     func togglePinned(id: UUID) throws {
         guard let activity = try activity(id: id) else {
             return
