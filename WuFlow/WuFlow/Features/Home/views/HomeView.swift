@@ -10,7 +10,7 @@ import SwiftData
 
 struct HomeView: View {
     @EnvironmentObject var router: Router
-    @Environment(\.modelContext) var modelContext
+    @Environment(\.repository) private var repository
     @State private var isPresentedAddProgress: Bool = false
     let progressCalculator: ProgressCalculator = .init()
     
@@ -133,10 +133,23 @@ struct HomeView: View {
                 focusSection
                 quickActionsSection
                 insightSection
+                developmentTools
             }
             .padding()
         }
         .scrollBounceBehavior(.basedOnSize)
+    }
+    var developmentTools: some View {
+        VStack{
+            Button(action: {
+                guard let repository else { return }
+                Task {
+                    try? await repository.deleteMostRecentlyCreatedActivity()
+                }
+            }, label: {
+                Text("Delete last activity and observations")
+            })
+        }
     }
     var dailySummarySection: some View {
         VStack(alignment: .leading, spacing: 16) {

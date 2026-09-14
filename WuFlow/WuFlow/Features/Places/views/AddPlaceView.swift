@@ -21,6 +21,8 @@ struct AddPlaceView: View {
     @State private var latitudeText: String = ""
     @State private var longitudeText: String = ""
     
+    @State private var showLocationPicker = false
+    
     @State private var latitude: Double?
     @State private var longitude: Double?
     @State private var isSaving = false
@@ -76,11 +78,14 @@ private extension AddPlaceView {
         VStack(alignment: .leading, spacing: 8) {
             Text(isEditing ? "Edit Place":"Create a Place")
                 .font(.largeTitle.bold())
-            Text("""
-                This place can be assigned to activities and used for \
-                location automations.
-                """)
-            .foregroundStyle(.secondary)
+            
+            if !isEditing {
+                Text("""
+                    This place can be assigned to activities and used for \
+                    location automations.
+                    """)
+                .foregroundStyle(.secondary)
+            }
         }
     }
     
@@ -88,7 +93,7 @@ private extension AddPlaceView {
         VStack(alignment: .leading, spacing: 12) {
             Text("Name")
                 .font(.headline)
-            TextField("Gym", text: $name)
+            TextField("Gym, Store, Cafe", text: $name)
                 .textFieldStyle(.roundedBorder)
         }
     }
@@ -97,11 +102,7 @@ private extension AddPlaceView {
         VStack(alignment: .leading, spacing: 16) {
             Text("Stored Location")
                 .font(.headline)
-            if isEditing {
-                locationEditionView
-            } else {
-                locationDataInfo
-            }
+            locationEditionView
             Button {
                 captureCurrentLocation()
             } label: {
@@ -149,7 +150,31 @@ private extension AddPlaceView {
                     text: $longitudeText
                 )
             }
+            Button {
+                showLocationPicker = true
+            } label: {
+                Label(
+                    "Select on Map",
+                    systemImage: "map"
+                )
+            }
+            .sheet(isPresented: $showLocationPicker) {
+                
+                LocationPickerView(initialCoordinate: initialCoordinates) { coordinate in
+                    latitude = coordinate.latitude
+                    longitude = coordinate.longitude
+                    latitudeText = "\(coordinate.latitude)"
+                    longitudeText = "\(coordinate.longitude)"
+                }
+            }
         }
+    }
+    var initialCoordinates: CLLocationCoordinate2D? {
+        let latitude = Double(self.latitudeText)
+        let longitude = Double(self.longitudeText)
+        guard let latitude,
+              let longitude else { return nil }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
     var locationDataInfo: some View {
         VStack {

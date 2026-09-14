@@ -40,6 +40,7 @@ struct FocusCardView: View {
             .frame(minWidth: 120)
             .clipShape(RoundedRectangle(cornerRadius: 20))
         }
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
         .overlay {
             if item.progress.status == .exceeded {
                 RoundedRectangle(cornerRadius: 20)
@@ -54,9 +55,18 @@ struct FocusCardView: View {
         }
     }
     var activityImage: some View {
-        ActivityImageView(path: item.activity.imagePath, icon: item.activity.iconName)
-            .scaledToFill()
-            .frame(maxWidth: 150, maxHeight: 180)
+        VStack {
+            if item.activity.imagePath != nil {
+                ActivityImageView(path: item.activity.imagePath, icon: item.activity.iconName)
+                    .scaledToFill()
+            } else {
+                Image(systemName: item.activity.iconName ?? "circle.dotted")
+                    .scaledToFill()
+                    .font(Font.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundStyle(.yellow.opacity(0.6))
+            }
+        }
+        .frame(maxWidth: 150, maxHeight: 200)
     }
 }
 

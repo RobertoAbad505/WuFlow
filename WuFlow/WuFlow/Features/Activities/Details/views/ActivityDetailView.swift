@@ -201,8 +201,14 @@ struct ActivityDetailView: View {
                         print("Error creating observation: \(error.localizedDescription)")
                     }
                     
+                    await MainActor.run {
+                        presentCreateObservation = false
+                    }
                 }
             }
+//            .onDisappear {
+//                presentCreateObservation = false
+//            }
         }
         .fullScreenCover(isPresented: $presentEditProcess) {
             CreateActivityView(mode: .edit(self.activity))
@@ -240,7 +246,6 @@ extension ActivityDetailView {
                     ForEach(self.observations) { observation in
                         ActivityObservationView(observation: observation)
                     }
-                    
                     Button(action: {
                         Task {
                             try? await repository?.deleteAllObservations()
@@ -250,7 +255,6 @@ extension ActivityDetailView {
                     })
                 }
                 .padding()
-                
             }
         }
         .background(
@@ -289,24 +293,31 @@ extension ActivityDetailView {
     }
     var heroButtons: some View {
         VStack {
-            if activity.type == .decrease {
-                Text("Incidents: \(decreaseSummary.incidentCount)")
+            // CTA (important positioning)
+            Button {
+                presentAddProgress.toggle()
+            } label: {
+                Label("Add progress", systemImage: "plus.circle.fill")
+                    .font(.headline)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            
-            if activity.allowsManualProgress || true {
-                // CTA (important positioning)
-                Button {
-                    presentAddProgress.toggle()
-                } label: {
-                    Label("Add progress", systemImage: "plus.circle.fill")
-                        .font(.headline)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                }
-            }
+            //Create observation
+            Button(action: {
+                print("Create observation triggered!")
+                presentCreateObservation.toggle()
+            }, label: {
+                Label("Add observation ☯️👀", systemImage: "plus.circle")
+                .font(.headline)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background(Color.green)
+                .foregroundColor(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            })
             if activity.isAutomated && activity.trackingType == .healthSteps {
                 Button {
                     healthKit.sync()
@@ -320,8 +331,6 @@ extension ActivityDetailView {
                         .foregroundColor(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-            }
-            if activity.isAutomated && activity.trackingType == .healthSteps {
                 Button {
                     healthKit.resetTodayHealthStepSync(self.activity.id)
                 } label: {
@@ -335,17 +344,6 @@ extension ActivityDetailView {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
             }
-            Button {
-                presentCreateObservation.toggle()
-            } label: {
-                Label("Add observation ☯️👀",
-                      systemImage: "plus.circle")
-                    .font(.headline)
-            }
-            .tint(.black)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
         }
     }
     var identity: some View {
@@ -411,26 +409,17 @@ extension ActivityDetailView {
             
             Text("Your patterns")
                 .font(.headline)
+            
+            if activity.type == .decrease {
+                Text("\(decreaseSummary.incidentCount) Incidents")
+            }
+            
             ForEach(insights) { insight in
                 InsightRow(icon: "lightbulb.fill",
                            color: .black,
                            title: insight.title,
                            subtitle: insight.message)
             }
-//            if let sessionConsistencyInsight {
-//                InsightRow(icon: "lightbulb.fill",
-//                           color: .black,
-//                           title: sessionConsistencyInsight.title,
-//                           subtitle: sessionConsistencyInsight.message)
-//            }
-//            if let typicalSessionInsight {
-////                InsightCard(insight: typicalSessionInsight)
-////                    .frame(maxWidth: .infinity)
-//                InsightRow(icon: "lightbulb.fill",
-//                           color: .black,
-//                           title: typicalSessionInsight.title,
-//                           subtitle: typicalSessionInsight.message)
-//            }
             VStack(spacing: 12) {
                 
                 InsightRow(
