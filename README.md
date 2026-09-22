@@ -5,29 +5,51 @@
 </p>
 
 <p align="center">
-A native iOS habit tracker that reduces friction through automation.<br>
+A native iOS app for observing, tracking, and understanding personal behavior.<br>
 Built with <strong>SwiftUI</strong>, <strong>SwiftData</strong>, <strong>CoreLocation</strong>, <strong>HealthKit</strong>, and modern Apple frameworks.
 </p>
 
 ---
 
-# Overview
+## Overview
 
-WuFlow is a native iOS application designed around a simple idea:
+WuFlow started as a habit tracker, but evolved into something broader:
 
-> **The easiest habit to maintain is the one you don't have to remember.**
+> **Observe behavior before trying to change it.**
 
-Rather than relying entirely on manual interaction, WuFlow integrates with Apple system frameworks to automate habit tracking whenever possible.
+Instead of focusing only on whether a habit was completed, WuFlow explores the relationship between:
 
-Examples include:
+- **Intention** — what the user wants to build, maintain, or reduce
+- **Behavior** — what actually happens
+- **Context** — where and when behavior occurs
+- **Observation** — what the user notices about it
+- **Insight** — patterns derived from recorded behavior
 
-- 📍 Detecting when you arrive at the gym using geofencing
-- ❤️ Reading health data from HealthKit
-- 🔔 Triggering interactive notifications
-- ✅ Recording progress directly from a notification without opening the app
+The goal is to reduce the friction of collecting this information while keeping the user in control of how it is interpreted.
 
-The project is inspired by the Taoist concept of **Wu Wei (無為)**—often translated as *effortless action*—encouraging consistent progress while minimizing friction.
+WuFlow is also a technical exploration of modern native iOS development, combining system frameworks, local persistence, background automation, behavioral analysis, and testable domain logic.
 
+---
+
+# 🧘 Concept
+
+WuFlow takes inspiration from the Taoist concept of **Wu Wei (無為)**, often translated as *effortless action*.
+
+The project does not interpret this as eliminating effort. Instead, it explores how software can reduce unnecessary friction and encourage observation before intervention.
+
+For example, instead of requiring a user to remember to record a gym session:
+
+```text
+Arrive at the gym
+       ↓
+CoreLocation detects the place
+       ↓
+WuFlow creates a session
+       ↓
+The user receives contextual feedback
+       ↓
+Behavior is recorded with minimal interaction
+```
 ---
 
 # Features
