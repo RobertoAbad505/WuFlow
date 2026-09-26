@@ -26,6 +26,7 @@ struct AnimatedBackgroundView: View {
                 FloatingBlobView(config: blob)
             }
         }
+        .allowsHitTesting(false)
         .animation(.easeInOut(duration: 0.8), value: style) // 🔥 transition
     }
     

@@ -29,6 +29,9 @@ struct ActivityDetailView: View {
     let activity: Activity
     @State private var selectedFilter: TimeFilter = .last7Days
     @State private var showDeleteDialog = false
+    @State private var displayedCalendarMonth: Date = {
+        Calendar.current.startOfMonth(for: Date())
+    }()
     
     // MARK: - Computed
     var filteredRecords: [ProgressRecord] {
@@ -97,6 +100,50 @@ struct ActivityDetailView: View {
             sessions: sessions
         )
     }
+    @State private var selectedObservation: ObservationRecord?
+    @State private var selectedBehaviorDay: BehaviorDay?
+    
+    private var calendarMonthRange: DateInterval? {
+        Calendar.current.dateInterval(
+            of: .month,
+            for: Date()
+        )
+    }
+    private var currentMonth: Date {
+        behaviorCalendarCalendar.startOfMonth(
+            for: Date()
+        )
+    }
+    private var canGoNextCalendarMonth: Bool {
+        displayedCalendarMonth < currentMonth
+    }
+    private var behaviorCalendarCalendar: Calendar {
+        Calendar.current
+    }
+    private var displayedMonthRange: DateInterval? {
+        behaviorCalendarCalendar.dateInterval(
+            of: .month,
+            for: displayedCalendarMonth
+        )
+    }
+    private var behaviorCalendarData: BehaviorCalendarData? {
+        guard let range = displayedMonthRange else {
+            return nil
+        }
+
+        return behaviorCalendarDataCalculator.calculate(
+            progressRecords: records,
+            observations: observations,
+            from: range.start,
+            to: range.end,
+            calendar: behaviorCalendarCalendar
+        )
+    }
+    private let behaviorCalendarDataCalculator =
+        BehaviorCalendarDataCalculator()
+    private var isCurrentCalendarMonth: Bool {
+        displayedCalendarMonth == currentMonth
+    }
     // MARK: - Init
     
     init(activity: Activity) {
@@ -131,7 +178,7 @@ struct ActivityDetailView: View {
     var body: some View {
         ZStack {
             AnimatedBackgroundView(style: .calm)
-                .ignoresSafeArea()
+                .ignoresSafeArea()                
             content
         }
         .toolbar(content: {
@@ -200,18 +247,26 @@ struct ActivityDetailView: View {
                     } catch let error {
                         print("Error creating observation: \(error.localizedDescription)")
                     }
-                    
-                    await MainActor.run {
-                        presentCreateObservation = false
-                    }
                 }
             }
-//            .onDisappear {
-//                presentCreateObservation = false
-//            }
+            .onDisappear {
+                self.presentCreateObservation = false
+                print("Dismissed create observation")
+            }
+        }
+        .sheet(item: $selectedObservation) { observation in
+            ActivityObservationView(observation: observation)
         }
         .fullScreenCover(isPresented: $presentEditProcess) {
             CreateActivityView(mode: .edit(self.activity))
+        }
+        .sheet(item: $selectedBehaviorDay) { day in
+            BehaviorDayDetailView(
+                day: day,
+                mode: activity.type == .decrease
+                    ? .incidents
+                    : .progress
+            )
         }
     }
     var content: some View {
@@ -224,12 +279,12 @@ struct ActivityDetailView: View {
                     trackingSection
                     meaningSection
                     insightsSection
-                    chartSection
-                    recordsSection
+                    calendarComponentSection
+                    behavioralHistorySection
                     deleteButton
                 }
                 .padding()
-                .offset(y: !isPresentingImage ? 0: -150)
+//                .offset(y: !isPresentingImage ? 0: -150)
             }
         }
         .edgesIgnoringSafeArea(.top)
@@ -237,51 +292,75 @@ struct ActivityDetailView: View {
 }
 extension ActivityDetailView {
     var observationsSection: some View {
-        VStack {
+        VStack(spacing: 10) {
             if self.observations.count > 0 {
-                VStack {
+                HStack {
                     Text("Observations")
                         .font(.headline)
                         .foregroundColor(.primary)
+                }
+                .padding(10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.regularMaterial)
+                LazyVGrid(columns: .init(repeating: GridItem(.flexible()), count: 1), spacing: 20) {
                     ForEach(self.observations) { observation in
                         ActivityObservationView(observation: observation)
                     }
-                    Button(action: {
-                        Task {
-                            try? await repository?.deleteAllObservations()
-                        }
-                    }, label: {
-                        Text("Delete all observations")
-                    })
                 }
-                .padding()
+                .background(.clear)
+                
+//                HStack {
+//                    Spacer()
+//                    Button(action: {
+//                        Task {
+//                            try? await repository?.deleteAllObservations()
+//                        }
+//                    }, label: {
+//                        Text("Delete all observations")
+//                    })
+//                    Spacer()
+//                }
+//                .padding(10)
+//                .background(
+//                    RoundedRectangle(cornerRadius: 28)
+//                        .fill(.regularMaterial)
+//                )
+//                .padding(.top)
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 28)
-                .fill(.regularMaterial)
-        )
-        .cornerRadius(20)
+        .clipShape(RoundedRectangle(cornerRadius: 35))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    
+    @ViewBuilder
     var heroSection: some View {
+        switch activity.type {
+        case .increase, .maintain:
+            progressHeroSection
+
+        case .decrease:
+            decreaseHeroSection
+        }
+    }
+    var progressHeroSection: some View {
         VStack(spacing: 15) {
-            // Identity
             identity
-            
-            // Progress value
+
             VStack(spacing: 15) {
                 ProgressView(value: progress.ratio)
                     .tint(Color.colorForActivity(activity))
                     .animation(.easeInOut, value: progress.ratio)
+
                 Text(progress.description(activity.measurement))
                     .font(.headline)
-                // Feedback (THIS is the key)
+
                 Text(feedbackMessage())
                     .font(.subheadline)
                     .foregroundColor(colorForStatus)
                     .multilineTextAlignment(.center)
             }
             .padding(.leading)
+
             heroButtons
         }
         .padding()
@@ -290,6 +369,51 @@ extension ActivityDetailView {
                 .fill(.regularMaterial)
         )
         .cornerRadius(20)
+    }
+    var decreaseHeroSection: some View {
+        VStack(spacing: 20) {
+
+            identity
+
+            VStack(spacing: 8) {
+                Text(DurationFormatter.string(
+                    from: decreaseSummary.currentIncidentFreeDuration
+                ))
+                .font(.system(size: 40, weight: .bold))
+
+                Text("since your last incident")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            HStack(spacing: 12) {
+
+                DecreaseMetric(
+                    value: "\(decreaseSummary.incidentCount)",
+                    title: "Incidents",
+                    icon: "exclamationmark.circle"
+                )
+
+                DecreaseMetric(
+                    value: DurationFormatter.string(from: decreaseSummary.awarenessDuration),
+                    title: "Awareness",
+                    icon: "eye"
+                )
+            }
+            decreaseHeroButtons
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+        )
+        .cornerRadius(20)
+    }
+    @ViewBuilder
+    var decreaseHeroButtons: some View {
+        VStack {
+            addObservationButton
+        }
     }
     var heroButtons: some View {
         VStack {
@@ -305,19 +429,7 @@ extension ActivityDetailView {
                     .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            //Create observation
-            Button(action: {
-                print("Create observation triggered!")
-                presentCreateObservation.toggle()
-            }, label: {
-                Label("Add observation ☯️👀", systemImage: "plus.circle")
-                .font(.headline)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity)
-                .background(Color.green)
-                .foregroundColor(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-            })
+            addObservationButton
             if activity.isAutomated && activity.trackingType == .healthSteps {
                 Button {
                     healthKit.sync()
@@ -345,6 +457,22 @@ extension ActivityDetailView {
                 }
             }
         }
+    }
+    @ViewBuilder
+    var addObservationButton: some View {
+        //Create observation
+        Button(action: {
+            print("Create observation triggered!")
+            presentCreateObservation.toggle()
+        }, label: {
+            Label("Add observation ☯️👀", systemImage: "plus.circle")
+            .font(.headline)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(Color.green)
+            .foregroundColor(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        })
     }
     var identity: some View {
         VStack(alignment: .center, spacing: 6) {
@@ -404,7 +532,16 @@ extension ActivityDetailView {
         let hasOutcome = !(activity.expectedOutcomeDescription?.isEmpty ?? true)
         return hasMotivation || hasOutcome
     }
+    @ViewBuilder
     var insightsSection: some View {
+        switch activity.type {
+        case .increase, .maintain:
+            progressInsightsSection
+        case .decrease:
+            decreasePatternsSection
+        }
+    }
+    var progressInsightsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             
             Text("Your patterns")
@@ -453,7 +590,49 @@ extension ActivityDetailView {
                 .fill(.regularMaterial)
         )
     }
-    
+    var decreasePatternsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Your patterns")
+                .font(.headline)
+
+            DecreaseMetric(
+                value: DurationFormatter.string(
+                    from: decreaseSummary.longestIncidentFreeDuration
+                ),
+                title: "Longest incident-free",
+                icon: "chart.line.uptrend.xyaxis"
+            )
+            if let average = decreaseSummary.averageIncidentInterval {
+                DecreaseMetric(
+                    value: DurationFormatter.string(from: average),
+                    title: "Average time between incidents",
+                    icon: "arrow.left.arrow.right"
+                )
+            }
+            DecreaseMetric(
+                value: "\(decreaseSummary.incidentCount)",
+                title: "Incidents recorded",
+                icon: "exclamationmark.circle"
+            )
+            DecreaseMetric(
+                value: DurationFormatter.string(
+                    from: decreaseSummary.currentIncidentFreeDuration
+                ),
+                title: decreaseIncidentFreeDurationTitle,
+                icon: "clock"
+            )
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+        )
+    }
+    var decreaseIncidentFreeDurationTitle: String {
+        return decreaseSummary.incidentCount == 0
+        ? "Since you started"
+        : "Since last incident"
+    }
     func streakMessage(_ streakCount: Int) -> String {
         switch streakCount {
         case 0:
@@ -473,6 +652,132 @@ extension ActivityDetailView {
         let avg = totals.reduce(0, +) / Double(totals.count)
         
         return "\(Int(avg)) \(activity.unitType.rawValue)"
+    }
+    @ViewBuilder
+    var behavioralHistorySection: some View {
+        switch activity.type {
+        case .increase, .maintain:
+            VStack(spacing: 24) {
+                chartSection
+                recordsSection
+            }
+
+        case .decrease:
+            decreaseHistorySection
+        }
+    }
+    var calendarComponentSection: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text("Behavior history")
+                    .font(.headline)
+                Spacer()
+                if !isCurrentCalendarMonth {
+                    Button("Today") {
+                        displayedCalendarMonth = currentMonth
+                    }
+                    .font(.caption)
+                }
+            }
+            behaviorCalendarSection
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+        )
+    }
+    private func showPreviousCalendarMonth() {
+        guard let previousMonth = behaviorCalendarCalendar.date(
+            byAdding: .month,
+            value: -1,
+            to: displayedCalendarMonth
+        ) else {
+            return
+        }
+
+        displayedCalendarMonth = previousMonth
+    }
+    private func showNextCalendarMonth() {
+        guard canGoNextCalendarMonth else {
+            return
+        }
+
+        guard let nextMonth = behaviorCalendarCalendar.date(
+            byAdding: .month,
+            value: 1,
+            to: displayedCalendarMonth
+        ) else {
+            return
+        }
+
+        displayedCalendarMonth = nextMonth
+    }
+    @ViewBuilder
+    private var behaviorCalendarSection: some View {
+        if let calendarData = behaviorCalendarData {
+            VStack(alignment: .leading) {
+                CalendarMonthHeader(
+                    month: displayedCalendarMonth,
+                    calendar: behaviorCalendarCalendar,
+                    onPrevious: showPreviousCalendarMonth,
+                    onNext: showNextCalendarMonth,
+                    canGoNext: canGoNextCalendarMonth)
+                BehaviorCalendar(
+                    positions: calendarData.positions,
+                    calendar: behaviorCalendarCalendar,
+                    mode: activity.type == .decrease
+                        ? .incidents
+                    : .progress,
+                    onDaySelected: { day in
+                        selectedBehaviorDay = day
+                    }
+                )
+            }
+        }
+    }
+    var decreaseHistorySection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+
+            Text("Incident history")
+                .font(.headline)
+
+            let incidents = observations.filter {
+                $0.kind == .incident
+            }
+
+            if incidents.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "checkmark.circle")
+                        .font(.system(size: 30))
+                        .foregroundStyle(.secondary)
+
+                    Text("No incidents recorded")
+                        .font(.headline)
+
+                    Text("Keep observing. You can record an incident whenever it happens.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(incidents) { observation in
+                        DecreaseIncidentRow(observation: observation)
+                            .onTapGesture {
+                                selectedObservation = observation
+                            }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+        )
     }
     //chart sections
     var chartSection: some View {
@@ -662,9 +967,15 @@ extension ActivityDetailView {
             if !isPresentingImage {
                 Spacer(minLength: 190)
             }
-            ActivityImageView(path: activity.imagePath, icon: activity.iconName)
-                .frame(maxHeight: 600)
-                .id(activity.imagePath)
+
+            ActivityImageView(
+                path: activity.imagePath,
+                icon: activity.iconName
+            )
+            .frame(maxHeight: 600)
+            .frame(maxWidth: .infinity)
+            .allowsHitTesting(false)
+            .id(activity.imagePath)
         }
     }
     

@@ -63,7 +63,7 @@ struct FocusCardView: View {
                 Image(systemName: item.activity.iconName ?? "circle.dotted")
                     .scaledToFill()
                     .font(Font.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundStyle(.yellow.opacity(0.6))
+                    .foregroundStyle(.white)
             }
         }
         .frame(maxWidth: 150, maxHeight: 200)

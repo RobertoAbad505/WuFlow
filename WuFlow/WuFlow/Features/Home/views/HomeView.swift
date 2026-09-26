@@ -222,9 +222,6 @@ struct HomeView: View {
                         FocusCardView(item: item) {
                             router.homePath.append(ActivitiesRoute.detail(item.activity))
                         }
-                        .onAppear {
-                            print("Rendering: \(item.activity.name)")
-                        }
                     }
                 }
             }

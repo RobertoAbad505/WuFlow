@@ -149,11 +149,14 @@ final class NotificationManager {
         session: PlaceSession
     ) {
 
-        guard activity.remindersEnabled else { return }
+        guard activity.remindersEnabled else {
+            return
+        }
+        let placeName = session.place?.name ?? "this place"
 
         sendNotification(
             title: "🏁 Session Complete",
-            body: "You spent \(session.formattedDuration) at \(session.place?.name). Record today's \(activity.name)?",
+            body: "You spent \(session.formattedDuration) at \(placeName). Record today's \(activity.name)?",
             identifier: "session_end_\(session.id)",
             category: NotificationCategory.sessionCompleted,
             userInfo: [

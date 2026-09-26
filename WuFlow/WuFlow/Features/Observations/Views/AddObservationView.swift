@@ -14,11 +14,11 @@ struct AddObservationView: View {
     let activity: Activity
     
     @State var note: String = ""
-    @State var emotion: String = "🫠"
+    @State var emotion: String = ""
     @ObservedObject var cameraManager: CameraManager = .init()
     
     @State private var selectedPhoto: PhotosPickerItem?
-
+    @State private var isAnIncident: Bool = false
     @State private var selectedImage: UIImage?
     @State private var imageSource: ImageSource = .defaultImage
     
@@ -91,13 +91,42 @@ struct AddObservationView: View {
         VStack {
             titleHeader
             textInputView
+            isAnIncidentSection
+            visualInputSection
             preview
             actions
         }
     }
-    private var titleHeader: some View {
+    private var isAnIncidentSection: some View {
         VStack {
-            Text("What is your observation for \(activity.name)?\n👀")
+            Button {
+                isAnIncident.toggle()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName:
+                        isAnIncident
+                        ? "checkmark.circle.fill"
+                        : "circle"
+                    )
+                    .font(.title3)
+
+                    Text("This was an incident")
+
+                    Spacer()
+                }
+                .foregroundStyle(isAnIncident ? .primary : .secondary)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(isAnIncident ? .orange.opacity(0.12) : .clear)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+    private var titleHeader: some View {
+        VStack(alignment: .leading) {
+            Text("Describe is your observation for \(activity.name)?👀")
                 .font(.title2)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -109,18 +138,29 @@ struct AddObservationView: View {
                     Text("I want to feel more focused, calm, and in control...")
                         .foregroundColor(.secondary.opacity(0.6))
                         .padding(.horizontal, 8)
-                        .padding(.top, 12)
                 }
                 TextEditor(text: $note)
                     .textFieldStyle(.roundedBorder)
                     .frame(height: 120)
                     .textEditorStyle(.plain)
+                    .offset(y: 20)
             }
-            TextField("Emotion", text: $emotion, prompt: Text("Pick an emoji for this feeling"))
+            VStack(alignment: .leading) {
+                Text("Pick an emoji that best describes how you felt")
+                TextField("🙂", text: $emotion)
+                    .font(.system(size: 32))
+                    .multilineTextAlignment(.center)
+                    .onChange(of: emotion) { _, newValue in
+                        if let first = newValue.first {
+                            emotion = String(first)
+                        }
+                    }
+            }
         }
     }
-    private var actions: some View {
+    private var visualInputSection: some View {
         VStack {
+            Text("Want to add a photo?")
             HStack(spacing: 16) {
                 Button {
                     cameraManager.checkCameraPermission { granted in
@@ -151,14 +191,11 @@ struct AddObservationView: View {
                 }
                .buttonStyle(.bordered)
             }
-            if self.imagePath != nil {
-                Button("Remove image") {
-                    ImageStore.shared.delete(at: self.imagePath)
-                    self.imagePath = nil
-                    cameraManager.image = nil
-                }
-                .foregroundColor(.red)
-            }
+            
+        }
+    }
+    private var actions: some View {
+        VStack {
             Button(action: {
                 save()
             }, label: {
@@ -182,6 +219,7 @@ struct AddObservationView: View {
         
     }
     private var preview: some View {
+        
         ZStack {
             if let img = image {
                 Image(uiImage: img)
@@ -193,6 +231,24 @@ struct AddObservationView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .symbolEffect(.pulse)
             }
+            if self.imagePath != nil {
+                VStack {
+                    Button("x") {
+                        ImageStore.shared.delete(at: self.imagePath)
+                        self.imagePath = nil
+                        cameraManager.image = nil
+                    }
+                    .bold()
+                    .foregroundColor(.secondary)
+                    .background(.clear)
+                    .padding(.horizontal)
+                    .padding(.vertical, 5)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.secondary, lineWidth: 3)
+                    }
+                }
+            }
         }
         .id("id\(self.imagePath)")
     }
@@ -203,7 +259,8 @@ struct AddObservationView: View {
             note: note,
             emotion: emotion,
             imagePath: self.imagePath,
-            activity: self.activity
+            activity: self.activity,
+            kind: self.isAnIncident ? .incident : .note
         )
         onDismiss(newObservation)
         dismiss()

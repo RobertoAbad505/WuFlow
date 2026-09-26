@@ -67,7 +67,7 @@ final class InsightEngine {
             return nil
         }
 
-        let durationText = formatDuration(expectedDuration)
+        let durationText = DurationFormatter.string(from: expectedDuration)
 
         return Insight(
             title: "Your typical session",
@@ -213,15 +213,5 @@ final class InsightEngine {
             message: "Your recorded progress in \(largestIncrease.lifeArea.title) increased from \(previousPercentage)% to \(currentPercentage)% compared with the previous period."
         )
     }
-
-    private func formatDuration(
-        _ duration: TimeInterval
-    ) -> String {
-
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute]
-        formatter.unitsStyle = .abbreviated
-
-        return formatter.string(from: duration) ?? "-"
-    }
+    
 }
