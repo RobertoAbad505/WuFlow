@@ -17,17 +17,6 @@ struct CreateActivityView: View {
     @State private var step: CreateActivityStep = .identity
     @State private var draft = ActivityDraft()
     @StateObject private var cameraManager = CameraManager()
-//    let allSteps: [CreateActivityStep] = [
-//        .identity,
-//        .measurement,
-//        .trackingType,
-//        .intention,
-//        .lifeArea,
-//        .goal,
-//        .meaning,
-//        .visual,
-//        .review
-//    ]
     var steps: [CreateActivityStep] {
         ActivityFlow.steps(for: draft.trackingType)
     }

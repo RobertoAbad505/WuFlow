@@ -15,11 +15,12 @@ struct ActivityObservationView: View {
         VStack(alignment: .center, spacing: 0) {
             if hasImage {
                 imageSection
+                    .allowsHitTesting(false)
             }
             VStack(spacing: 10) {
                 HStack {
                     VStack {
-                        Text("I felt:")
+                        Text("I felt")
                             .font(.system(size: 8))
                         Text("\(observation.emotion ?? "")")
                             .font(.system(size: 15))
@@ -31,24 +32,26 @@ struct ActivityObservationView: View {
                 Text(observation.note)
                     .font(.body)
                     .fixedSize(horizontal: false, vertical: true)
-                HStack {
-                    Spacer()
-                    Image(systemName: "exclamationmark.triangle")
-                    Text("This was an incident ")
+                if observation.kind == .incident {
+                    HStack {
+                        Spacer()
+                        Image(systemName: "exclamationmark.triangle")
+                        Text("This was an incident")
+                    }
+                    .foregroundStyle(.secondary)
+                    .font(.system(size: 11))
                 }
-                .foregroundStyle(.secondary)
-                .font(.system(size: 11))
-                .font(.system(.footnote, design: .monospaced, weight: .semibold))
             }
             .padding(10)
             .background(.thinMaterial)
-            .background(hasImage ? .clear:.white)
+            .background(hasImage ? .clear : .white)
         }
         .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.5),
-                radius: 5,
-                x: 4,
-                y: 4
+        .shadow(
+            color: .black.opacity(0.5),
+            radius: 5,
+            x: 4,
+            y: 4
         )
     }
     

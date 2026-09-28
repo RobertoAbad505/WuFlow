@@ -10,4 +10,10 @@ enum BackgroundStyle {
     case focus
     case energy
     case calm
+
+    // New
+    case growth
+    case reduce
+    case night
+    case minimal
 }

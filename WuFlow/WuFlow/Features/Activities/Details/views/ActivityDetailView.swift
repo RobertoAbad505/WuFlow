@@ -284,7 +284,7 @@ struct ActivityDetailView: View {
                     deleteButton
                 }
                 .padding()
-//                .offset(y: !isPresentingImage ? 0: -150)
+                .offset(y: !isPresentingImage ? 0: -150)
             }
         }
         .edgesIgnoringSafeArea(.top)
@@ -292,44 +292,27 @@ struct ActivityDetailView: View {
 }
 extension ActivityDetailView {
     var observationsSection: some View {
-        VStack(spacing: 10) {
-            if self.observations.count > 0 {
-                HStack {
+        Group {
+            if !observations.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
                     Text("Observations")
                         .font(.headline)
-                        .foregroundColor(.primary)
-                }
-                .padding(10)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(.regularMaterial)
-                LazyVGrid(columns: .init(repeating: GridItem(.flexible()), count: 1), spacing: 20) {
-                    ForEach(self.observations) { observation in
-                        ActivityObservationView(observation: observation)
+
+                    LazyVStack(spacing: 20) {
+                        ForEach(observations) { observation in
+                            ActivityObservationView(observation: observation)
+                        }
                     }
                 }
-                .background(.clear)
-                
-//                HStack {
-//                    Spacer()
-//                    Button(action: {
-//                        Task {
-//                            try? await repository?.deleteAllObservations()
-//                        }
-//                    }, label: {
-//                        Text("Delete all observations")
-//                    })
-//                    Spacer()
-//                }
-//                .padding(10)
-//                .background(
-//                    RoundedRectangle(cornerRadius: 28)
-//                        .fill(.regularMaterial)
-//                )
-//                .padding(.top)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 28)
+                        .fill(.regularMaterial)
+                )
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 35))
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//        .allowsHitTesting(false) // TEMPORARY TEST
     }
     
     @ViewBuilder
@@ -412,6 +395,7 @@ extension ActivityDetailView {
     @ViewBuilder
     var decreaseHeroButtons: some View {
         VStack {
+//            deleteAllObservations
             addObservationButton
         }
     }
@@ -455,24 +439,25 @@ extension ActivityDetailView {
                         .foregroundColor(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
+                deleteAllObservations
             }
         }
     }
     @ViewBuilder
     var addObservationButton: some View {
-        //Create observation
-        Button(action: {
-            print("Create observation triggered!")
-            presentCreateObservation.toggle()
-        }, label: {
-            Label("Add observation ☯️👀", systemImage: "plus.circle")
-            .font(.headline)
-            .padding(.vertical, 12)
-            .frame(maxWidth: .infinity)
-            .background(Color.green)
-            .foregroundColor(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-        })
+       //Create observation
+       Button(action: {
+           print("Create observation triggered!")
+           presentCreateObservation.toggle()
+       }, label: {
+           Label("Add observation ☯️👀", systemImage: "plus.circle")
+           .font(.headline)
+           .padding(.vertical, 12)
+           .frame(maxWidth: .infinity)
+           .background(Color.green)
+           .foregroundColor(.white)
+           .clipShape(RoundedRectangle(cornerRadius: 16))
+       })
     }
     var identity: some View {
         VStack(alignment: .center, spacing: 6) {
@@ -974,7 +959,7 @@ extension ActivityDetailView {
             )
             .frame(maxHeight: 600)
             .frame(maxWidth: .infinity)
-            .allowsHitTesting(false)
+//            .allowsHitTesting(false)
             .id(activity.imagePath)
         }
     }
@@ -1120,6 +1105,25 @@ extension ActivityDetailView {
         case .notStarted:
             return "Not started"
         }
+    }
+    var deleteAllObservations: some View {
+        HStack {
+            Spacer()
+            Button(action: {
+                Task {
+                    try? await repository?.deleteAllObservations()
+                }
+            }, label: {
+                Text("Delete all observations")
+            })
+            Spacer()
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+        )
+        .padding(.top)
     }
 }
 

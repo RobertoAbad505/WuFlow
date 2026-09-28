@@ -28,16 +28,21 @@ struct AddObservationView: View {
         ImageStore.shared.load(from: imagePath, category: .activity)
     }
     
+    //FLOW STEPS
+    var steps: [CreateObservationStep] {
+        ObservationFlow.steps()
+    }
+    @State private var step: CreateObservationStep = .note
+    
     let onDismiss: ((ObservationRecord?) -> Void)
     
     var body: some View {
-        VStack(alignment: .leading){
+        
+        ZStack {
+            AnimatedBackgroundView(style: .night)
+                .ignoresSafeArea()
             content
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.clear)
-        .background(.ultraThinMaterial)
         .fullScreenCover(isPresented: $cameraManager.showImagePicker) {
             ImagePicker(
                 image: $cameraManager.image,
@@ -88,17 +93,90 @@ struct AddObservationView: View {
         }
     }
     var content: some View {
+        VStack(alignment: .leading){
+            stepView
+            navigationControls
+        }
+        .padding()
+        .background(Color.white.opacity(0.5))
+        .background(.ultraThinMaterial)
+        .cornerRadius(30)
+        .padding(10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    var stepView: some View {
+        VStack(alignment: .center, spacing: 0) {
+            closeHeader
+            switch step {
+            case .note:
+                noteSection
+            case .image:
+                imageSection
+            case .incidentCheck:
+                incidentCheck
+            case .review:
+                reviewSection
+            }
+        }
+    }
+
+    var noteSection: some View {
         VStack {
             titleHeader
             textInputView
-            isAnIncidentSection
+        }
+    }
+    var imageSection: some View {
+        VStack {
             visualInputSection
+        }
+    }
+    
+    var incidentCheck: some View {
+        VStack {
+            isAnIncidentSection
+        }
+    }
+    
+    var reviewSection: some View {
+        VStack {
+            Text("Got it, is this correct?")
+                .font(.title2)
+            summaryCard
+        }
+    }
+    private var summaryCard: some View {
+        VStack(spacing: 20) {
             preview
+            Divider()
+            Text(note)
+                .font(.body)
+            Divider()
+            Text(emotion)
+                .font(.body)
+            if isAnIncident {
+                Divider()
+                incidentLabel
+            }
             actions
         }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
+    }
+    private var incidentLabel: some View {
+        HStack {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.title3)
+            Text("This was an incident")
+                .font(.headline)
+        }
+        .foregroundStyle(.primary)
     }
     private var isAnIncidentSection: some View {
         VStack {
+            
+            Text("Do you think is an incident?")
+                .font(.title2)
             Button {
                 isAnIncident.toggle()
             } label: {
@@ -125,11 +203,24 @@ struct AddObservationView: View {
         }
     }
     private var titleHeader: some View {
-        VStack(alignment: .leading) {
-            Text("Describe is your observation for \(activity.name)?👀")
+        HStack {
+            Text("Describe your observation for \(activity.name)?👀")
                 .font(.title2)
                 .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer()
         }
+    }
+    private var closeHeader: some View {
+        HStack {
+            Spacer()
+            Button(action: { dismiss() }, label: {
+                HStack {Image(systemName: "chevron.left")}
+                .font(.system(size: 15, weight: .regular))
+            })
+            .buttonStyle(.glass)
+        }
+        .padding()
+        .foregroundStyle(Color(.label))
     }
     private var textInputView: some View {
         VStack {
@@ -161,7 +252,10 @@ struct AddObservationView: View {
     private var visualInputSection: some View {
         VStack {
             Text("Want to add a photo?")
-            HStack(spacing: 16) {
+                .font(.title2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            preview
+            VStack(spacing: 10) {
                 Button {
                     cameraManager.checkCameraPermission { granted in
                         if granted {
@@ -191,66 +285,34 @@ struct AddObservationView: View {
                 }
                .buttonStyle(.bordered)
             }
-            
+            .padding(10)
         }
     }
     private var actions: some View {
-        VStack {
-            Button(action: {
-                save()
-            }, label: {
-                Text("Add Observation")
-                Image(systemName: "plus")
-            })
-            .frame(maxWidth: .infinity, maxHeight: 40)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 25))
-            
-            Button(action: {
-                dismiss()
-            }, label: {
-                Image(systemName: "clear")
-                    .font(.system(size: 15))
-                Text("Cancel")
-            })
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: 40)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 25))
-        }
-        
+        Button(action: {
+            dismiss()
+        }, label: {
+            Image(systemName: "clear")
+                .font(.system(size: 15))
+            Text("Cancel")
+        })
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 25))
     }
     private var preview: some View {
-        
         ZStack {
             if let img = image {
                 Image(uiImage: img)
                     .resizable()
-                    .scaledToFill()
-                    .frame(height: 150)
-                    .frame(maxWidth: 150)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: 250)
                     .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .symbolEffect(.pulse)
             }
-            if self.imagePath != nil {
-                VStack {
-                    Button("x") {
-                        ImageStore.shared.delete(at: self.imagePath)
-                        self.imagePath = nil
-                        cameraManager.image = nil
-                    }
-                    .bold()
-                    .foregroundColor(.secondary)
-                    .background(.clear)
-                    .padding(.horizontal)
-                    .padding(.vertical, 5)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.secondary, lineWidth: 3)
-                    }
-                }
-            }
         }
-        .id("id\(self.imagePath)")
+        .id("id\(self.imagePath ?? "")")
     }
     
     func save() {
@@ -265,8 +327,96 @@ struct AddObservationView: View {
         onDismiss(newObservation)
         dismiss()
     }
+    //🥺
 }
+extension AddObservationView {
+    
+    var navigationControls: some View {
+        HStack(alignment: .top, spacing: 0) {
+            if step != .note {
+                Button(action: {
+                    withAnimation {
+                        step = previousStep()
+                    }
+                }, label: {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                            .font(Font.body)
+                        Text("Back")
+                    }
+                })
+                .padding()
+                .glassEffect()
+            }
+            Spacer()
+            Button(action: {
+                handleNext()
+            }, label: {
+                HStack {
+                    Text(step == .review ? modeTitle : "Next")
+                    Image(systemName: step == .review ? "plus":"chevron.right")
+                        .font(Font.body)
+                }
+            })
+            .padding()
+            .glassEffect()
+        }
+        .tint(.green)
+        .padding()
+        .font(.body)
+    }
+    var modeTitle: String {
+        "Save observation"
+    }
+    func nextStep() -> CreateObservationStep {
+        let steps = steps
+        guard let index = steps.firstIndex(of: step),
+              index < steps.count - 1 else {
+            return step
+        }
+        return steps[index + 1]
+    }
 
+    func previousStep() -> CreateObservationStep {
+        let steps = steps
+        guard let index = steps.firstIndex(of: step),
+              index > 0 else {
+            return step
+        }
+        return steps[index - 1]
+    }
+    func handleNext() {
+        if step == .review {
+            save()
+            withAnimation {
+                dismiss()
+            }
+        } else {
+            withAnimation {
+                step = nextStep()
+            }
+        }
+    }
+}
+enum CreateObservationStep {
+    case note
+    case image
+    case incidentCheck
+    case review
+}
+struct ObservationFlow {
+
+    static func steps() -> [CreateObservationStep] {
+        return defaultSteps
+    }
+
+    static let defaultSteps: [CreateObservationStep] = [
+        .note,
+        .image,
+        .incidentCheck,
+        .review
+    ]
+}
 #Preview {
     
     AddObservationView(activity: .init(name: "Gym",
@@ -277,3 +427,4 @@ struct AddObservationView: View {
     }
     )
 }
+//🤖🤖
