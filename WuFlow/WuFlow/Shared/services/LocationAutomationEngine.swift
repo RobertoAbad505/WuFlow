@@ -9,6 +9,8 @@ import Observation
 
 @Observable
 final class LocationAutomationEngine {
+    
+    private let minimumSessionDuration: TimeInterval = 10 * 60
     let liveActivityManager: LiveActivityManager
     let sessionManager: SessionManager
     private let repository: ActivityRepository
@@ -90,22 +92,39 @@ final class LocationAutomationEngine {
         activity: Activity,
         regionIdentifier: String
     ) async {
-
         guard let session = await sessionManager.endSession(
             regionIdentifier: regionIdentifier
         ) else {
             return
         }
 
-        await liveActivityManager.end(
-            sessionID: session.id
-        )
+        // Always finish the Live Activity once the session has ended.
+        await liveActivityManager.end(sessionID: session.id)
 
+        guard let duration = session.duration else {
+            print("⚠️ Missing session end date; cannot validate duration.")
+            return
+        }
+
+        // Discard sessions shorter than 10 minutes.
+        guard duration >= minimumSessionDuration else {
+            do {
+                try await repository.deletePlaceSession(id: session.id)
+                print("🗑️ Discarded short session (\(Int(duration)) seconds).")
+            } catch {
+                print("❌ Failed to delete short session:", error)
+            }
+
+            return
+        }
+
+        // Only valid sessions trigger the completion notification.
         NotificationManager.shared.sendPlaceSessionCompleted(
             activity: activity,
             session: session
         )
     }
+    
     private func makeLiveSession(
         activity: Activity,
         session: PlaceSession,

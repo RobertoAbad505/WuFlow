@@ -38,7 +38,10 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         let sessionId = userInfo["sessionId"] as? String
 
         switch response.actionIdentifier {
-
+        case NotificationAction.discard:
+            await actionHandler.handleDiscard(
+                sessionId: sessionId
+            )
         case NotificationAction.done:
 
             await actionHandler.handleDone(
@@ -364,6 +367,7 @@ final class NotificationManager {
         sendNotification(title: nil, body: message, identifier: "", category: NotificationCategory.activityReminder)
     }
     func registerNotificationCategories() {
+        //REGISTER ACTIONS
         let doneAction = UNNotificationAction(
             identifier: NotificationAction.done,
             title: "Done ✅",
@@ -375,6 +379,13 @@ final class NotificationManager {
             title: "Later ⏰",
             options: []
         )
+        let discardAction = UNNotificationAction(
+            identifier: NotificationAction.discard,
+            title: "Discard Session 🗑️",
+            options: [.destructive]
+        )
+        
+        //REGISTER CATEGORIES
         let enterSessionPlace = UNNotificationCategory(
             identifier: NotificationCategory.sessionStarted,
             actions: [],
@@ -385,7 +396,8 @@ final class NotificationManager {
             identifier: NotificationCategory.sessionCompleted,
             actions: [
                 doneAction,
-                laterAction
+                laterAction,
+                discardAction
             ],
             intentIdentifiers: [],
             options: []
@@ -422,5 +434,6 @@ enum NotificationPermissionStatus {
 enum NotificationAction {
     static let done = "DONE_ACTION"
     static let later = "LATER_ACTION"
+    static let discard = "DISCARD_SESSION_ACTION"
     static let dismiss = "DISMISS_ACTION"
 }

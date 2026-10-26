@@ -343,6 +343,13 @@ extension ActivityRepository {
 
         try modelContext.save()
     }
+    func deletePlace(id: Place.ID) throws {
+        guard let place = try place(id: id) else {
+            return
+        }
+        modelContext.delete(place)
+        try modelContext.save()
+    }
 }
 //Place persistance endpoints
 extension ActivityRepository {
@@ -454,11 +461,12 @@ extension ActivityRepository {
         return activity
     }
     
-    func deletePlace(id: Place.ID) throws {
-        guard let place = try place(id: id) else {
+    func deletePlaceSession(id: UUID) throws {
+        guard let session = try placeSession(id: id) else {
             return
         }
-        modelContext.delete(place)
+
+        modelContext.delete(session)
         try modelContext.save()
     }
 }
@@ -582,5 +590,35 @@ extension ActivityRepository {
         try modelContext.save()
 
         print("🗑️ Deleted \(observations.count) observations")
+    }
+    
+    @discardableResult
+    func deleteInvalidPlaceSessions(
+        minimumDuration: TimeInterval = 10 * 60
+    ) throws -> Int {
+        let descriptor = FetchDescriptor<PlaceSession>()
+        let sessions = try modelContext.fetch(descriptor)
+
+        let invalidSessions = sessions.filter { session in
+            guard let endedAt = session.endedAt else {
+                return false // Preserve active sessions.
+            }
+
+            let duration = endedAt.timeIntervalSince(session.startedAt)
+
+            return duration >= 0 && duration < minimumDuration
+        }
+
+        guard !invalidSessions.isEmpty else {
+            return 0
+        }
+
+        for session in invalidSessions {
+            modelContext.delete(session)
+        }
+
+        try modelContext.save()
+
+        return invalidSessions.count
     }
 }

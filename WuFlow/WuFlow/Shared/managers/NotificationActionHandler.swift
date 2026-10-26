@@ -59,6 +59,22 @@ final class NotificationActionHandler {
         }
         Router().navigate(to: ActivitiesRoute.detail(activity))
     }
+    func handleDiscard(sessionId: String?) async {
+        guard
+            let sessionId,
+            let sessionUUID = UUID(uuidString: sessionId)
+        else {
+            print("❌ Cannot discard session: invalid session ID.")
+            return
+        }
+
+        do {
+            try await repository.deletePlaceSession(id: sessionUUID)
+            print("🗑️ Session discarded: \(sessionUUID)")
+        } catch {
+            print("❌ Failed to discard session:", error)
+        }
+    }
 }
 struct NotificationContext {
 
