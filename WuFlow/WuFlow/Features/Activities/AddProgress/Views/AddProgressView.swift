@@ -31,7 +31,7 @@ struct AddActivityProgressView: View {
     func quickButtonsSuggestions(_ unit: UnitType) -> [Double] {
         switch unit {
         case .minutes:
-            return [10,15,30,45,60]
+            return [5,10,15,30,60]
         case .steps:
             return [100,200,400,600,800]
         case .sessions, .count:
@@ -73,16 +73,18 @@ struct AddActivityProgressView: View {
     }
     
     var content: some View {
-        VStack {
-            switch step {
-            case .selectActivity:
-                selectActivityView
-            case .inputValue:
-                inputView
+        ScrollView {
+            VStack {
+                switch step {
+                case .selectActivity:
+                    selectActivityView
+                case .inputValue:
+                    inputView
+                }
             }
+            .padding()
+            .animation(.easeInOut, value: step)
         }
-        .padding()
-        .animation(.easeInOut, value: step)
     }
     var inputView: some View {
         VStack(spacing: 24) {
@@ -93,30 +95,24 @@ struct AddActivityProgressView: View {
             quickActions
             actionButtons
         }
-        .frame(maxWidth: .infinity)
     }
     var activityImageHeader: some View {
         ActivityImageView(
             path: selectedActivity?.imagePath,
             icon: selectedActivity?.iconName
         )
-        .frame(width: 250, height: 250)
-        .clipShape(RoundedRectangle(cornerRadius: 40))
+        .scaledToFill()
+        .frame(maxWidth: .infinity, maxHeight: 250)
+        .clipShape(RoundedRectangle(cornerRadius: 50))
     }
     private var activityHeader: some View {
-        VStack(spacing: 20) {
-            Text(selectedActivity?.name ?? "")
-                .font(.title2.bold())
-            Text(selectedActivity?.goalDescription ?? "")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
+        Text(selectedActivity?.name ?? "")
+            .font(.title2.bold())
     }
     private var progressSummary: some View {
         VStack(spacing: 12) {
             if let activity = selectedActivity, let progress = progress {
-                ProgressView(value: progress.ratio ?? 0)
+                ProgressView(value: progress.ratio)
                 Text(progress.description(activity.measurement))
                     .font(.headline)
 
@@ -127,12 +123,9 @@ struct AddActivityProgressView: View {
         }
     }
     private var inputSection: some View {
-
         VStack(spacing: 12) {
-
             Text(inputTitle)
                 .font(.headline)
-
             TextField(
                 "0",
                 value: $value,
@@ -140,7 +133,7 @@ struct AddActivityProgressView: View {
             )
             .keyboardType(.decimalPad)
             .multilineTextAlignment(.center)
-            .font(.system(size: 42, weight: .bold))
+            .font(.system(size: 30, weight: .bold))
             .padding()
             .glassEffect()
         }
@@ -169,104 +162,87 @@ struct AddActivityProgressView: View {
     private var quickActions: some View {
 
         HStack(spacing: 12) {
+            if let unit = selectedActivity?.unitType {
+                ForEach(
+                    quickButtonsSuggestions(unit),
+                    id: \.self
+                ) { amount in
 
-            ForEach(
-                suggestedValues,
-                id: \.self
-            ) { amount in
+                    Button {
 
-                Button {
+                        value += amount
 
-                    value += amount
+                    } label: {
 
-                } label: {
-
-                    Text("+\(Int(amount))")
-                        .font(.headline)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 10)
+                        Text("+\(Int(amount))")
+                            .font(.headline)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 10)
+                    }
+                    .glassEffect(
+                        .clear,
+                        in: Capsule()
+                    )
                 }
-                .glassEffect(
-                    .clear,
-                    in: Capsule()
-                )
             }
         }
     }
-    private var suggestedValues: [Double] {
-
-        guard let activity = selectedActivity else {
-            return []
-        }
-
-        switch activity.measurement {
-
-        case .session:
-            return [1]
-
-        case .duration:
-            return [5, 10, 15, 30]
-
-        case .count:
-            return [100, 500, 1000, 5000]
-
-        case .distance:
-            return [1, 2, 5, 10]
-        }
-    }
     private var actionButtons: some View {
-
         VStack(spacing: 12) {
-
             Button {
-
                 save()
-
             } label: {
-
-                Text(saveButtonTitle)
-                    .frame(maxWidth: .infinity)
+                Label(title: {
+                    Text(saveButtonTitle)
+                }, icon: {
+                    Image(systemName: "plus")
+                })
+                .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
 
             if !entryFromSelectedActivity {
-
                 Button("Choose Another Activity") {
-
                     step = .selectActivity
                 }
+            } else {
+                //Cancel add progress
+                Button {
+                    dismiss()
+                } label: {
+                    Label(title: {
+                        Text("Cancel")
+                    }, icon: {
+                        Image(systemName: "chevron.left")
+                    })
+                    .frame(maxWidth: .infinity)
+                }
+                .tint(.secondary)
+                .buttonStyle(.borderedProminent)
             }
         }
     }
     private var saveButtonTitle: String {
-
         guard let activity = selectedActivity else {
             return "Save"
         }
-
         switch activity.measurement {
-
         case .session:
-            return "Complete Session"
-
+            return "Add Session"
         case .duration:
             return "Add \(Int(value)) Minutes"
-
         case .count:
             return "Add Progress"
-
         case .distance:
             return "Add Distance"
         }
     }
     var selectActivityView: some View {
-        ScrollView {
-            ActivitySelectionGridView(activities: self.activities,
-                                      onSelect: { activitySelected in
-                selectedActivity = activitySelected
-                step = .inputValue
-            })
-        }
+        ActivitySelectionGridView(activities: self.activities,
+                                  onSelect: { activitySelected in
+            selectedActivity = activitySelected
+            step = .inputValue
+        })
     }
     func save() {
         guard let repository else {
@@ -276,12 +252,17 @@ struct AddActivityProgressView: View {
             return
         }
         Task {
-            do {                
-                try await repository.addProgress(
-                    activityId: activity.id,
-                    value: value,
-                    source: .manual
-                )
+            do {
+                if activity.trackingType  == .healthSteps {
+                    
+                    
+                } else {
+                    try await repository.addProgress(
+                        activityId: activity.id,
+                        value: value,
+                        source: .manual
+                    )
+                }
             } catch let error {
                 print("Error saving progress: \(error)")
             }

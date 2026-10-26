@@ -23,19 +23,22 @@ struct HealtKitSettingsView: View {
         }
     }
     var content: some View {
-        VStack(alignment: .leading, spacing: 30) {
-            titleHeader
-            firstRow
-            requestPermissionButton
+        ScrollView {
+            VStack(alignment: .leading, spacing: 30) {
+                titleHeader
+                firstRow
+                requestPermissionButton
+                automationTools
+            }
+            .padding()
         }
-        .padding()
     }
     var titleHeader: some View {
         HStack(alignment: .top) {
             Image(systemName: "figure.cooldown")
-                .font(Font.largeTitle.weight(.bold))
+                .font(Font.title)
             Text("HealtKit Settings")
-                .font(Font.largeTitle.weight(.bold))
+                .font(Font.title2.weight(.bold))
         }
     }
     var firstRow: some View {
@@ -52,7 +55,7 @@ struct HealtKitSettingsView: View {
                 Image(systemName: "figure.walk")
                     .font(.title)
                 Text(stepCount.formatted())
-                    .font(.largeTitle.bold())
+                    .font(.title.bold())
             }
             Text("Today's\nSteps")
                 .font(Font.body.weight(.bold))
@@ -76,7 +79,7 @@ struct HealtKitSettingsView: View {
                 Image(systemName: "brain")
                     .font(.title)
                 Text("\(mindfulSessions.count)")
-                    .font(.largeTitle.bold())
+                    .font(.title.bold())
             }
             Text("Mindfulness\nSessions")
                 .font(Font.body.weight(.bold))
@@ -105,7 +108,7 @@ struct HealtKitSettingsView: View {
                 Image(systemName: "figure.run")
                     .font(.title)
                 Text("\(workoutSessions.count)")
-                    .font(.largeTitle.bold())
+                    .font(.title.bold())
             }
             Text("Workout\n Sessions")
                 .font(Font.body.weight(.bold))
@@ -129,7 +132,7 @@ struct HealtKitSettingsView: View {
     }
     
     var requestPermissionButton: some View {
-        VStack(alignment: .center) {
+        VStack(alignment: .leading) {
             Text("Request HealthKit Access")
                 .bold(true)
             Button("HealtKit permission") {
@@ -152,6 +155,31 @@ struct HealtKitSettingsView: View {
             }
             .frame(maxWidth: .infinity)
             .buttonStyle(.glass)
+        }
+        .padding(.horizontal)
+    }
+    var automationTools: some View {
+        VStack {
+            automationToolsTitle
+            syncPreviousHealtStepsSection
+        }
+    }
+    var automationToolsTitle: some View {
+        HStack(alignment: .top) {
+            Image(systemName: "wrench.and.screwdriver")
+                .font(Font.title2)
+            Text("Automation tools")
+                .font(Font.title2.weight(.bold))
+        }
+    }
+    
+    var syncPreviousHealtStepsSection: some View {
+        VStack {
+            NavigationLink {
+                HealthKitSyncConsoleView()
+            } label: {
+                Label("HealthKit Sync", systemImage: "heart.text.square")
+            }
         }
     }
 }
