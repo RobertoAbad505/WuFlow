@@ -27,37 +27,93 @@ struct ActivityDetailView: View {
     
     private let insightEngine = InsightEngine()
     let activity: Activity
-    @State private var selectedFilter: TimeFilter = .last7Days
     @State private var showDeleteDialog = false
     @State private var displayedCalendarMonth: Date = {
         Calendar.current.startOfMonth(for: Date())
     }()
     
     // MARK: - Computed
-    var filteredRecords: [ProgressRecord] {
-        guard let range = selectedFilter.dateRange() else {
-            return records
+    @State private var selectedRange: ActivityHistoryRange = .last7Days
+    private var selectedDateRange: DateInterval? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+
+        switch selectedRange {
+        case .last7Days:
+            guard let start = calendar.date(
+                byAdding: .day,
+                value: -6,
+                to: today
+            ),
+            let end = calendar.date(
+                byAdding: .day,
+                value: 1,
+                to: today
+            ) else {
+                return nil
+            }
+
+            return DateInterval(start: start, end: end)
+
+        case .last30Days:
+            guard let start = calendar.date(
+                byAdding: .day,
+                value: -29,
+                to: today
+            ),
+            let end = calendar.date(
+                byAdding: .day,
+                value: 1,
+                to: today
+            ) else {
+                return nil
+            }
+
+            return DateInterval(start: start, end: end)
+
+        case .selectedMonth:
+            return calendar.dateInterval(
+                of: .month,
+                for: displayedCalendarMonth
+            )
         }
-        
+    }
+
+    var filteredRecords: [ProgressRecord] {
+        guard let range = selectedDateRange else {
+            return []
+        }
+
         return records.filter {
-            $0.date >= range.start && $0.date <= range.end
+            $0.date >= range.start && $0.date < range.end
+        }
+    }
+
+    private var filteredObservations: [ObservationRecord] {
+        guard let range = selectedDateRange else {
+            return []
+        }
+
+        return observations.filter {
+            $0.date >= range.start && $0.date < range.end
         }
     }
     var groupedRecordsByDay: [(date: Date, records: [ProgressRecord])] {
         let calendar = Calendar.current
-        
+
         let grouped = Dictionary(grouping: filteredRecords) {
             calendar.startOfDay(for: $0.date)
         }
-        
+
         return grouped
-            .map { ($0.key, $0.value) }
+            .map { (date: $0.key, records: $0.value) }
             .sorted { $0.date > $1.date }
     }
 
     var groupedData: [Date: Double] {
         ProgressAnalytics.groupByDay(filteredRecords)
     }
+
     var chartData: [DailyProgress] {
         ProgressAnalytics.makeChartData(from: groupedData)
     }
@@ -74,6 +130,7 @@ struct ActivityDetailView: View {
             records: records
         )
     }
+    
     let progressCalculator: ProgressCalculator = .init()
     
     //Decrease calculator
@@ -132,8 +189,8 @@ struct ActivityDetailView: View {
         }
 
         return behaviorCalendarDataCalculator.calculate(
-            progressRecords: records,
-            observations: observations,
+            progressRecords: filteredRecords,
+            observations: filteredObservations,
             from: range.start,
             to: range.end,
             calendar: behaviorCalendarCalendar
@@ -660,6 +717,7 @@ extension ActivityDetailView {
                 if !isCurrentCalendarMonth {
                     Button("Today") {
                         displayedCalendarMonth = currentMonth
+                        selectedRange = .selectedMonth
                     }
                     .font(.caption)
                 }
@@ -682,21 +740,21 @@ extension ActivityDetailView {
         }
 
         displayedCalendarMonth = previousMonth
+        selectedRange = .selectedMonth
     }
-    private func showNextCalendarMonth() {
-        guard canGoNextCalendarMonth else {
-            return
-        }
 
-        guard let nextMonth = behaviorCalendarCalendar.date(
-            byAdding: .month,
-            value: 1,
-            to: displayedCalendarMonth
-        ) else {
+    private func showNextCalendarMonth() {
+        guard canGoNextCalendarMonth,
+              let nextMonth = behaviorCalendarCalendar.date(
+                  byAdding: .month,
+                  value: 1,
+                  to: displayedCalendarMonth
+              ) else {
             return
         }
 
         displayedCalendarMonth = nextMonth
+        selectedRange = .selectedMonth
     }
     @ViewBuilder
     private var behaviorCalendarSection: some View {
@@ -779,27 +837,33 @@ extension ActivityDetailView {
             }
             
             // Filter
-            Picker("", selection: $selectedFilter) {
-                Text("7D").tag(TimeFilter.last7Days)
-                Text("30D").tag(TimeFilter.last30Days)
-                Text("All").tag(TimeFilter.all)
+            Picker("History range", selection: $selectedRange) {
+                ForEach(ActivityHistoryRange.allCases) { range in
+                    Text(range.title)
+                        .tag(range)
+                }
             }
             .pickerStyle(.segmented)
+            .onChange(of: selectedRange) { _, newValue in
+                if newValue != .selectedMonth {
+                    displayedCalendarMonth = currentMonth
+                }
+            }
             
             // Chart
             Chart(chartData) { item in
-                
                 BarMark(
                     x: .value("Day", item.date, unit: .day),
                     y: .value("Progress", item.total)
                 )
                 .foregroundStyle(barColor(for: item))
-                
                 // Optional value label
                 .annotation(position: .top) {
-                    Text("\(Int(item.total))")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                    if item.total > 0 {
+                        Text("\(Int(item.total))")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 RuleMark(y: .value("Goal", activity.goalValue))
                 .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
