@@ -49,8 +49,8 @@ struct PlaceDetailsView: View {
     
     var content: some View {
         VStack {
+            heroImage
             VStack {
-                heroImage
                 heroDetails
             }
             .padding()
@@ -60,11 +60,10 @@ struct PlaceDetailsView: View {
     }
     
     var heroImage: some View {
-        Image("activityImg")
+        Image("gymImg")
             .resizable()
             .scaledToFill()
-            .frame(maxWidth: 170, maxHeight: 200)
-            .clipShape(RoundedRectangle(cornerRadius: 30))
+            .frame(maxWidth: .infinity, maxHeight: 200)
     }
     var heroDetails: some View {
         VStack(spacing: 10) {
@@ -80,6 +79,9 @@ struct PlaceDetailsView: View {
                 Text("long \(place.longitude)")
             }
         }
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 30))
     }
     var mapSection: some View {
         LocationMapView(place: place)
