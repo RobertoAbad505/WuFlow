@@ -25,14 +25,15 @@ final class AppContainer {
     
     let sessionManager: SessionManager
 
-    init() {
+    init(router: Router) {
+        
         self.persistence = DataStore.shared
 
         self.repository = ActivityRepository(modelContainer: persistence.container)
 
         self.healthKitSyncService = HealthKitSyncService(repository: repository)
 
-        self.notificationActionHandler = NotificationActionHandler(repository: repository)
+        self.notificationActionHandler = NotificationActionHandler(repository: repository, router: router)
         
         self.sessionManager = SessionManager(repository: repository, durationCalculator: SessionDurationCalculator())
         

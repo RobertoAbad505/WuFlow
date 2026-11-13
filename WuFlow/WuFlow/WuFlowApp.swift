@@ -10,13 +10,19 @@ import SwiftData
 
 @main
 struct WuFlowApp: App {
-    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var router = Router()
+    @Environment(\.scenePhase) private var scenePhase
     let notificationDelegate: NotificationDelegate
     
-    let container = AppContainer()
+    let container: AppContainer
     
     init() {
+        
+        let router = Router()
+        
+        _router = StateObject(wrappedValue: router)
+        container = AppContainer(router: router)
+        
         notificationDelegate = NotificationDelegate(actionHandler: container.notificationActionHandler)
         UNUserNotificationCenter.current().delegate = notificationDelegate
         NotificationManager.shared.registerNotificationCategories()

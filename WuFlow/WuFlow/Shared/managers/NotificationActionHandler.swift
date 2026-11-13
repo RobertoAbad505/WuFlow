@@ -11,9 +11,14 @@ import SwiftData
 final class NotificationActionHandler {
 
     private let repository: ActivityRepository
+    private let router: Router
 
-    init(repository: ActivityRepository) {
+    init(
+        repository: ActivityRepository,
+        router: Router
+    ) {
         self.repository = repository
+        self.router = router
     }
 
     func handleDone(
@@ -52,12 +57,13 @@ final class NotificationActionHandler {
         activityId: String?,
         sessionId: String?
     ) async {
-        print("Notification opened")
+        print("Opening notification")
         guard let id = UUID(uuidString: activityId ?? ""),
               let activity = try? await repository.activity(id: id) else {
             return
         }
-        Router().navigate(to: ActivitiesRoute.detail(activity))
+        print("Navigate from notification for \(activity.name) session")
+        router.navigate(to: ActivitiesRoute.detail(activity))
     }
     func handleDiscard(sessionId: String?) async {
         guard
