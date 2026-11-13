@@ -8,8 +8,6 @@
 import SwiftUI
 import SwiftData
 import Charts
-import SwiftUI
-import SwiftData
 
 struct ActivityDetailView: View {
     @Environment(\.dismiss) private var dismiss
@@ -19,14 +17,14 @@ struct ActivityDetailView: View {
     @Query var records: [ProgressRecord] = []
     @Query var observations: [ObservationRecord] = []
     @Query var sessions: [PlaceSession]
+    private var activeSession: PlaceSession? {
+        sessions.first(where: \.isActive)
+    }
     
-    @State var presentAddProgress: Bool = false
-    @State var presentEditProcess: Bool = false
-    @State var presentRemindersProcess: Bool = false
-    @State var presentCreateObservation: Bool = false
+    @State private var activeSheet: ActiveDetailsSheet?
     
     private let insightEngine = InsightEngine()
-    let activity: Activity
+    private let activity: Activity
     @State private var showDeleteDialog = false
     @State private var displayedCalendarMonth: Date = {
         Calendar.current.startOfMonth(for: Date())
@@ -79,7 +77,7 @@ struct ActivityDetailView: View {
         }
     }
 
-    var filteredRecords: [ProgressRecord] {
+    private var filteredRecords: [ProgressRecord] {
         guard let range = selectedDateRange else {
             return []
         }
@@ -98,7 +96,7 @@ struct ActivityDetailView: View {
             $0.date >= range.start && $0.date < range.end
         }
     }
-    var groupedRecordsByDay: [(date: Date, records: [ProgressRecord])] {
+    private var groupedRecordsByDay: [(date: Date, records: [ProgressRecord])] {
         let calendar = Calendar.current
 
         let grouped = Dictionary(grouping: filteredRecords) {
@@ -110,18 +108,18 @@ struct ActivityDetailView: View {
             .sorted { $0.date > $1.date }
     }
 
-    var groupedData: [Date: Double] {
+    private var groupedData: [Date: Double] {
         ProgressAnalytics.groupByDay(filteredRecords)
     }
 
-    var chartData: [DailyProgress] {
+    private var chartData: [DailyProgress] {
         ProgressAnalytics.makeChartData(from: groupedData)
     }
 
-    var activeDaysLast7: Int {
+    private var activeDaysLast7: Int {
         ActivityInsights.activeDaysLast7(records: records)
     }
-    var isPresentingImage: Bool {
+    private var isPresentingImage: Bool {
         return !(activity.imagePath == nil || (activity.imagePath ?? "").isEmpty)
     }
     private var progress: ProgressSummary {
@@ -131,7 +129,7 @@ struct ActivityDetailView: View {
         )
     }
     
-    let progressCalculator: ProgressCalculator = .init()
+    private let progressCalculator: ProgressCalculator = .init()
     
     //Decrease calculator
     private let decreaseActivityCalculator = DecreaseActivityCalculator()
@@ -159,13 +157,8 @@ struct ActivityDetailView: View {
     }
     @State private var selectedObservation: ObservationRecord?
     @State private var selectedBehaviorDay: BehaviorDay?
+    @State private var placeSession: PlaceSession?
     
-    private var calendarMonthRange: DateInterval? {
-        Calendar.current.dateInterval(
-            of: .month,
-            for: Date()
-        )
-    }
     private var currentMonth: Date {
         behaviorCalendarCalendar.startOfMonth(
             for: Date()
@@ -238,84 +231,42 @@ struct ActivityDetailView: View {
                 .ignoresSafeArea()                
             content
         }
-        .toolbar(content: {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    presentEditProcess = true
-                }, label: {
-                    Image(systemName: "pencil")
-                        .font(Font.system(size: 20))
-                        .tint(activity.remindersEnabled ? .green: .gray)
-                })
-                .buttonStyle(.glass)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    setPinnedActivity()
-                }, label: {
-                    Image(systemName: activity.isPinned ? "pin.fill":"pin")
-                        .font(Font.system(size: 20))
-                        .tint(.green)
-                })
-                .buttonStyle(.glass)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    print("Enable notifications: \(activity.remindersEnabled ? "OFF":"ON")")
-                    enableNotifications()
-                }, label: {
-                    Image(systemName: "bell")
-                        .font(Font.system(size: 20))
-                        .tint(activity.remindersEnabled ? .green: .gray)
-                })
-                .buttonStyle(.glass)
-            }
-            if activity.remindersEnabled {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        presentRemindersProcess.toggle()
-                    }, label: {
-                        Image(systemName: "calendar")
-                            .font(Font.system(size: 20))
-                            .tint(.green)
-                    })
-                    .buttonStyle(.glass)
-                }
-            }
-        })
-        .sheet(isPresented: $presentAddProgress) {
-            AddActivityProgressView(activity: activity)
+        .toolbar {
+            activityToolbar
         }
-        .sheet(isPresented: $presentRemindersProcess) {
-            ReminderSettingsView(activity: activity)
-        }
-        .sheet(isPresented: $presentCreateObservation) {
-            AddObservationView(activity: activity) { newObservation in
-                
-                guard let repository, let newObservation else {
-                    return
-                }
-                Task {
-                    do{
-                        let observation = try await repository.createObservation(newObservation, activity)
-                        print("✅ Observation saved:", observation.id)
-                        print("Activity:", observation.activity.name)
-                        print("New observation👀 created!")
-                    } catch let error {
-                        print("Error creating observation: \(error.localizedDescription)")
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .addProgress:
+                AddActivityProgressView(activity: activity)
+
+            case .editActivity:
+                CreateActivityView(mode: .edit(activity))
+
+            case .activityReminders:
+                ReminderSettingsView(activity: activity)
+
+            case .createObservation:
+                AddObservationView(activity: activity) { newObservation in
+                    
+                    guard let repository, let newObservation else {
+                        return
+                    }
+                    Task {
+                        do{
+                            let observation = try await repository.createObservation(newObservation, activity)
+                            print("✅ Observation saved:", observation.id)
+                            print("Activity:", observation.activity.name)
+                            print("New observation👀 created!")
+                        } catch let error {
+                            print("Error creating observation: \(error.localizedDescription)")
+                        }
                     }
                 }
+                .onDisappear {
+                    self.activeSheet = nil
+                    print("Dismissed create observation")
+                }
             }
-            .onDisappear {
-                self.presentCreateObservation = false
-                print("Dismissed create observation")
-            }
-        }
-        .sheet(item: $selectedObservation) { observation in
-            ActivityObservationView(observation: observation)
-        }
-        .fullScreenCover(isPresented: $presentEditProcess) {
-            CreateActivityView(mode: .edit(self.activity))
         }
         .sheet(item: $selectedBehaviorDay) { day in
             BehaviorDayDetailView(
@@ -326,11 +277,65 @@ struct ActivityDetailView: View {
             )
         }
     }
+    
+    @ToolbarContentBuilder
+    private var activityToolbar: some ToolbarContent {
+
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button {
+                activeSheet = .editActivity
+            } label: {
+                Image(systemName: "pencil")
+                    .font(.system(size: 20))
+                    .tint(activity.remindersEnabled ? .green : .gray)
+            }
+            .buttonStyle(.glass)
+        }
+
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button {
+                setPinnedActivity()
+            } label: {
+                Image(systemName: activity.isPinned ? "pin.fill" : "pin")
+                    .font(.system(size: 20))
+                    .tint(.green)
+            }
+            .buttonStyle(.glass)
+        }
+
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button {
+                enableNotifications()
+            } label: {
+                Image(systemName: "bell")
+                    .font(.system(size: 20))
+                    .tint(activity.remindersEnabled ? .green : .gray)
+            }
+            .buttonStyle(.glass)
+        }
+
+        if activity.remindersEnabled {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    activeSheet = .activityReminders
+                } label: {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 20))
+                        .tint(.green)
+                }
+                .buttonStyle(.glass)
+            }
+        }
+    }
+
     var content: some View {
         ScrollView {
             activityImage
             VStack {
                 VStack(spacing: 24) {
+                    if let session = activeSession {
+                        ActiveSessionCard(session: session)
+                    }
                     heroSection
                     observationsSection
                     trackingSection
@@ -344,7 +349,7 @@ struct ActivityDetailView: View {
                 .offset(y: !isPresentingImage ? 0: -150)
             }
         }
-        .edgesIgnoringSafeArea(.top)
+        .ignoresSafeArea(edges: .top)
     }
 }
 extension ActivityDetailView {
@@ -369,7 +374,6 @@ extension ActivityDetailView {
                 )
             }
         }
-//        .allowsHitTesting(false) // TEMPORARY TEST
     }
     
     @ViewBuilder
@@ -452,7 +456,6 @@ extension ActivityDetailView {
     @ViewBuilder
     var decreaseHeroButtons: some View {
         VStack {
-//            deleteAllObservations
             addObservationButton
         }
     }
@@ -460,7 +463,7 @@ extension ActivityDetailView {
         VStack {
             // CTA (important positioning)
             Button {
-                presentAddProgress.toggle()
+                self.activeSheet = .addProgress
             } label: {
                 Label("Add progress", systemImage: "plus.circle.fill")
                     .font(.headline)
@@ -496,26 +499,10 @@ extension ActivityDetailView {
                         .foregroundColor(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-                deleteAllObservations
             }
         }
     }
-    @ViewBuilder
-    var addObservationButton: some View {
-       //Create observation
-       Button(action: {
-           print("Create observation triggered!")
-           presentCreateObservation.toggle()
-       }, label: {
-           Label("Add observation ☯️👀", systemImage: "plus.circle")
-           .font(.headline)
-           .padding(.vertical, 12)
-           .frame(maxWidth: .infinity)
-           .background(Color.green)
-           .foregroundColor(.white)
-           .clipShape(RoundedRectangle(cornerRadius: 16))
-       })
-    }
+    
     var identity: some View {
         VStack(alignment: .center, spacing: 6) {
             Text(activity.name)
@@ -530,6 +517,22 @@ extension ActivityDetailView {
         }
     }
     
+    @ViewBuilder
+    var addObservationButton: some View {
+       //Create observation
+       Button(action: {
+           print("Create observation triggered!")
+           self.activeSheet = .createObservation
+       }, label: {
+           Label("Add observation ☯️👀", systemImage: "plus.circle")
+           .font(.headline)
+           .padding(.vertical, 12)
+           .frame(maxWidth: .infinity)
+           .background(Color.green)
+           .foregroundColor(.white)
+           .clipShape(RoundedRectangle(cornerRadius: 16))
+       })
+    }
     var meaningSection: some View {
         VStack(alignment: .leading, spacing: 20) {
             if hasMeaningContent {
@@ -589,10 +592,6 @@ extension ActivityDetailView {
             Text("Your patterns")
                 .font(.headline)
             
-            if activity.type == .decrease {
-                Text("\(decreaseSummary.incidentCount) Incidents")
-            }
-            
             ForEach(insights) { insight in
                 InsightRow(icon: "lightbulb.fill",
                            color: .black,
@@ -636,6 +635,8 @@ extension ActivityDetailView {
         VStack(alignment: .leading, spacing: 16) {
             Text("Your patterns")
                 .font(.headline)
+            
+            Text("\(decreaseSummary.incidentCount) Incidents")
 
             DecreaseMetric(
                 value: DurationFormatter.string(
@@ -851,28 +852,18 @@ extension ActivityDetailView {
             }
             
             // Chart
-            Chart(chartData) { item in
-                BarMark(
-                    x: .value("Day", item.date, unit: .day),
-                    y: .value("Progress", item.total)
-                )
-                .foregroundStyle(barColor(for: item))
-                // Optional value label
-                .annotation(position: .top) {
-                    if item.total > 0 {
-                        Text("\(Int(item.total))")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
+            Chart {
+                ForEach(chartData) { item in
+                    BarMark(
+                        x: .value("Day", item.date, unit: .day),
+                        y: .value("Progress", item.total)
+                    )
+                    .foregroundStyle(barColor(for: item))
                 }
+
                 RuleMark(y: .value("Goal", activity.goalValue))
-                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-                .foregroundStyle(Color.gray.opacity(0.6))
-                .annotation(position: .topTrailing) {
-                    Text("Goal")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                    .foregroundStyle(.gray.opacity(0.6))
             }
             .chartYAxis {
                 AxisMarks(position: .leading)
@@ -1088,14 +1079,14 @@ extension ActivityDetailView {
             guard let repository else { return }
             do {
                 try await repository.deleteActivity(id: activity.id)
+                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                dismiss()
             } catch let error {
                 print("❌ Delete activity failed:", error)
                 print("activity name: \(activity.name)")
                 print("error.localizedDescription:", error)
             }
-            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
-        dismiss()
     }
     private func enableNotifications() {
         Task {
@@ -1113,7 +1104,6 @@ extension ActivityDetailView {
             } catch let error {
                 print("❌ Enable notifications failed:", error)
             }
-            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
     }
     private func setPinnedActivity() {
@@ -1170,27 +1160,15 @@ extension ActivityDetailView {
             return "Not started"
         }
     }
-    var deleteAllObservations: some View {
-        HStack {
-            Spacer()
-            Button(action: {
-                Task {
-                    try? await repository?.deleteAllObservations()
-                }
-            }, label: {
-                Text("Delete all observations")
-            })
-            Spacer()
-        }
-        .padding(10)
-        .background(
-            RoundedRectangle(cornerRadius: 28)
-                .fill(.regularMaterial)
-        )
-        .padding(.top)
-    }
 }
+private enum ActiveDetailsSheet: Identifiable {
+    case addProgress
+    case editActivity
+    case activityReminders
+    case createObservation
 
+    var id: Self { self }
+}
 #Preview {
     let path = try? ImageStore.shared.save(UIImage(named: "activityImg") ?? UIImage(),
                                            category: .activity)

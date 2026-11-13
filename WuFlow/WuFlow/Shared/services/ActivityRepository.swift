@@ -578,19 +578,6 @@ extension ActivityRepository {
         try modelContext.save()
         return observation
     }
-    func deleteAllObservations() throws {
-        let descriptor = FetchDescriptor<ObservationRecord>()
-
-        let observations = try modelContext.fetch(descriptor)
-
-        for observation in observations {
-            modelContext.delete(observation)
-        }
-
-        try modelContext.save()
-
-        print("🗑️ Deleted \(observations.count) observations")
-    }
     
     @discardableResult
     func deleteInvalidPlaceSessions(
