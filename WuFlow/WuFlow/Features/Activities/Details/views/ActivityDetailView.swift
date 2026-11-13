@@ -17,8 +17,12 @@ struct ActivityDetailView: View {
     @Query var records: [ProgressRecord] = []
     @Query var observations: [ObservationRecord] = []
     @Query var sessions: [PlaceSession]
+    
     private var activeSession: PlaceSession? {
         sessions.first(where: \.isActive)
+    }
+    private var expectedSessionDuration: TimeInterval? {
+        SessionDurationCalculator().expectedDuration(from: sessions)
     }
     
     @State private var activeSheet: ActiveDetailsSheet?
@@ -333,8 +337,11 @@ struct ActivityDetailView: View {
             activityImage
             VStack {
                 VStack(spacing: 24) {
-                    if let session = activeSession {
-                        ActiveSessionCard(session: session)
+                    if let activeSession {
+                        ActiveSessionCard(
+                            session: activeSession,
+                            expectedDuration: expectedSessionDuration
+                        )
                     }
                     heroSection
                     observationsSection
@@ -346,7 +353,8 @@ struct ActivityDetailView: View {
                     deleteButton
                 }
                 .padding()
-                .offset(y: !isPresentingImage ? 0: -150)
+                .offset(y: isPresentingImage ? -150:0)
+                .offset(y: activeSession == nil ? 0: -50)
             }
         }
         .ignoresSafeArea(edges: .top)
