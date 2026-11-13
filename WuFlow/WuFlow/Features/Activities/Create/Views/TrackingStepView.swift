@@ -80,14 +80,15 @@ extension TrackingStepView {
                     .frame(width: 40)
 
                 VStack(alignment: .leading) {
-
                     Text(title)
                         .font(.headline)
 
                     Text(subtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                .frame(width: .infinity)
 
                 Spacer()
 

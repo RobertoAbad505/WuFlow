@@ -134,7 +134,9 @@ struct LocationSettings: View {
                 }
                 .buttonStyle(.glass)
                 Button("Determine state") {
-                    places.first(where: { $0.identifier == placeId })
+                    if let place = places.first(where: { $0.identifier == placeId }) {
+                        locationService.requestState(place: place)
+                    }
                 }
                 .buttonStyle(.glass)
             }
@@ -176,6 +178,10 @@ struct LocationSettings: View {
     }
     func startMonitoring() {
         guard let repository else {
+            return
+        }
+        if !locationService.isMonitoringAvailable {
+            print("Monitoring is not available ...")
             return
         }
         print("START monitoring ...")

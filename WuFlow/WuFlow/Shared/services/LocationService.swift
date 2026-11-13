@@ -21,7 +21,8 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     var lastRegionEvent: String = "None"
     
     var monitoredRegionCount: Int {
-        manager.monitoredRegions.count
+        print("🌎 '\(manager.monitoredRegions.count)' regions being monitored ")
+        return manager.monitoredRegions.count
     }
     var monitoredRegionIdentifiers: [String] {
         manager.monitoredRegions.map(\.identifier)
@@ -228,5 +229,17 @@ extension LocationService {
     }
     func clearLogs() {
         debugEvents.removeAll()
+    }
+    var isMonitoringAvailable: Bool {
+        let isMonitoringAvailable = CLLocationManager.isMonitoringAvailable(
+            for: CLCircularRegion.self
+        )
+        if isMonitoringAvailable {
+            log("🌎 Region monitor enabled ✅")
+            return true
+        } else {
+            log("🚫 Region monitoring available/supported: \(isMonitoringAvailable)")
+            return false
+        }
     }
 }

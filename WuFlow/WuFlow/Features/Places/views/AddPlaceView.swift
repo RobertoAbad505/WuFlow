@@ -215,6 +215,8 @@ private extension AddPlaceView {
                 in: 25...500,
                 step: 25
             )
+            //Monitor this place?
+            Toggle("Monitor this place", isOn: $isMonitored)
         }
         .padding()
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
