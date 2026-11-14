@@ -133,7 +133,7 @@ struct HomeView: View {
                 focusSection
                 quickActionsSection
                 insightSection
-                developmentTools
+//                developmentTools
             }
             .padding()
         }

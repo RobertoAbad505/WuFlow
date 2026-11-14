@@ -141,6 +141,10 @@ final class NotificationManager {
             title: "🏃 Session Started",
             body: "Tracking your \(activity.name) session.",
             identifier: "session_start_\(activity.id)",
+//            trigger: UNTimeIntervalNotificationTrigger(
+//                timeInterval: 5,
+//                repeats: false
+//            ),
             category: NotificationCategory.sessionStarted,
             userInfo: [
                 "activityId": activity.id.uuidString
@@ -198,7 +202,7 @@ final class NotificationManager {
         body: String,
         identifier: String,
         trigger: UNNotificationTrigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: 4,
+            timeInterval: 5,
             repeats: false
         ),
         category: String,

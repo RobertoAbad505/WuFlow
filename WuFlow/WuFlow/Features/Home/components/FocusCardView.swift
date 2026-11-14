@@ -66,7 +66,7 @@ struct FocusCardView: View {
                     .foregroundStyle(.white)
             }
         }
-        .frame(maxWidth: 150, maxHeight: 200)
+        .frame(minWidth: 150, maxWidth: 150, minHeight: 150, maxHeight: 200)
     }
 }
 
