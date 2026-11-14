@@ -51,6 +51,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6F3C5F8930A8FCFF00B02635 /* WuFlow_Home_to_Gym.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = WuFlow_Home_to_Gym.gpx; path = ../../../../Downloads/WuFlow_Home_to_Gym.gpx; sourceTree = "<group>"; };
 		6F70F884304F843B007F7931 /* WuFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WuFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F71210A2F75BBA1001CEF33 /* WuFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WuFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F7121232F75BBA3001CEF33 /* WuFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WuFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -160,6 +161,7 @@
 		6F7121012F75BBA1001CEF33 = {
 			isa = PBXGroup;
 			children = (
+				6F3C5F8930A8FCFF00B02635 /* WuFlow_Home_to_Gym.gpx */,
 				6F71210C2F75BBA1001CEF33 /* WuFlow */,
 				6F7121262F75BBA3001CEF33 /* WuFlowUITests */,
 				6F7BF21030113A1D00BB71D7 /* WuFlowWidget */,
