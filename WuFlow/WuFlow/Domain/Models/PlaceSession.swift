@@ -91,7 +91,8 @@ extension PlaceSession {
             placeName: place?.name ?? "place unkown",
             startedAt: startedAt,
             icon: icon ?? "circle.dotted",
-            expectedDuration: expectedDuration
+            expectedDuration: expectedDuration,
+            activityName: self.activity?.name ?? ""
         )
     }
 }

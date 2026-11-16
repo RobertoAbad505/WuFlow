@@ -91,7 +91,7 @@ final class LiveActivityManager: LiveActivityManaging {
 
         PlaceSessionAttributes(
             sessionID: session.sessionID,
-            activityName: session.placeName,
+            activityName: session.activityName,
             placeName: session.placeName,
             icon: session.icon ?? "circle.dotted",
             expectedDuration: session.expectedDuration
@@ -123,4 +123,5 @@ struct ActivePlaceSession: Sendable {
     let startedAt: Date
     let icon: String?
     let expectedDuration: TimeInterval?
+    let activityName: String
 }

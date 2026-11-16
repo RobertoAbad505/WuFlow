@@ -43,6 +43,7 @@ struct SessionProgressView: View {
                 .tint(progressTint)
             }
         }
+        .padding(.horizontal, 5)
     }
     private var progressTint: Color {
         guard let expectedEndDate else {

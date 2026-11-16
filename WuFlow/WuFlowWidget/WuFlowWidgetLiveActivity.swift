@@ -23,29 +23,31 @@ struct WuFlowWidgetLiveActivity: Widget {
         ActivityConfiguration(for: PlaceSessionAttributes.self) { context in
             // Lock screen/banner UI goes here
             VStack(alignment: .center, spacing: 0) {
-                HStack {
+                HStack(alignment: .center) {
                     Image(systemName: context.attributes.icon)
-                        .font(.system(size: 30))
+                        .symbolEffect(.breathe)
+                        .font(.system(size: 27))
                     VStack(alignment: .center, spacing: 5) {
                         Text(context.attributes.activityName)
                             .font(.system(size: 15))
                         Text("📍\(context.attributes.placeName)")
-                            .font(.system(size: 20))
+                            .font(.system(size: 18))
                     }
                     Spacer()
                     Text("\(progressStatus(context))")
-                        .font(.subheadline)
+                        .font(.body.bold())
                         .fixedSize(horizontal: false, vertical: true)
                         .multilineTextAlignment(.center)
                 }
                 .padding()
                 HStack {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Workout time")
+                        Text("Session time")
                             .font(.footnote)
                         Text(context.state.startedAt, style: .timer)
-                            .font(.title)
+                            .font(.title2)
                             .monospacedDigit()
+                            .font(.system(size: 15))
                     }
                     VStack(alignment: .center) {
                         Text("Started time")
@@ -56,6 +58,7 @@ struct WuFlowWidgetLiveActivity: Widget {
                     VStack {
                         Text("Typical session")
                         Text("\(typicalSessionText(context))")
+                            .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
@@ -74,12 +77,12 @@ struct WuFlowWidgetLiveActivity: Widget {
                 // Expanded UI goes here.  Compose the expanded UI through
                 // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("🌿\(context.attributes.activityName.removingEmojis)")
-                        .font(.title3.bold())
+                    Text("🌿 Live")
+                        .font(.body.bold())
                         .padding(2)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("📍\(context.attributes.placeName.removingEmojis)")
+                    Text("📍\(context.attributes.placeName)")
                         .padding(2)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
@@ -89,7 +92,7 @@ struct WuFlowWidgetLiveActivity: Widget {
                                 .font(.system(size: 25))
                                 .symbolEffect(.rotate)
                             VStack(alignment: .leading) {
-                                Text("Temps")
+                                Text("Time")
                                     .font(.footnote)
                                 Text(context.state.startedAt, style: .timer)
                                     .font(.title3)
@@ -105,10 +108,18 @@ struct WuFlowWidgetLiveActivity: Widget {
                             }
                         }
                         SessionProgressView(context: context)
+                        HStack {
+                            Text("Typical session")
+                            Text("\(typicalSessionText(context))")
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                        }
+                        .font(.system(.footnote, weight: .light))
                     }
                 }
             } compactLeading: {
-                Text("🌿 \(context.attributes.activityName.removingEmojis)")
+                Text("🌿 \(context.attributes.activityName)")
                     .bold()
             } compactTrailing: {
                 Text(
@@ -121,7 +132,7 @@ struct WuFlowWidgetLiveActivity: Widget {
             }
         }
     }
-    
+
     private func expectedEndDate(_ context: ActivityViewContext<PlaceSessionAttributes>) -> Date? {
         guard let expectedDuration = context.attributes.expectedDuration else {
             return nil
