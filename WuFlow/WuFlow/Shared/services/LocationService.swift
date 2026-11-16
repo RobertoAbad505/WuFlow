@@ -134,14 +134,12 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         manager.requestState(for: monitoredRegion)
     }
     func stopMonitoring() {
-
         for region in manager.monitoredRegions {
             manager.stopMonitoring(for: region)
         }
-
         log("Stopped monitoring all regions.")
     }
-    //didEnterRegion
+    //didEnterRegion handler
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         log("Entered: \(region.identifier)")
         lastRegionEvent = "Entered \(region.identifier)"
@@ -152,6 +150,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
             )
         }
     }
+    //didExitRegion handler
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         log("Exited: \(region.identifier)")
         lastRegionEvent = "Exited \(region.identifier)"
@@ -164,11 +163,9 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     }
     func printMonitoredRegions() {
         log("──---── Monitored Regions ────")
-
         for region in manager.monitoredRegions {
             log(region.identifier)
         }
-
         log("Total: \(manager.monitoredRegions.count)")
     }
     func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
