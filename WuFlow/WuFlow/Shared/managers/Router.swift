@@ -74,6 +74,7 @@ final class Router: ObservableObject {
             //no host available, ignore
             return
         }
+        
         switch host {
         case "activities":
             navigate(to: .activitiesList)

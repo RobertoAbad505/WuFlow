@@ -10,57 +10,37 @@ import SwiftUI
 struct HomeHeaderView: View {
     
     let userName: String = "Roberto"
-    let greeting: String = "Good morning"
-    let imageName: String? = "selfie" // optional for flexibility
-    
+
     var body: some View {
-        HStack(alignment: .center) {            
+        HStack(alignment: .center, spacing: 8) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(HomeHeaderView.currentGreeting()),")
-                    .font(.headline)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppColors.oceanBlue)
                 Text(userName)
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(.largeTitle.weight(.semibold))
+                    .foregroundStyle(AppColors.midnightNavy)
                 Text("Let’s keep your flow today")
-                        .font(.subheadline)
+                    .font(.subheadline)
+                    .foregroundStyle(AppColors.secondaryText)
             }
-            Spacer()
-            avatarView
+            Spacer(minLength: 0)
         }
-        .padding(.horizontal)
-        .padding(.top, 10)
+//        .padding(.top, 8)
+        .padding(.bottom, 4)
     }
 }
 private extension HomeHeaderView {
-    
-    @ViewBuilder
-    var avatarView: some View {
-        if let imageName = imageName {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 130, height: 140)
-                .clipShape(Circle())
-                .overlay {
-                    Circle().stroke(.white, lineWidth: 5)
-                }
-        } else {
-            Image(systemName: "person.crop.circle.fill")
-                .resizable()
-                .frame(width: 100, height: 100)
-                .foregroundStyle(.gray)
-        }
-    }
     static func currentGreeting() -> String {
         let hour = Calendar.current.component(.hour, from: Date())
         
         switch hour {
         case 5..<12:
-            return "Good morning🌅"
+            return "Good morning"
         case 12..<18:
-            return "Good afternoon☀️"
+            return "Good afternoon"
         default:
-            return "Good evening🌃"
+            return "Good evening"
         }
     }
 }
