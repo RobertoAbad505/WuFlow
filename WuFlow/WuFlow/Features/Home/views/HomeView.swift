@@ -43,64 +43,77 @@ struct HomeView: View {
     )
     private var progressRecords: [ProgressRecord]
     
-    var focusCards: [ActivitySummary] {
-        Array(activitySummaries.prefix(5))
-    }
-    private var activitySummaries: [ActivitySummary] {
-        activities.map { activity in
+    private let decreaseActivityCalculator = DecreaseActivityCalculator()
+
+    private var focusCards: [FocusActivityCardItem] {
+        activities.prefix(5).map { activity in
+            if activity.type == .decrease {
+                return FocusActivityCardItem(
+                    activity: activity,
+                    summary: .decrease(
+                        decreaseActivityCalculator.calculate(
+                            activity: activity,
+                            observations: observations
+                        )
+                    )
+                )
+            }
 
             let records = progressRecords.filter {
                 $0.activity.id == activity.id
             }
-
             let progress = progressCalculator.progress(
                 for: activity,
                 records: records
             )
-
-            return ActivitySummary(
+            return FocusActivityCardItem(
                 activity: activity,
-                progress: progress
+                summary: .progress(progress)
             )
         }
     }
     
-    private var totalActivities: Int {
-        activitySummaries.count
+    @Query(sort: \ObservationRecord.date, order: .reverse)
+    private var observations: [ObservationRecord]
+
+    private var todaysProgressRecords: [ProgressRecord] {
+        progressRecords.filter { Calendar.current.isDateInToday($0.date) }
     }
 
-    private var completedActivities: Int {
-        activitySummaries.count(where: \.progress.completed)
+    private var activitiesWithProgressToday: Int {
+        Set(todaysProgressRecords.map(\.activity.id)).count
     }
 
-    private var progressRatio: Double {
-        guard totalActivities > 0 else {
-            return 0
-        }
-        return Double(completedActivities) / Double(totalActivities)
+    private var progressActivityDescription: String {
+        let count = activitiesWithProgressToday
+        return "Across \(count) \(count == 1 ? "activity" : "activities")"
     }
-    
-    var progressMessage: String {
-        switch progressRatio {
-        case 0:
-            return "Start your day with a small action"
-        case 0..<0.5:
-            return "You're getting started"
-        case 0..<1:
-            return "You're building momentum"
-        default:
-            return "Great job — you're on fire 🔥"
-        }
+
+    private var decreaseActivities: [Activity] {
+        activities.filter { $0.type == .decrease }
+    }
+
+    private var decreaseActivitiesWithIncidentsToday: Set<UUID> {
+        Set(observations.compactMap { observation in
+            guard observation.kind == .incident,
+                  Calendar.current.isDateInToday(observation.date),
+                  observation.activity.type == .decrease else {
+                return nil
+            }
+            return observation.activity.id
+        })
+    }
+
+    private var incidentFreeDecreaseActivityCount: Int {
+        decreaseActivities.filter {
+            !decreaseActivitiesWithIncidentsToday.contains($0.id)
+        }.count
     }
     
     var body: some View {
         NavigationStack(path: $router.homePath) {
             ZStack {
-                Image("plantBackground")
-                    .resizable()
-                    .ignoresSafeArea()
-                    .blur(radius: 3)
-                Color.black.opacity(0.1)
+                AppColors.canvas
                     .ignoresSafeArea()
                 content
             }
@@ -126,18 +139,31 @@ struct HomeView: View {
         }
     }
     var content: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 24) {
-                HomeHeaderView()
-                dailySummarySection
-                focusSection
-                quickActionsSection
-                insightSection
-//                developmentTools
+        GeometryReader { geometry in
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 24) {
+                    HomeHeaderView()
+                    dailySummarySection
+                    focusSection
+                    quickActionsSection
+                    insightSection
+
+                }
+                .padding(16)
             }
-            .padding()
+            .background(alignment: .top) {
+                Image("WuFlowHeaderImg")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(
+                        width: geometry.size.width,
+                        height: 260 + geometry.safeAreaInsets.top
+                    )
+                    .ignoresSafeArea(edges: .top)
+            }
+            .foregroundStyle(AppColors.midnightNavy)
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .scrollBounceBehavior(.basedOnSize)
     }
     var developmentTools: some View {
         VStack{
@@ -152,54 +178,76 @@ struct HomeView: View {
         }
     }
     var dailySummarySection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Overview")
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Today's behavior")
                 .font(.headline)
-            
+                .foregroundStyle(AppColors.midnightNavy)
+
             VStack(alignment: .leading, spacing: 16) {
-                
-                // Title + message
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Build your momentum")
-                        .font(.title3.bold())
-                    
-                    Text(progressMessage)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                HStack(alignment: .top, spacing: 12) {
+                    overviewMetric(
+                        value: "\(todaysProgressRecords.count)",
+                        title: "Progress entries",
+                        detail: progressActivityDescription
+                    )
+
+                    Rectangle()
+                        .fill(AppColors.divider)
+                        .frame(width: 1, height: 62)
+                        .padding(.top, 4)
+
+                    overviewMetric(
+                        value: decreaseActivities.isEmpty
+                            ? "—"
+                            : "\(incidentFreeDecreaseActivityCount) / \(decreaseActivities.count)",
+                        title: "No incident logged today",
+                        detail: decreaseActivities.isEmpty
+                            ? "No reduce activities yet"
+                            : "Reduce activities"
+                    )
                 }
-                
-                // Progress + ring
-                HStack {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("\(completedActivities) / \(totalActivities)")
-                            .font(.title2.bold())
-                        Text("Goals completed!")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Button {
-                            isPresentedAddProgress = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "plus")
-                                Text("Add Progress")
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.green)
-                            .foregroundColor(.white)
-                            .clipShape(Capsule())
-                        }
-                    }
-                    Spacer()
-                    ProgressRingView(progress: progressRatio)
+
+                Button {
+                    router.homePath.append(ActivitiesRoute.activitiesList)
+                } label: {
+                    Label("View Activities", systemImage: "arrow.right")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .foregroundStyle(.white)
+                        .background(AppColors.midnightNavy, in: Capsule())
                 }
+                .buttonStyle(.plain)
             }
-            .padding(15)
-            .background(.ultraThinMaterial)
-            .cornerRadius(24)
+            .padding(16)
+            .background(AppColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(AppColors.divider.opacity(0.8), lineWidth: 1)
+            }
         }
-        .padding(15)
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24))
+    }
+
+    private func overviewMetric(value: String, title: String, detail: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(value)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(AppColors.midnightNavy)
+                .contentTransition(.numericText())
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+
+            Text(title)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(AppColors.midnightNavy)
+
+            Text(detail)
+                .font(.footnote)
+                .foregroundStyle(AppColors.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     var focusSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -212,7 +260,7 @@ struct HomeView: View {
                 } label: {
                     Text("See all")
                         .font(.callout)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(AppColors.oceanBlue)
                 }
             }
             
@@ -226,8 +274,6 @@ struct HomeView: View {
                 }
             }
         }
-        .padding()
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24))
     }
     var quickActionsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -235,97 +281,159 @@ struct HomeView: View {
                 .font(.headline)
             HStack(spacing: 12) {
                 QuickActionButton(
-                    title: "Add",
+                    title: "Progress",
                     systemImage: "plus",
-                    tint: .green) {
+                    isPrimary: true) {
                     isPresentedAddProgress = true
                 }
                 QuickActionButton(
                     title: "New",
                     systemImage: "square.and.pencil",
-                    tint: .blue) {
+                    isPrimary: false) {
                     print("Navigate to add activity view!!🚀 ")
                     router.homePath.append(ActivitiesRoute.addActivity)
                 }
                 QuickActionButton(
                     title: "Insights",
                     systemImage: "chart.bar",
-                    tint: .purple) {
+                    isPrimary: false) {
                         print("Navigate to activity insights view!!🚀 ")
                     router.homePath.append(ActivitiesRoute.insights(nil))
                 }
                 QuickActionButton(
                     title: "Places",
                     systemImage: "pin",
-                    tint: .purple) {
+                    isPrimary: false) {
                         print("Navigate to Places view!!🚀 ")
                     router.homePath.append(ActivitiesRoute.places)
                 }
             }
         }
-        .padding()
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24))
     }
     var insightSection: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Insights")
                 .font(.headline)
-                .bold(true)
+                .foregroundStyle(AppColors.midnightNavy)
             ForEach(generalInsights) { insight in
-                InsightRow(icon: "lightbulb.fill",
-                           color: .yellow,
-                           title: insight.title,
-                           subtitle: insight.message)
+                HStack(alignment: .center, spacing: 12) {
+                    WuWeiMark(size: 22)
+
+                    Rectangle()
+                        .fill(AppColors.divider)
+                        .frame(width: 1, height: 54)
+
+                    HStack(alignment: .top, spacing: 10) {
+//                        Image(systemName: "lightbulb.fill")
+//                            .font(.title3)
+//                            .foregroundStyle(AppColors.vermilion)
+//                            .padding(.top, 1)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(insight.title)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(AppColors.midnightNavy)
+                            Text(insight.message)
+                                .font(.footnote)
+                                .foregroundStyle(AppColors.secondaryText)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(AppColors.divider.opacity(0.8), lineWidth: 1)
+                }
             }
         }
-        .padding()
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24))
     }
 }
 struct QuickActionButton: View {
     
     let title: String
     let systemImage: String
-    let tint: Color
+    let isPrimary: Bool
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
             
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 Image(systemName: systemImage)
                     .font(.system(size: 18, weight: .semibold))
                 
                 Text(title)
-                    .font(.caption)
+                    .font(.footnote.weight(.medium))
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .frame(maxWidth: .infinity, minHeight: 64)
+            .background {
+                if isPrimary {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(AppColors.midnightNavy)
+                } else {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(AppColors.surface)
+                }
+            }
+            .overlay {
+                if !isPrimary {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(AppColors.divider, lineWidth: 1)
+                }
+            }
+            .foregroundStyle(isPrimary ? Color.white : AppColors.midnightNavy)
         }
         .buttonStyle(.plain)
     }
 }
-struct ProgressRingView: View {
-    
-    let progress: Double
-    
+
+private struct WuWeiMark: View {
+    let size: CGFloat
+
     var body: some View {
-        ZStack {
-            Circle()
-                .stroke(Color.gray.opacity(0.2), lineWidth: 8)
-            
-            Circle()
-                .trim(from: 0, to: progress)
-                .stroke(Color.green, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .animation(.easeInOut, value: progress)
-            
-            Text("\(Int(progress * 100))%")
-                .font(.caption.bold())
+        GeometryReader { geometry in
+            let diameter = geometry.size.width
+            ZStack {
+                Circle()
+                    .fill(AppColors.surface)
+                YinYangDarkHalf()
+                    .fill(AppColors.midnightNavy)
+                Circle()
+                    .fill(AppColors.surface)
+                    .frame(width: diameter * 0.2, height: diameter * 0.2)
+                    .position(x: diameter * 0.29, y: diameter * 0.25)
+                Circle()
+                    .fill(AppColors.midnightNavy)
+                    .frame(width: diameter * 0.2, height: diameter * 0.2)
+                    .position(x: diameter * 0.71, y: diameter * 0.75)
+            }
+            .clipShape(Circle())
+            .overlay {
+                Circle()
+                    .stroke(AppColors.midnightNavy.opacity(0.25), lineWidth: 0.5)
+            }
         }
-        .frame(width: 70, height: 70)
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct YinYangDarkHalf: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addCurve(
+            to: CGPoint(x: rect.midX, y: rect.maxY),
+            control1: CGPoint(x: rect.minX + rect.width * 1.2, y: rect.minY + rect.height * 0.2),
+            control2: CGPoint(x: rect.minX - rect.width * 0.2, y: rect.minY + rect.height * 0.8)
+        )
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.closeSubpath()
+        return path
     }
 }
 #Preview {
@@ -335,7 +443,7 @@ struct ProgressRingView: View {
         Activity(name: "Push-ups", unitType: .count, goalValue: 20, trackingType: .manual)
     ]
     HomeView()
-            .modelContainer(for: Activity.self, inMemory: true) { result in
+            .modelContainer(for: [Activity.self, ProgressRecord.self, ObservationRecord.self], inMemory: true) { result in
                 if case let .success(container) = result {
                     let context = container.mainContext
                     previewItems.forEach { context.insert($0) }

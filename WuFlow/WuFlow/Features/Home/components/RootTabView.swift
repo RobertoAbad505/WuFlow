@@ -37,7 +37,7 @@ struct RootTabView: View {
                 }
                 .tag(AppTab.settings)
         }
-        .tint(.green.opacity(0.7))
+        .tint(AppColors.midnightNavy)
     }
 }
 

@@ -11,25 +11,34 @@ struct ActivityImageView: View {
     let path: String?
     let icon: String?
     let category: ImageCategory
+    let contentMode: ContentMode
     
     @State private var image: UIImage?
     
-    init(path: String?, icon: String?, category: ImageCategory = .activity) {
+    init(
+        path: String?,
+        icon: String?,
+        category: ImageCategory = .activity,
+        contentMode: ContentMode = .fill
+    ) {
         self.path = path
         self.category = category
         self.icon = icon
+        self.contentMode = contentMode
     }
     
     var body: some View {
-        VStack {
+        Group {
             if let image {
                 Image(uiImage: image)
                     .resizable()
-                    .scaledToFill()
+                    .aspectRatio(contentMode: contentMode)
             } else {
                 placeholder
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
         .onAppear {
             loadImage()
         }
