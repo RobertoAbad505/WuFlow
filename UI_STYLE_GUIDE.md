@@ -26,6 +26,8 @@ These are initial values to validate on real screens, not a locked design system
 | Supporting accent | Ocean blue `#286B8A` | Progress, secondary actions, links |
 | Supporting surface | Mist blue `#BCD8E1` | Secondary cards and progress tracks |
 | Occasional accent | Vermilion `#D84B36` | Incident markers or a notable insight; never a general-purpose warning color |
+| Incident-free status | Matcha sage `#3B7A57` | Calm, positive marker for reduce activities between incidents |
+| Above-goal status | Kin gold `#C59B27` | Goal exceeded bar, badge, and subtle card accent |
 | Dividers | Muted parchment / semantic separator | Quietly separate related content |
 | Text hierarchy | System styles | Screen title, `.headline` section title, `.subheadline` card title, `.footnote` supporting detail |
 
@@ -57,10 +59,18 @@ The hex values are starting estimates taken from the app icon and should be cont
 - **Greeting:** Keep it warm and personal without letting the greeting outweigh the behavioral snapshot. The static profile photo is omitted because it is not an account control or user-editable identity; the app icon and greeting provide identity with less visual weight.
 - **Today’s behavior:** Show progress entries and reduce activities with no incident logged as separate, factual measures. Avoid combining them into a “completion” score. Keep a clear “View Activities” action to reach the full list.
 - **Your Focus:** Use one 170 × 190 pt card pattern for both activity types. Increase and maintain activities show goal progress; decrease activities show time since the last incident. Crop images to fill by default; the shared image view also supports fitting the full image when that is preferable. Let activity photos carry personality.
-- **Progress status colors (proposal):** Use muted mist for not started, ocean blue while in progress, midnight navy when the goal is reached, and vermilion for above-goal progress. Pair completed and above-goal colors with short status labels; reserve a soft vermilion halo for above-goal cards.
+- **Progress status colors:** Use muted mist for not started, ocean blue while in progress, midnight navy when the goal is reached, and kin gold for above-goal progress. Pair completed and above-goal colors with short status labels; reserve a soft gold halo for above-goal cards. Use matcha sage for incident-free reduce activities.
 - **Quick Actions:** Use consistent compact controls. Give the leading action the navy treatment and keep secondary actions quiet.
 - **Attention insight:** Show the leading life area and its share (for example, “Health, 96% this period”) in one compact surface, without nesting a card inside a glass frame. Keep the lightbulb as the insight cue and use a small custom yin-yang mark as its highlight bullet.
 - **Canvas:** Use parchment behind the content, paper surfaces for cards, and the icon’s ocean colors for structure. A compact mountain, sun, and wave illustration may sit beside the greeting; avoid a full-screen image behind every section.
+
+## Activities screen direction
+
+- **Header:** Reuse the mountain, sun, and wave artwork. Let glass summary pills show activity count and streak; use glass filters only if they remain compact and readable over the artwork.
+- **Activity rows:** Use equal thumbnail frames for both photos and icons, with the same crop, corner radius, and subtle border. Keep activity name, current amount, target, status, and progress aligned consistently.
+- **Decrease milestones:** Show time incident-free and progress toward the next milestone (for example, 2d 5h toward 3 days). Use matcha sage as the calm milestone-progress color; the milestone ladder should be defined as a product rule before implementation.
+- **Debug controls:** Keep notification diagnostics out of the activity list. If needed, place them in a debug-only menu.
+- **Brand mark:** Use the yin-yang mark sparingly as a section accent rather than repeating it on every activity row.
 
 ## Review checklist
 

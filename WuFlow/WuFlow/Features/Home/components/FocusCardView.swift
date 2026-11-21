@@ -46,7 +46,7 @@ struct FocusCardView: View {
             if case .progress(let progress) = item.summary,
                progress.status == .exceeded {
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(AppColors.vermilion, lineWidth: 3)
+                    .stroke(AppColors.kinGold, lineWidth: 3)
             }
         }
         .padding(3)
@@ -81,7 +81,7 @@ private extension FocusCardView {
                 .font(.footnote)
                 .foregroundStyle(.white.opacity(0.9))
             ProgressView(value: progress.ratio)
-                .tint(AppColors.oceanBlue)
+                .tint(progress.status == .exceeded ? AppColors.kinGold : AppColors.oceanBlue)
 
         case .decrease(let summary):
             HStack(spacing: 6) {
