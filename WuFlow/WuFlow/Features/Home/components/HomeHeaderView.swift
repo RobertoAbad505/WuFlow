@@ -13,7 +13,7 @@ struct HomeHeaderView: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text("\(HomeHeaderView.currentGreeting()),")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(AppColors.oceanBlue)
@@ -23,11 +23,10 @@ struct HomeHeaderView: View {
                 Text("Let’s keep your flow today")
                     .font(.subheadline)
                     .foregroundStyle(AppColors.secondaryText)
+                Spacer(minLength: 70)
             }
-            Spacer(minLength: 0)
         }
-//        .padding(.top, 8)
-        .padding(.bottom, 4)
+        .padding(.bottom, 60)
     }
 }
 private extension HomeHeaderView {

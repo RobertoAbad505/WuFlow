@@ -16,14 +16,14 @@ struct ActivityStatusBadge: View {
             Text(label)
                 .frame(maxWidth: 100, alignment: .center)
         }
-        .font(.caption2)
+        .font(.caption2.weight(.medium))
         .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(color.opacity(0.15))
-        .foregroundColor(color)
+        .padding(.vertical, 5)
+        .background(color.opacity(0.12))
+        .foregroundStyle(color)
         .clipShape(Capsule())
         .overlay {
-            Capsule().stroke(strokeColor, lineWidth: 2)
+            Capsule().stroke(color.opacity(0.28), lineWidth: 1)
         }
     }
     
@@ -32,7 +32,7 @@ struct ActivityStatusBadge: View {
         case .notStarted: return "Not started"
         case .inProgress: return "In progress"
         case .completed: return "Completed"
-        case .exceeded: return "Exceeded"
+        case .exceeded: return "Above goal"
         }
     }
     
@@ -47,18 +47,10 @@ struct ActivityStatusBadge: View {
     
     private var color: Color {
         switch status {
-        case .notStarted: return .gray
-        case .inProgress: return .blue
-        case .completed: return .green
-        case .exceeded: return .orange
-        }
-    }
-    private var strokeColor: Color {
-        switch status {
-        case .notStarted: return .gray
-        case .inProgress: return .blue
-        case .completed: return .green
-        case .exceeded: return .green
+        case .notStarted: return AppColors.secondaryText
+        case .inProgress: return AppColors.oceanBlue
+        case .completed: return AppColors.midnightNavy
+        case .exceeded: return AppColors.kinGold
         }
     }
 }

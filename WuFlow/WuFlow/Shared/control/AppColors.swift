@@ -14,6 +14,8 @@ struct AppColors {
     static let oceanBlue = Color(red: 40.0 / 255, green: 107.0 / 255, blue: 138.0 / 255)
     static let mistBlue = Color(red: 188.0 / 255, green: 216.0 / 255, blue: 225.0 / 255)
     static let vermilion = Color(red: 216.0 / 255, green: 75.0 / 255, blue: 54.0 / 255)
+    static let matchaSage = Color(red: 59.0 / 255, green: 122.0 / 255, blue: 87.0 / 255)
+    static let kinGold = Color(red: 197.0 / 255, green: 155.0 / 255, blue: 39.0 / 255)
     static let secondaryText = Color(red: 82.0 / 255, green: 105.0 / 255, blue: 119.0 / 255)
     static let divider = Color(red: 217.0 / 255, green: 207.0 / 255, blue: 188.0 / 255)
 
