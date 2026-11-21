@@ -46,9 +46,10 @@ struct FocusCardView: View {
             if case .progress(let progress) = item.summary,
                progress.status == .exceeded {
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(AppColors.oceanBlue, lineWidth: 2)
+                    .stroke(AppColors.vermilion, lineWidth: 3)
             }
         }
+        .padding(3)
     }
 
     private var activityImage: some View {
