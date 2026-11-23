@@ -9,7 +9,11 @@ import SwiftUI
 struct FocusCardView: View {
 
     let item: FocusActivityCardItem
+    let item: FocusActivityCardItem
     let action: () -> Void
+
+    private let cardWidth: CGFloat = 170
+    private let cardHeight: CGFloat = 190
 
     private let cardWidth: CGFloat = 170
     private let cardHeight: CGFloat = 190
@@ -39,7 +43,29 @@ struct FocusCardView: View {
                 .padding(12)
             }
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .overlay(alignment: .bottom) {
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.76)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
+                VStack(alignment: .leading, spacing: 6) {
+                    Spacer(minLength: 0)
+                    Text(item.activity.name)
+                        .font(.subheadline.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                        .foregroundStyle(.white)
+                    summaryView
+                }
+                .padding(12)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(item.activity.name), \(item.accessibilitySummary)")
         .buttonStyle(.plain)
         .accessibilityLabel("\(item.activity.name), \(item.accessibilitySummary)")
         .overlay {
@@ -61,12 +87,21 @@ struct FocusCardView: View {
                     icon: item.activity.iconName,
                     contentMode: .fill
                 )
+                ActivityImageView(
+                    path: item.activity.imagePath,
+                    icon: item.activity.iconName,
+                    contentMode: .fill
+                )
             } else {
                 Image(systemName: item.activity.iconName ?? "circle.dotted")
                     .font(.system(size: 32, weight: .medium, design: .rounded))
                     .foregroundStyle(AppColors.midnightNavy)
+                    .font(.system(size: 32, weight: .medium, design: .rounded))
+                    .foregroundStyle(AppColors.midnightNavy)
             }
         }
+        .frame(width: cardWidth, height: cardHeight)
+        .clipped()
         .frame(width: cardWidth, height: cardHeight)
         .clipped()
     }
@@ -142,8 +177,31 @@ struct FocusActivityCardItem: Identifiable {
             )
         )
     )
+    let preview = ActivitySummary.preview
+    let focusItem = FocusActivityCardItem(
+        activity: preview.activity,
+        summary: .progress(preview.progress)
+    )
+    let reduceActivity = Activity(
+        name: "Smoke",
+        unitType: .count,
+        goalValue: 1,
+        createdAt: Date().addingTimeInterval(-2 * 24 * 60 * 60),
+        type: .decrease
+    )
+    let reduceItem = FocusActivityCardItem(
+        activity: reduceActivity,
+        summary: .decrease(
+            DecreaseActivityCalculator().calculate(
+                activity: reduceActivity,
+                observations: []
+            )
+        )
+    )
     VStack {
         HStack {
+            FocusCardView(item: focusItem, action: { })
+            FocusCardView(item: reduceItem, action: { })
             FocusCardView(item: focusItem, action: { })
             FocusCardView(item: reduceItem, action: { })
         }

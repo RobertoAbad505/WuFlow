@@ -11,13 +11,18 @@ struct HomeHeaderView: View {
     
     let userName: String = "Roberto"
 
+
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
             VStack(alignment: .leading, spacing: 5) {
                 Text("\(HomeHeaderView.currentGreeting()),")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(AppColors.oceanBlue)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppColors.oceanBlue)
                 Text(userName)
+                    .font(.largeTitle.weight(.semibold))
+                    .foregroundStyle(AppColors.midnightNavy)
                     .font(.largeTitle.weight(.semibold))
                     .foregroundStyle(AppColors.midnightNavy)
                 Text("Let’s keep your flow today")
@@ -36,9 +41,12 @@ private extension HomeHeaderView {
         switch hour {
         case 5..<12:
             return "Good morning"
+            return "Good morning"
         case 12..<18:
             return "Good afternoon"
+            return "Good afternoon"
         default:
+            return "Good evening"
             return "Good evening"
         }
     }
