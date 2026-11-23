@@ -1,334 +1,252 @@
 # 🌊 WuFlow
 
 <p align="center">
-  <img src="Screenshots/dashboard.png" alt="WuFlow Dashboard" width="300">
+  <img src="Screenshots/home-dashboard.png" alt="WuFlow home dashboard" width="320">
 </p>
 
 <p align="center">
-A native iOS app for observing, tracking, and understanding personal behavior.<br>
-Built with <strong>SwiftUI</strong>, <strong>SwiftData</strong>, <strong>CoreLocation</strong>, <strong>HealthKit</strong>, and modern Apple frameworks.
+  <strong>Build better habits. Find your flow.</strong><br>
+  A native iOS application for observing, tracking, and understanding personal behavior.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-iOS-0A84FF?logo=apple" alt="Platform: iOS">
+  <img src="https://img.shields.io/badge/Language-Swift%206-F05138?logo=swift" alt="Swift 6">
+  <img src="https://img.shields.io/badge/UI-SwiftUI-007AFF?logo=swift" alt="SwiftUI">
+  <img src="https://img.shields.io/badge/Persistence-SwiftData-6E6E73" alt="SwiftData">
 </p>
 
 ---
 
 ## Overview
 
-WuFlow started as a habit tracker, but evolved into something broader:
+WuFlow started as a habit tracker and evolved into a broader exploration of personal behavior.
+
+Its guiding idea is:
 
 > **Observe behavior before trying to change it.**
 
-Instead of focusing only on whether a habit was completed, WuFlow explores the relationship between:
+Rather than focusing only on whether a habit was completed, WuFlow brings together five parts of a person's daily experience:
 
-- **Intention** — what the user wants to build, maintain, or reduce
-- **Behavior** — what actually happens
-- **Context** — where and when behavior occurs
-- **Observation** — what the user notices about it
-- **Insight** — patterns derived from recorded behavior
+- **Intention** — what someone wants to build, maintain, or reduce.
+- **Behavior** — what actually happens.
+- **Context** — where and when behavior occurs.
+- **Observation** — what someone notices about their own behavior.
+- **Insight** — patterns derived from recorded activity.
 
-The goal is to reduce the friction of collecting this information while keeping the user in control of how it is interpreted.
+The goal is to make tracking less dependent on manual input while keeping people in control of their data and how it is interpreted.
 
-WuFlow is also a technical exploration of modern native iOS development, combining system frameworks, local persistence, background automation, behavioral analysis, and testable domain logic.
-
----
-
-# 🧘 Concept
+## The idea behind WuFlow
 
 WuFlow takes inspiration from the Taoist concept of **Wu Wei (無為)**, often translated as *effortless action*.
 
-The project does not interpret this as eliminating effort. Instead, it explores how software can reduce unnecessary friction and encourage observation before intervention.
+The project does not interpret this as eliminating effort. Instead, it explores how technology can reduce unnecessary friction and encourage awareness before intervention.
 
-For example, instead of requiring a user to remember to record a gym session:
+For example, rather than asking someone to remember to record every gym visit:
 
 ```text
-Arrive at the gym
-       ↓
-CoreLocation detects the place
-       ↓
-WuFlow creates a session
-       ↓
+Arrive at a saved place
+        ↓
+Core Location detects the geofence event
+        ↓
+WuFlow starts an activity session
+        ↓
 The user receives contextual feedback
-       ↓
-Behavior is recorded with minimal interaction
+        ↓
+The session becomes part of their behavioral history
 ```
 
-The same principle applies to HealthKit integrations and interactive notifications.
+The same principle informs integrations with HealthKit, notifications, and Live Activities.
 
 ---
 
-# ✨ Core Features
+## Features
 
-## Activity Tracking
+### Activity tracking
 
-Activities represent behaviors the user wants to:
+Activities represent behaviors someone wants to:
 
-- 🌱 **Build** — increase or develop
-- 🌊 **Maintain** — preserve consistently
-- 🔥 **Reduce** — decrease or move away from
+- 🌱 **Build** — increase or develop.
+- 🌊 **Maintain** — preserve consistently.
+- 🔥 **Reduce** — decrease or move away from.
 
-Each activity can contain:
+Activities can include goals, measurement types, progress history, life-area classification, reminders, location automation, and behavioral observations.
 
-- Custom goals
-- Measurement types
-- Progress history
-- Life-area classification
-- Optional reminders
-- Optional location automation
-- Behavioral observations
+### Progress tracking
 
----
+For Build and Maintain activities, WuFlow records progress over time. Entries can be added manually or synchronized through supported system integrations.
 
-## 📈 Progress Tracking
+The app provides daily progress, historical records, goal tracking, activity summaries, charts, and active-day visualizations. Progress is stored as structured records rather than being derived from UI state.
 
-For activities that are built or maintained, WuFlow records progress over time.
+### Behavioral observations
 
-Progress can be entered manually or generated automatically by system integrations.
+WuFlow separates **what happened** from **what someone noticed**.
 
-The application provides:
-
-- Daily progress
-- Historical records
-- Goal progress
-- Activity summaries
-- Progress charts
-- Active-day visualization
-
-Progress is stored as structured records rather than being derived from UI state.
-
----
-
-# 👁️ Behavioral Observations
-
-WuFlow separates **what happened** from **what the user noticed**.
-
-An observation can contain:
-
-- A timestamp
-- A note
-- Optional emotion
-- Optional image
-- An observation type
-
-Observations currently support:
+An observation can include a timestamp, note, optional emotion, optional image, and an observation type. Current observation types include:
 
 - `note`
 - `incident`
 
-This allows the same behavioral history to contain both normal reflections and meaningful events.
+This allows a behavioral history to contain both everyday reflections and meaningful events.
 
 For example:
 
 ```text
 Progress
-    ↓
 "I went to the gym for 45 minutes."
 
 Observation
-    ↓
 "I noticed I had more energy after work today."
 ```
 
-The goal is to preserve context that would otherwise be lost in a simple habit-completion system.
+### Reduce activities
 
----
+Reduce activities use a different behavioral model. Instead of asking only how much progress was made, WuFlow can help answer:
 
-# 🔥 Decrease Activities
+> How long has it been since the last incident?
 
-Decrease activities use a different behavioral model.
+Incidents are represented as structured observations. The app can calculate awareness duration, incident count, current and longest incident-free durations, and average intervals between incidents.
 
-Instead of asking:
+### Behavior calendar
 
-> "How much progress did I make?"
+The calendar visualizes behavior over time:
 
-WuFlow can ask:
+- Build and Maintain activities show days containing progress.
+- Reduce activities show days containing incidents.
 
-> "How long has it been since the last incident?"
+It supports monthly navigation, progress and incident modes, day selection, and detailed inspection of records for a selected day.
 
-Incidents are represented as structured observations rather than a separate data model.
+### Deterministic insights
 
-The application calculates:
+WuFlow uses deterministic domain logic for its current behavioral analysis rather than relying on an AI model for basic calculations.
 
-- Awareness duration
-- Incident count
-- Current incident-free duration
-- Longest incident-free duration
-- Average interval between incidents
+Current insight areas include:
 
-This allows decrease-oriented behaviors to be analyzed without forcing them into the same progress model used for build/maintain activities.
+- **Typical session duration** — estimates the typical time spent at a place from recorded sessions.
+- **Session consistency** — compares session durations against the median.
+- **Life-area attention** — measures how recorded progress is distributed across life areas.
+- **Life-area trends** — compares periods to identify changes in activity distribution.
 
----
+These calculations live outside SwiftUI views and can be tested independently.
 
-# 📅 Behavior Calendar
+### Location automation
 
-WuFlow includes a calendar visualization designed to make behavioral patterns visible over time.
+WuFlow uses Core Location geofencing to connect physical context with behavior.
 
-For **Build** and **Maintain** activities, the calendar visualizes days containing progress.
-
-For **Reduce** activities, it visualizes days containing incidents.
-
-The calendar is intentionally based on behavior rather than generic productivity metrics.
+Users can create reusable Places, configure geofence radii, associate activities with locations, detect region entry, start activity sessions, and receive contextual notifications.
 
 ```text
-SwiftData Records
-       ↓
-BehaviorDayCalculator
-       ↓
-BehaviorDay[]
-       ↓
-BehaviorCalendarCalculator
-       ↓
-CalendarDayPosition[]
-       ↓
-BehaviorCalendar
-```
-
-The calendar supports:
-
-- Monthly navigation
-- Progress mode
-- Incident mode
-- Day selection
-- Detailed day inspection
-
-Selecting a day opens the underlying progress and observation records for that date.
-
----
-
-# 💡 Deterministic Insights
-
-WuFlow does not rely on an AI model to perform basic behavioral analysis.
-
-Instead, deterministic domain logic calculates meaningful patterns from structured data.
-
-Current insights include:
-
-### Typical Session Duration
-
-Uses recorded location sessions to determine a typical amount of time spent at a place.
-
-### Session Consistency
-
-Compares session durations against the median and identifies when sessions remain relatively consistent.
-
-### Life Area Attention
-
-Measures how recorded progress is distributed across life areas.
-
-### Life Area Trends
-
-Compares two time periods and identifies changes in the distribution of activity across life areas.
-
-These calculations live outside SwiftUI views and are independently testable.
-
----
-
-# 📍 Location Automation
-
-WuFlow uses **CoreLocation geofencing** to connect physical context with behavior.
-
-Users can:
-
-- Create reusable Places
-- Configure a geofence radius
-- Associate activities with locations
-- Detect region entry
-- Start activity sessions
-- Receive contextual notifications
-
-Example flow:
-
-```text
-Enter Gym
-    ↓
-CoreLocation Region Event
-    ↓
+Enter a saved place
+        ↓
+Core Location region event
+        ↓
 LocationAutomationEngine
-    ↓
-Activity Session
-    ↓
-Live Activity / Notification
-    ↓
-Progress or session tracking
+        ↓
+Activity session
+        ↓
+Live Activity / notification
+        ↓
+Session tracking
 ```
 
-The location layer is separated from the persistence layer through dedicated services and automation logic.
+The location layer is separated from persistence through dedicated services and automation logic.
 
----
-
-# ❤️ HealthKit Integration
+### HealthKit integration
 
 WuFlow can use HealthKit data to reduce manual tracking.
 
-Current integrations include:
+Current integrations include daily step data and workout-related data. Synchronized health data can be incorporated into the progress model.
 
-- Daily step data
-- Workout-related data
+Synchronization is designed to be idempotent. For example, syncing daily steps updates the existing record for that activity and day instead of creating duplicates.
 
-Health data can be synchronized into WuFlow's progress model while keeping synchronization idempotent.
+### Notifications and Live Activities
 
-For example, when daily steps are synchronized, WuFlow updates the existing record for that activity and day rather than creating duplicates.
+WuFlow uses UserNotifications and ActivityKit to provide contextual feedback without requiring the app to remain open.
 
----
-
-# 🔔 Notifications & Live Activities
-
-WuFlow uses Apple's notification and Live Activity APIs to provide contextual feedback without requiring the application to remain open.
-
-Interactive notifications can allow users to record progress directly from the notification.
-
-Live Activities provide real-time session information, including support for the Dynamic Island on compatible devices.
+Interactive notifications can allow progress to be recorded directly from a notification. Live Activities display real-time session information, including Dynamic Island presentation on compatible devices.
 
 ---
 
-# 🏗 Architecture
+## Screenshots
 
-WuFlow separates persistence, domain calculations, system integrations, and presentation.
+The screenshots below should represent the current UI, not earlier design iterations.
+
+| Screen | Suggested asset |
+|---|---|
+| Home dashboard | `Screenshots/home-dashboard.png` |
+| Activity detail and progress | `Screenshots/activity-detail.png` |
+| Behavior calendar | `Screenshots/behavior-calendar.png` |
+| Insights | `Screenshots/insights-dashboard.png` |
+| Place and geofence session | `Screenshots/geofence-session.png` |
+| Live Activity / Dynamic Island | `Screenshots/live-activity.png` |
+| HealthKit step tracking | `Screenshots/healthkit-steps.png` |
+
+<p align="center">
+  <img src="Screenshots/activity-detail.png" alt="WuFlow activity detail" width="250">
+  &nbsp;&nbsp;
+  <img src="Screenshots/behavior-calendar.png" alt="WuFlow behavior calendar" width="250">
+</p>
+
+<p align="center">
+  <img src="Screenshots/insights-dashboard.png" alt="WuFlow insights dashboard" width="250">
+  &nbsp;&nbsp;
+  <img src="Screenshots/geofence-session.png" alt="WuFlow location session" width="250">
+</p>
+
+<p align="center">
+  <img src="Screenshots/live-activity.png" alt="WuFlow Live Activity" width="250">
+  &nbsp;&nbsp;
+  <img src="Screenshots/healthkit-steps.png" alt="WuFlow HealthKit step tracking" width="250">
+</p>
+
+---
+
+## Architecture
+
+WuFlow separates presentation, domain calculations, persistence, and system integrations.
 
 At a high level:
 
 ```text
-                SwiftUI
-                   │
-                   ▼
-              Application
-                   │
-        ┌──────────┴──────────┐
-        ▼                     ▼
-   Domain Logic          System Services
-        │                     │
-        │              ┌──────┼─────────┐
-        │              ▼      ▼         ▼
-        │        CoreLocation HealthKit Notifications
-        │
-        ▼
-   Repositories
-        │
-        ▼
-     SwiftData
+                         SwiftUI
+                            │
+                            ▼
+                      Application
+                            │
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+         Domain Logic                System Services
+              │                           │
+              │                    ┌──────┼──────────┐
+              │                    ▼      ▼          ▼
+              │              CoreLocation HealthKit Notifications
+              │
+              ▼
+         Repositories
+              │
+              ▼
+           SwiftData
 ```
 
-Behavioral calculations are intentionally kept outside the views:
+Behavioral calculations are kept outside the views:
 
 ```text
-SwiftData
-    ↓
-Records
-    ↓
-Calculators
-    ↓
-Domain Summaries
-    ↓
-Insights / Visualization
-    ↓
+SwiftData records
+        ↓
+Domain calculators
+        ↓
+Domain summaries
+        ↓
+Insights and visualizations
+        ↓
 SwiftUI
 ```
 
 This keeps business rules testable and prevents views from becoming responsible for behavioral analysis.
 
----
+### Domain calculations
 
-# 🧩 Domain Architecture
-
-Some examples of the domain layer include:
+Examples of focused domain components include:
 
 ```text
 ProgressCalculator
@@ -345,270 +263,154 @@ InsightEngine
 
 Each calculator has a focused responsibility and can be tested independently from SwiftUI.
 
----
+### Persistence
 
-# 💾 Persistence
-
-WuFlow uses **SwiftData** for local persistence.
+WuFlow uses SwiftData for local persistence.
 
 Core models include:
 
 ```text
 Activity
-    │
-    ├── ProgressRecord[]
-    ├── ObservationRecord[]
-    └── Place
+ ├── ProgressRecord[]
+ ├── ObservationRecord[]
+ └── Place
 
 Place
-    │
-    └── PlaceSession
+ └── PlaceSession
 ```
 
-Observations support multiple behavioral meanings through a structured observation type:
-
-```text
-Observation
-    ├── Note
-    └── Incident
-```
-
-This avoids creating separate persistence models for every kind of behavioral event.
+Observations support multiple behavioral meanings through a structured observation type, including notes and incidents.
 
 ---
 
-# 🧪 Testing
+## Engineering highlights
 
-Domain logic is covered with unit tests using an in-memory SwiftData configuration where persistence behavior needs to be exercised.
+WuFlow is also an exploration of modern native iOS engineering:
 
-Current test coverage includes areas such as:
-
-- Progress calculations
-- Decrease activity calculations
-- Incident intervals
-- Session duration calculations
-- Session consistency
-- Life-area attention
-- Life-area trends
-- Behavior-day aggregation
-- Behavior calendar positioning
-- Observation filtering
-- Mixed progress / incident data
-
-The goal is to keep behavioral rules independent from the UI so they can be validated through deterministic tests.
-
----
-
-# 🛠 Technologies
-
-## Language
-
-- Swift 6
-
-## UI
-
-- SwiftUI
-- NavigationStack
-- Charts
-- SF Symbols
-
-## Persistence
-
-- SwiftData
-- `@Model`
-- `@ModelActor`
-- Repository Pattern
-
-## Apple Frameworks
-
-- CoreLocation
-- MapKit
-- HealthKit
-- UserNotifications
-- ActivityKit
-- WidgetKit
-
-## Concurrency
-
-- Swift Concurrency
-- `async/await`
-- Actors
-- Structured concurrency
+- Native SwiftUI application architecture.
+- Separation of presentation and domain logic.
+- Repository pattern and dependency injection.
+- SwiftData persistence and `@ModelActor`.
+- Swift Concurrency, actors, and structured concurrency.
+- Core Location geofencing and location automation.
+- HealthKit synchronization.
+- Interactive notifications and Live Activities.
+- MapKit-based location selection.
+- Deterministic behavioral analysis.
+- Reusable SwiftUI components.
+- Unit-tested domain logic.
 
 ## Testing
 
-- XCTest
-- In-memory SwiftData containers
-- Unit testing of domain logic
+Domain logic is covered by unit tests. In-memory SwiftData configurations are used where persistence behavior needs to be exercised.
 
----
+Tested areas include:
 
-# 📁 Project Structure
+- Progress and decrease-activity calculations.
+- Incident intervals.
+- Session duration and consistency.
+- Life-area attention and trends.
+- Behavior-day aggregation and calendar positioning.
+- Observation filtering.
+- Mixed progress and incident data.
+
+The goal is to keep behavioral rules independent from the UI so they can be validated with deterministic tests.
+
+## Technologies
+
+| Area | Technologies |
+|---|---|
+| Language | Swift 6 |
+| UI | SwiftUI, NavigationStack, Charts, SF Symbols |
+| Persistence | SwiftData, `@Model`, `@ModelActor` |
+| Apple frameworks | Core Location, MapKit, HealthKit, UserNotifications, ActivityKit, WidgetKit |
+| Concurrency | Swift Concurrency, `async/await`, actors, structured concurrency |
+| Testing | XCTest, in-memory SwiftData, domain unit tests |
+
+## Project structure
+
+The project is organized by feature and responsibility. The following is a high-level representation:
 
 ```text
 WuFlow
-│
 ├── Features
 │   ├── Activities
 │   ├── Places
 │   ├── Statistics
 │   └── Settings
-│
 ├── Components
-│
 ├── Domain
 │   ├── Progress
 │   ├── Observations
 │   ├── Insights
 │   ├── Sessions
 │   └── BehaviorCalendar
-│
 ├── Services
 │   ├── LocationService
 │   ├── HealthKitSyncService
 │   └── NotificationManager
-│
 ├── Automation
 │   ├── LocationAutomationEngine
 │   └── NotificationActionHandler
-│
 ├── Persistence
 │   ├── Models
 │   └── Repositories
-│
 └── Resources
 ```
 
----
+## Roadmap
 
-# 🚀 Engineering Highlights
+WuFlow is being developed incrementally.
 
-WuFlow demonstrates several areas of modern iOS development:
+### Implemented
 
-- Native SwiftUI application architecture
-- SwiftData persistence
-- Repository Pattern
-- Dependency Injection
-- `@ModelActor`
-- Swift Concurrency
-- CoreLocation geofencing
-- HealthKit synchronization
-- Interactive notifications
-- Live Activities
-- Dynamic Island integration
-- MapKit-based location selection
-- Deterministic behavioral analysis
-- Reusable SwiftUI components
-- Unit-tested domain logic
-- Separation between UI and business rules
+- Activity and progress tracking.
+- SwiftData persistence.
+- Behavioral observations and incident tracking.
+- Reduce activity calculations.
+- Behavior calendar.
+- Deterministic insights.
+- HealthKit integration.
+- Location automation and Place sessions.
+- Notifications and Live Activities.
 
----
+### Exploring next
 
-# 🗺 Roadmap
+- Behavioral experiments.
+- Comparing behavior before and after intentional changes.
+- Additional deterministic insights.
+- AI-assisted behavioral synthesis.
+- Apple Watch integration.
+- Widgets and Shortcuts.
+- Additional automation sources.
+- Cloud synchronization.
 
-The project is being developed incrementally.
-
-### Completed
-
-- Activity tracking
-- Progress persistence
-- HealthKit integration
-- Location automation
-- Place sessions
-- Behavioral observations
-- Incident tracking
-- Decrease activity model
-- Deterministic insights
-- Behavior Calendar
-- Live Activities
-
-### Next
-
-- Behavioral experiments
-- Experiment tracking
-- Comparing behavior before and after intentional changes
-- Additional deterministic insights
-
-### Future Exploration
-
-- AI-assisted behavioral synthesis
-- Apple Watch integration
-- Widgets
-- Shortcuts
-- Additional automation sources
-- Cloud synchronization
-
-AI is intentionally planned after the deterministic analysis layer so that structured behavioral data and explicit rules form the foundation for any future interpretation.
+AI-assisted interpretation is being considered as a later layer, after structured behavioral data and deterministic rules provide a foundation.
 
 ---
 
-# 📸 Screenshots
+## Why WuFlow?
 
-## Dashboard
-
-<p align="center">
-<img src="Screenshots/dashboard.png" width="250">
-</p>
-
----
-
-## Activity Detail
-
-<p align="center">
-<img src="Screenshots/activity-detail.png" width="250">
-</p>
-
----
-
-## Location Automation
-
-<p align="center">
-<img src="Screenshots/location-map.png" width="250">
-<img src="Screenshots/location-notification.png" width="250">
-</p>
-
----
-
-## Statistics
-
-<p align="center">
-<img src="Screenshots/statistics.png" width="250">
-</p>
-
-> Additional screenshots for observations, decrease activities, the Behavior Calendar, and Live Activities will be added as the project presentation evolves.
-
----
-
-# 🎯 Why WuFlow?
-
-Most habit trackers primarily ask users to record whether something happened.
+Many habit trackers primarily ask whether something happened.
 
 WuFlow explores a different question:
 
 > **What can we learn when behavior, context, and observation are recorded together?**
 
-The project combines automatic context with explicit user input to create a richer behavioral history while keeping the underlying system understandable and deterministic.
+The project combines automatic context with explicit user input to create a richer behavioral history, while keeping the underlying system understandable and deterministic.
 
 It is both a personal application and an ongoing exploration of modern iOS engineering.
 
----
-
-# 👨‍💻 Author
+## Author
 
 **Roberto Abad**  
 Senior Software Engineer
 
-📱 iOS — Swift, SwiftUI  
-🌐 Full-Stack — .NET, C#
+- **iOS:** Swift, SwiftUI
+- **Full-stack:** .NET, C#
 
-🔗 [GitHub](https://github.com/RobertoAbad505)
+[GitHub](https://github.com/RobertoAbad505) · [LinkedIn](https://www.linkedin.com/in/robertoabad95/) · [Portfolio](https://roberto-abad.web.app)
 
-🔗 [LinkedIn](https://www.linkedin.com/in/robertoabad95/)
-
-🔗 [Portfolio](https://roberto-abad.web.app)
-
----
-
-# 📜 License
+## License
 
 This project is open for educational and portfolio purposes.
