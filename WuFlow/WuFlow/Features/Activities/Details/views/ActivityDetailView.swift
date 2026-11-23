@@ -126,6 +126,13 @@ struct ActivityDetailView: View {
     private var isPresentingImage: Bool {
         return !(activity.imagePath == nil || (activity.imagePath ?? "").isEmpty)
     }
+    private var backgroundStyle: BackgroundStyle {
+        switch activity.type {
+        case .increase: return .growth
+        case .maintain: return .flow
+        case .decrease: return .reduce
+        }
+    }
     private var progress: ProgressSummary {
         progressCalculator.progress(
             for: activity,
@@ -159,6 +166,7 @@ struct ActivityDetailView: View {
             sessions: sessions
         )
     }
+    @State private var selectedObservationImage: ObservationRecord?
     @State private var selectedObservation: ObservationRecord?
     @State private var selectedBehaviorDay: BehaviorDay?
     @State private var placeSession: PlaceSession?
@@ -231,8 +239,8 @@ struct ActivityDetailView: View {
     
     var body: some View {
         ZStack {
-            AnimatedBackgroundView(style: .calm)
-                .ignoresSafeArea()                
+            AnimatedBackgroundView(style: backgroundStyle)
+                .ignoresSafeArea()
             content
         }
         .toolbar {
@@ -279,6 +287,9 @@ struct ActivityDetailView: View {
                     ? .incidents
                     : .progress
             )
+        }
+        .fullScreenCover(item: $selectedObservationImage) { observation in
+            ObservationImageViewer(observation: observation)
         }
     }
     
@@ -370,7 +381,10 @@ extension ActivityDetailView {
 
                     LazyVStack(spacing: 20) {
                         ForEach(observations) { observation in
-                            ActivityObservationView(observation: observation)
+                            ActivityObservationView(observation: observation) {
+                                guard observation.imagePath?.isEmpty == false else { return }
+                                selectedObservationImage = observation
+                            }
                         }
                     }
                 }
@@ -469,44 +483,35 @@ extension ActivityDetailView {
     }
     var heroButtons: some View {
         VStack {
-            // CTA (important positioning)
-            Button {
-                self.activeSheet = .addProgress
-            } label: {
-                Label("Add progress", systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+            if activity.trackingType != .healthSteps {
+                Button {
+                    self.activeSheet = .addProgress
+                } label: {
+                    Label("Log progress", systemImage: "plus.circle.fill")
+                        .font(.headline)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background(AppColors.midnightNavy)
+                        .foregroundStyle(AppColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .buttonStyle(.plain)
             }
-            addObservationButton
+            observationActionButton
             if activity.isAutomated && activity.trackingType == .healthSteps {
                 Button {
                     healthKit.sync()
                 } label: {
-                    Label("Sync Steps",
+                    Label("Sync Apple Health",
                           systemImage: "arrow.trianglehead.2.clockwise.rotate.90.circle")
-                        .font(.headline)
-                        .padding(.vertical, 12)
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.vertical, 11)
                         .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .background(AppColors.mistBlue.opacity(0.6))
+                        .foregroundStyle(AppColors.oceanBlue)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
-                Button {
-                    healthKit.resetTodayHealthStepSync(self.activity.id)
-                } label: {
-                    Label("Clean up today steps",
-                          systemImage: "eraser.badge.xmark.fill")
-                        .font(.headline)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -524,23 +529,49 @@ extension ActivityDetailView {
                 .foregroundColor(.secondary)
         }
     }
+    private var observationActionButton: some View {
+        Button {
+            activeSheet = .createObservation
+        } label: {
+            Label(
+                activity.type == .decrease ? "Record observation" : "Add note",
+                systemImage: "plus.circle"
+            )
+            .font(.subheadline.weight(.medium))
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .background(AppColors.surface.opacity(0.8))
+            .foregroundStyle(AppColors.midnightNavy)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(AppColors.divider, lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+    }
     
     @ViewBuilder
     var addObservationButton: some View {
-       //Create observation
-       Button(action: {
-           print("Create observation triggered!")
-           self.activeSheet = .createObservation
-       }, label: {
-           Label("Add observation ☯️👀", systemImage: "plus.circle")
-           .font(.headline)
-           .padding(.vertical, 12)
-           .frame(maxWidth: .infinity)
-           .background(Color.green)
-           .foregroundColor(.white)
-           .clipShape(RoundedRectangle(cornerRadius: 16))
-       })
+        observationActionButton
     }
+    
+//    @ViewBuilder
+//    var addObservationButton: some View {
+//       //Create observation
+//       Button(action: {
+//           print("Create observation triggered!")
+//           self.activeSheet = .createObservation
+//       }, label: {
+//           Label("Add observation ☯️👀", systemImage: "plus.circle")
+//           .font(.headline)
+//           .padding(.vertical, 12)
+//           .frame(maxWidth: .infinity)
+//           .background(Color.green)
+//           .foregroundColor(.white)
+//           .clipShape(RoundedRectangle(cornerRadius: 16))
+//       })
+//    }
     var meaningSection: some View {
         VStack(alignment: .leading, spacing: 20) {
             if hasMeaningContent {

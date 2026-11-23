@@ -13,6 +13,7 @@ enum BackgroundStyle {
 
     // New
     case growth
+    case flow
     case reduce
     case night
     case minimal

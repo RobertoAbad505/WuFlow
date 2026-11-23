@@ -10,12 +10,18 @@ import SwiftUI
 struct ActivityObservationView: View {
     
     let observation: ObservationRecord
+    var onImageTap: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             if hasImage {
-                imageSection
-                    .allowsHitTesting(false)
+                Button {
+                    onImageTap?()
+                } label: {
+                    imageSection
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("View observation photo full screen")
             }
             VStack(spacing: 10) {
                 HStack {

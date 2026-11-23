@@ -12,7 +12,7 @@ struct HomeHeaderView: View {
     let userName: String = "Roberto"
 
     var body: some View {
-        HStack(alignment: .center, spacing: 8) {
+        HStack(alignment: .center, spacing: 0) {
             VStack(alignment: .leading, spacing: 5) {
                 Text("\(HomeHeaderView.currentGreeting()),")
                     .font(.subheadline.weight(.medium))
@@ -27,6 +27,7 @@ struct HomeHeaderView: View {
             }
         }
         .padding(.bottom, 60)
+        .padding(.top, 20)
     }
 }
 private extension HomeHeaderView {

@@ -105,18 +105,18 @@ extension BackgroundConfig {
         case .growth:
             return BackgroundConfig(
                 gradientA: [
-                    Color.green.opacity(0.28),
-                    Color.mint.opacity(0.22),
-                    Color.white
+                    AppColors.mistBlue.opacity(0.68),
+                    AppColors.oceanBlue.opacity(0.20),
+                    AppColors.canvas
                 ],
                 gradientB: [
-                    Color.mint.opacity(0.28),
-                    Color.green.opacity(0.18),
-                    Color.white
+                    AppColors.oceanBlue.opacity(0.25),
+                    AppColors.mistBlue.opacity(0.72),
+                    AppColors.canvas
                 ],
                 blobs: [
                     BlobConfig(
-                        color: Color.green.opacity(0.18),
+                        color: AppColors.oceanBlue.opacity(0.12),
                         size: 220,
                         initialOffset: CGSize(width: -140, height: 180),
                         finalOffset: CGSize(width: 140, height: -120),
@@ -124,21 +124,43 @@ extension BackgroundConfig {
                     )
                 ]
             )
-        case .reduce:
+        case .flow:
             return BackgroundConfig(
                 gradientA: [
-                    Color.orange.opacity(0.18),
-                    Color.red.opacity(0.12),
-                    Color.white
+                    AppColors.matchaSage.opacity(0.20),
+                    AppColors.mistBlue.opacity(0.64),
+                    AppColors.canvas
                 ],
                 gradientB: [
-                    Color.red.opacity(0.16),
-                    Color.orange.opacity(0.10),
-                    Color.white
+                    AppColors.mistBlue.opacity(0.7),
+                    AppColors.matchaSage.opacity(0.16),
+                    AppColors.canvas
                 ],
                 blobs: [
                     BlobConfig(
-                        color: Color.orange.opacity(0.12),
+                        color: AppColors.matchaSage.opacity(0.10),
+                        size: 210,
+                        initialOffset: CGSize(width: -120, height: 130),
+                        finalOffset: CGSize(width: 100, height: -110),
+                        animationDuration: 18
+                    )
+                ]
+            )
+        case .reduce:
+            return BackgroundConfig(
+                gradientA: [
+                    AppColors.oceanBlue.opacity(0.20),
+                    AppColors.matchaSage.opacity(0.22),
+                    AppColors.canvas
+                ],
+                gradientB: [
+                    AppColors.matchaSage.opacity(0.23),
+                    AppColors.oceanBlue.opacity(0.18),
+                    AppColors.canvas
+                ],
+                blobs: [
+                    BlobConfig(
+                        color: AppColors.matchaSage.opacity(0.10),
                         size: 180,
                         initialOffset: CGSize(width: -100, height: 100),
                         finalOffset: CGSize(width: 100, height: -100),
