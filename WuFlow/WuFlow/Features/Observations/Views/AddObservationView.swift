@@ -36,10 +36,17 @@ struct AddObservationView: View {
     
     let onDismiss: ((ObservationRecord?) -> Void)
     
+    private var backgroundStyle: BackgroundStyle {
+        switch activity.type {
+        case .increase: return .growth
+        case .maintain: return .flow
+        case .decrease: return .reduce
+        }
+    }
+    
     var body: some View {
-        
         ZStack {
-            AnimatedBackgroundView(style: .night)
+            AnimatedBackgroundView(style: backgroundStyle)
                 .ignoresSafeArea()
             content
         }
@@ -61,7 +68,6 @@ struct AddObservationView: View {
                 maxDimension: 1024,
                 compression: 0.6
             )
-
             imagePath = path
         }
         .onChange(of: selectedPhoto) { _, newImage in

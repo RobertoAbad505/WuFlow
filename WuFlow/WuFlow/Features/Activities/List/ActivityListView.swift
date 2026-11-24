@@ -118,9 +118,6 @@ struct ActivityListView: View {
                 }
             }
         }
-        .onAppear {
-            NotificationManager.shared.syncReminders(for: activities)
-        }
         .fullScreenCover(isPresented: $isPresentingCreateActivity) {
             CreateActivityView(mode: .create)
         }

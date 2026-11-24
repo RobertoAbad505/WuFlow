@@ -147,7 +147,7 @@ struct HomeView: View {
                     focusSection
                     quickActionsSection
                     insightSection
-
+                    EndPageView()
                 }
                 .padding(16)
                 .padding(.bottom, 60)
@@ -264,9 +264,8 @@ struct HomeView: View {
                         .foregroundStyle(AppColors.oceanBlue)
                 }
             }
-            
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: 5) {
                     ForEach(focusCards) { item in
                         FocusCardView(item: item) {
                             router.homePath.append(ActivitiesRoute.detail(item.activity))

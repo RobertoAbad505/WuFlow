@@ -38,6 +38,7 @@ struct RootTabView: View {
                 .tag(AppTab.settings)
         }
         .tint(AppColors.midnightNavy)
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
 
