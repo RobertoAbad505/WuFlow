@@ -28,10 +28,10 @@ struct SplashView: View {
                     .clipped()
                 VStack {
                     Text("WuFlow")
-                        .font(.title.bold())
+                        .font(.title2.bold())
                         .foregroundStyle(AppColors.midnightNavy)
                     Text("無為")
-                        .font(.title.bold())
+                        .font(.largeTitle.bold())
                         .foregroundStyle(AppColors.midnightNavy)
                         .padding(.bottom)
                     // Animated Wu Wei mark
