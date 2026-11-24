@@ -150,7 +150,7 @@ struct HomeView: View {
                     EndPageView()
                 }
                 .padding(16)
-                .padding(.bottom, 60)
+                .padding(.bottom, 20)
             }
             .background(alignment: .top) {
                 Image("WuFlowHeaderImg")

@@ -8,10 +8,16 @@
 import SwiftUI
 
 struct EndPageView: View {
+    let markSize: Double
+    
+    init(_ markSize: Double? = 15.0) {
+        self.markSize = markSize ?? 15.0
+    }
+    
     var body: some View {
         HStack {
             Spacer()
-            WuWeiMark(size: 15)
+            WuWeiMark(size: markSize)
             Spacer()
         }
         .padding(.vertical, 25)

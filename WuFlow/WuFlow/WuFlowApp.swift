@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct WuFlowApp: App {
+    @State private var showSplash = true
     @StateObject private var router = Router()
     @Environment(\.scenePhase) private var scenePhase
     let notificationDelegate: NotificationDelegate
@@ -29,22 +30,42 @@ struct WuFlowApp: App {
     }
 
     var body: some Scene {
+        
         WindowGroup {
-            RootTabView()
-                .preferredColorScheme(.light)
-                .onOpenURL { url in
-                    router.handleDeepLink(url)
+            ZStack {
+                // Main application stays loaded underneath
+                RootTabView()
+
+                if showSplash {
+                    SplashView()
+                        .transition(.opacity)
+                        .zIndex(1)
                 }
-                .environmentObject(router)
-                .environment(container.healthKitSyncService)
-                .environment(\.repository, container.repository)
-                .environment(container.locationService)
+            }
+            .ignoresSafeArea()
+            .animation(
+                .easeInOut(duration: 1),
+                value: showSplash
+            )
+            .task {
+                try? await Task.sleep(for: .seconds(1))
+                showSplash = false
+            }
+            .preferredColorScheme(.light)
+            .onOpenURL { url in
+                router.handleDeepLink(url)
+            }
+            .environmentObject(router)
+            .environment(container.healthKitSyncService)
+            .environment(\.repository, container.repository)
+            .environment(container.locationService)
         }
         .modelContainer(container.persistence.container)
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else {
                 return
             }
+
             container.healthKitSyncService.sync()
             restoreState()
         }
