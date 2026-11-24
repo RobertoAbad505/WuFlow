@@ -26,13 +26,22 @@ struct SplashView: View {
                         height: geometry.size.height
                     )
                     .clipped()
-
-                // Animated Wu Wei mark
-                WuWeiMark(size: 35)
-                    .rotationEffect(
-                        .degrees(isAnimating ? 360 : 0)
-                    )
-                    .scaleEffect(isAnimating ? 1.15 : 0.9)
+                VStack {
+                    Text("WuFlow")
+                        .font(.title.bold())
+                        .foregroundStyle(AppColors.midnightNavy)
+                    Text("無為")
+                        .font(.title.bold())
+                        .foregroundStyle(AppColors.midnightNavy)
+                        .padding(.bottom)
+                    // Animated Wu Wei mark
+                    WuWeiMark(size: 35)
+                        .rotationEffect(
+                            .degrees(isAnimating ? 360 : 0)
+                        )
+                        .scaleEffect(isAnimating ? 2.0 : 0.9)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
             .frame(
                 width: geometry.size.width,
