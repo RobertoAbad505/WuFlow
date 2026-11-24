@@ -578,6 +578,23 @@ extension ActivityRepository {
         try modelContext.save()
         return observation
     }
+
+    func observation(id: UUID) throws -> ObservationRecord? {
+        let descriptor = FetchDescriptor<ObservationRecord>(
+            predicate: #Predicate {
+                $0.id == id
+            }
+        )
+        return try modelContext.fetch(descriptor).first
+    }
+
+    func deleteObservation(id: UUID) throws {
+        guard let observation = try observation(id: id) else {
+            return
+        }
+        modelContext.delete(observation)
+        try modelContext.save()
+    }
     
     @discardableResult
     func deleteInvalidPlaceSessions(

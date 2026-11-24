@@ -166,6 +166,10 @@ struct ActivityDetailView: View {
             sessions: sessions
         )
     }
+    //Delete observation
+    @State private var isShowingDeleteObservationDialog: Bool = false
+    @State private var selectedObservationToDelete: ObservationRecord?
+    //---------------------------------------------------------------
     @State private var selectedObservationImage: ObservationRecord?
     @State private var selectedObservation: ObservationRecord?
     @State private var selectedBehaviorDay: BehaviorDay?
@@ -291,6 +295,31 @@ struct ActivityDetailView: View {
         .fullScreenCover(item: $selectedObservationImage) { observation in
             ObservationImageViewer(observation: observation)
         }
+        .confirmationDialog(
+            "Delete observation?",
+            isPresented: $isShowingDeleteObservationDialog,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let observation = selectedObservationToDelete {
+                    deleteObservation(observation)
+                }
+            }
+            Button("Cancel", role: .cancel) { selectedObservationToDelete = nil }
+        } message: {
+            Text("This action cannot be undone.")
+        }
+    }
+    private func deleteObservation(_ observation: ObservationRecord) {
+        Task {
+            guard let repository else { return }
+            do {
+                try await repository.deleteObservation(id: observation.id)
+            } catch {
+                print("Unable to delete activity:", error)
+            }
+            selectedObservationToDelete = nil
+        }
     }
     
     @ToolbarContentBuilder
@@ -384,6 +413,15 @@ extension ActivityDetailView {
                             ActivityObservationView(observation: observation) {
                                 guard observation.imagePath?.isEmpty == false else { return }
                                 selectedObservationImage = observation
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    selectedObservationToDelete = observation
+                                    isShowingDeleteObservationDialog = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
                         }
                     }
