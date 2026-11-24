@@ -293,6 +293,7 @@ struct ActivityListView: View {
                         }
                     }
                 }
+                EndPageView()
             }
         }
     }

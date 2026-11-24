@@ -395,6 +395,7 @@ struct ActivityDetailView: View {
                     calendarComponentSection
                     behavioralHistorySection
                     deleteButton
+                    EndPageView()
                 }
                 .padding()
                 .offset(y: isPresentingImage ? -135:0)
