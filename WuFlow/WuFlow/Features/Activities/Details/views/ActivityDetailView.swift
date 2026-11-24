@@ -25,7 +25,7 @@ struct ActivityDetailView: View {
         SessionDurationCalculator().expectedDuration(from: sessions)
     }
     
-    @State private var activeSheet: ActiveDetailsSheet?
+    @State private var activeSheet: ActiveDetailsSheet? = nil
     
     private let insightEngine = InsightEngine()
     private let activity: Activity
@@ -265,6 +265,7 @@ struct ActivityDetailView: View {
                 AddObservationView(activity: activity) { newObservation in
                     
                     guard let repository, let newObservation else {
+                        print("Error opening add observation sheet.")
                         return
                     }
                     Task {
@@ -277,6 +278,9 @@ struct ActivityDetailView: View {
                             print("Error creating observation: \(error.localizedDescription)")
                         }
                     }
+                }
+                .onAppear {
+                    print("Open create observation sheet")
                 }
                 .onDisappear {
                     self.activeSheet = nil
@@ -393,7 +397,7 @@ struct ActivityDetailView: View {
                     deleteButton
                 }
                 .padding()
-                .offset(y: isPresentingImage ? -150:0)
+                .offset(y: isPresentingImage ? -135:0)
                 .offset(y: activeSession == nil ? 0: -50)
             }
         }
@@ -513,10 +517,10 @@ extension ActivityDetailView {
         )
         .cornerRadius(20)
     }
-    @ViewBuilder
+    /*@ViewBuilder*/
     var decreaseHeroButtons: some View {
         VStack {
-            addObservationButton
+            observationActionButton
         }
     }
     var heroButtons: some View {
@@ -559,6 +563,10 @@ extension ActivityDetailView {
             Text(activity.name)
                 .font(.title2)
                 .fontWeight(.bold)
+            HStack(spacing: 8) {
+                identityTag("Goal is \(activity.type.name.removingEmojis.lowercased())", icon: intentionIcon)
+                identityTag(activity.lifeArea.title, icon: activity.lifeArea.iconName)
+            }
             Text(activity.goalDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -567,10 +575,26 @@ extension ActivityDetailView {
                 .foregroundColor(.secondary)
         }
     }
+    private var intentionIcon: String {
+        switch activity.type {
+        case .increase: return "leaf.fill"
+        case .maintain: return "water.waves"
+        case .decrease: return "arrow.down.right.circle"
+        }
+    }
+    private func identityTag(_ title: String, icon: String) -> some View {
+        Label(title, systemImage: icon)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(AppColors.midnightNavy)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(AppColors.mistBlue.opacity(0.55), in: Capsule())
+    }
     private var observationActionButton: some View {
-        Button {
-            activeSheet = .createObservation
-        } label: {
+        Button(action: {
+            print("\(activity.type == .decrease ? "Record observation" : "Add note")  clic")
+            self.activeSheet = .createObservation
+        }, label: {
             Label(
                 activity.type == .decrease ? "Record observation" : "Add note",
                 systemImage: "plus.circle"
@@ -585,30 +609,13 @@ extension ActivityDetailView {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(AppColors.divider, lineWidth: 1)
             }
-        }
+        })
         .buttonStyle(.plain)
-    }
-    
-    @ViewBuilder
-    var addObservationButton: some View {
-        observationActionButton
     }
     
 //    @ViewBuilder
 //    var addObservationButton: some View {
-//       //Create observation
-//       Button(action: {
-//           print("Create observation triggered!")
-//           self.activeSheet = .createObservation
-//       }, label: {
-//           Label("Add observation ☯️👀", systemImage: "plus.circle")
-//           .font(.headline)
-//           .padding(.vertical, 12)
-//           .frame(maxWidth: .infinity)
-//           .background(Color.green)
-//           .foregroundColor(.white)
-//           .clipShape(RoundedRectangle(cornerRadius: 16))
-//       })
+//        observationActionButton
 //    }
     var meaningSection: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -1084,14 +1091,12 @@ extension ActivityDetailView {
             if !isPresentingImage {
                 Spacer(minLength: 190)
             }
-
             ActivityImageView(
                 path: activity.imagePath,
                 icon: activity.iconName
             )
-            .frame(maxHeight: 600)
+            .frame(maxHeight: 550)
             .frame(maxWidth: .infinity)
-//            .allowsHitTesting(false)
             .id(activity.imagePath)
         }
     }

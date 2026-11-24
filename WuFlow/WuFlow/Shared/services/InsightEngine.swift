@@ -33,6 +33,8 @@ final class InsightEngine {
         for activity: Activity,
         sessions: [PlaceSession]
     ) -> [Insight] {
+        
+        if sessions.count == 0 { return [] }
 
         var insights: [Insight] = []
 
@@ -58,12 +60,7 @@ final class InsightEngine {
         sessions: [PlaceSession]
     ) -> Insight? {
 
-        guard let expectedDuration =
-                sessionDurationCalculator.expectedDuration(
-                    from: sessions
-                )
-        else {
-            print("💡🚫[INSIGHTS] No 'typicalSessionInsight' insight data for \(activity.name)")
+        guard let expectedDuration = sessionDurationCalculator.expectedDuration(from: sessions) else {
             return nil
         }
 
@@ -80,16 +77,10 @@ final class InsightEngine {
         sessions: [PlaceSession]
     ) -> Insight? {
 
-        guard let consistency =
-                sessionConsistencyCalculator.consistency(from: sessions)
-        else {
-            print("💡🚫[INSIGHTS] No 'sessionConsistency' insight - No relevant data for \(activity.name)")
+        guard let consistency = sessionConsistencyCalculator.consistency(from: sessions) else {
             return nil
         }
-        guard consistency.isConsistent else {
-            print("💡🚫[INSIGHTS] No 'sessionConsistency' insight - Not consistent data for \(activity.name)")
-            return nil
-        }
+        guard consistency.isConsistent else { return nil }
 
         return Insight(
             title: "You're pretty consistent",

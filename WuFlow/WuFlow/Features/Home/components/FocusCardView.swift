@@ -11,8 +11,8 @@ struct FocusCardView: View {
     let item: FocusActivityCardItem
     let action: () -> Void
 
-    private let cardWidth: CGFloat = 170
-    private let cardHeight: CGFloat = 190
+    private let cardWidth: CGFloat = 160
+    private let cardHeight: CGFloat = 180
 
     var body: some View {
 

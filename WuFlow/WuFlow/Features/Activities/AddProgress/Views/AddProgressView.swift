@@ -59,9 +59,20 @@ struct AddActivityProgressView: View {
         }
     }
     
+    private var backgroundStyle: BackgroundStyle {
+        guard let activity = self.selectedActivity else {
+            return .wuFlow
+        }
+        switch activity.type {
+        case .increase: return .growth
+        case .maintain: return .flow
+        case .decrease: return .reduce
+        }
+    }
+    
     var body: some View {
         ZStack {
-            AnimatedBackgroundView(style: .wuFlow)
+            AnimatedBackgroundView(style: backgroundStyle)
                 .ignoresSafeArea()
             content
         }
@@ -139,11 +150,9 @@ struct AddActivityProgressView: View {
         }
     }
     private var inputTitle: String {
-
         guard let activity = selectedActivity else {
             return "Add Progress"
         }
-
         switch activity.measurement {
 
         case .session:
@@ -169,20 +178,14 @@ struct AddActivityProgressView: View {
                 ) { amount in
 
                     Button {
-
                         value += amount
-
                     } label: {
-
                         Text("+\(Int(amount))")
                             .font(.headline)
                             .padding(.horizontal, 18)
                             .padding(.vertical, 10)
                     }
-                    .glassEffect(
-                        .clear,
-                        in: Capsule()
-                    )
+                    .glassEffect(.clear,in: Capsule())
                 }
             }
         }
