@@ -27,7 +27,7 @@ struct HomeHeaderView: View {
             }
         }
         .padding(.bottom, 60)
-        .padding(.top, 20)
+        .padding(.top, 5)
     }
 }
 private extension HomeHeaderView {
