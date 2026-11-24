@@ -150,6 +150,7 @@ struct ReminderSettingsView: View {
 
             if activity.remindersEnabled {
                 NotificationManager.shared.scheduleReminder(for: activity)
+                NotificationManager.shared.syncReminders(for: [activity])
             } else {
                 NotificationManager.shared.cancelReminder(for: activity)
             }
