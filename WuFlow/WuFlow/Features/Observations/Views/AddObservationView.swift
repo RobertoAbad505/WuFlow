@@ -13,8 +13,8 @@ struct AddObservationView: View {
     @Environment(\.dismiss) var dismiss
     let activity: Activity
     
-    @State var note: String = ""
-    @State var emotion: String = ""
+    @State private var note: String = ""
+    @State private var emotion: String = "🙂"
     @ObservedObject var cameraManager: CameraManager = .init()
     
     @State private var selectedPhoto: PhotosPickerItem?
@@ -43,11 +43,11 @@ struct AddObservationView: View {
         case .decrease: return .reduce
         }
     }
+    private let emotionOptions = ["🙂", "😌", "😄", "😊", "😐", "🤔", "😕", "😔", "😣", "😤", "😰","🫠"]
     
     var body: some View {
         ZStack {
-            AnimatedBackgroundView(style: backgroundStyle)
-                .ignoresSafeArea()
+            AnimatedBackgroundView(style: self.backgroundStyle)
             content
         }
         .fullScreenCover(isPresented: $cameraManager.showImagePicker) {
@@ -58,7 +58,6 @@ struct AddObservationView: View {
         }
         .onChange(of: cameraManager.image) { newImage in
             guard let newImage else {
-                print("New image is null!!!")
                 return
             }
             imageSource = .camera
@@ -99,27 +98,29 @@ struct AddObservationView: View {
         }
     }
     var content: some View {
-        VStack(alignment: .leading){
+        VStack(spacing: 12) {
+            closeHeader
             stepView
             navigationControls
         }
-        .padding()
-        .background(Color.white.opacity(0.5))
-        .background(.ultraThinMaterial)
-        .cornerRadius(30)
-        .padding(10)
+        .padding(16)
+        .background(AppColors.surface.opacity(0.94), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(AppColors.divider.opacity(0.85), lineWidth: 1)
+        }
+        .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     var stepView: some View {
         VStack(alignment: .center, spacing: 0) {
-            closeHeader
             switch step {
             case .note:
                 noteSection
             case .image:
                 imageSection
             case .incidentCheck:
-                incidentCheck
+                isAnIncidentSection
             case .review:
                 reviewSection
             }
@@ -138,127 +139,96 @@ struct AddObservationView: View {
         }
     }
     
-    var incidentCheck: some View {
-        VStack {
-            isAnIncidentSection
-        }
-    }
-    
-    var reviewSection: some View {
-        VStack {
-            Text("Got it, is this correct?")
-                .font(.title2)
-            summaryCard
-        }
-    }
-    private var summaryCard: some View {
-        VStack(spacing: 20) {
-            preview
-            Divider()
-            Text(note)
-                .font(.body)
-            Divider()
-            Text(emotion)
-                .font(.body)
-            if isAnIncident {
-                Divider()
-                incidentLabel
-            }
-            actions
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
-    }
     private var incidentLabel: some View {
         HStack {
             Image(systemName: "exclamationmark.triangle")
-                .font(.title3)
+                .font(.system(size: 17))
             Text("This was an incident")
                 .font(.headline)
+                .fontWeight(.regular)
         }
         .foregroundStyle(.primary)
     }
-    private var isAnIncidentSection: some View {
-        VStack {
-            
-            Text("Do you think is an incident?")
-                .font(.title2)
-            Button {
-                isAnIncident.toggle()
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName:
-                        isAnIncident
-                        ? "checkmark.circle.fill"
-                        : "circle"
-                    )
-                    .font(.title3)
-
-                    Text("This was an incident")
-
-                    Spacer()
-                }
-                .foregroundStyle(isAnIncident ? .primary : .secondary)
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(isAnIncident ? .orange.opacity(0.12) : .clear)
-                )
-            }
-            .buttonStyle(.plain)
-        }
-    }
     private var titleHeader: some View {
         HStack {
-            Text("Describe your observation for \(activity.name)?👀")
-                .font(.title2)
+            Text("What did you observed about \(activity.name.lowercased())?")
+                .font(.headline)
+                .fontWeight(.medium)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
+        }
+    }
+    private var textInputView: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            ZStack {
+                if note.isEmpty {
+                    VStack(alignment: .leading) {
+                        Text("Today I noticed ...")
+                            .font(.headline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary.opacity(0.6))
+                            .padding(.horizontal, 8)
+                    }
+                }
+                TextEditor(text: $note)
+                    .frame(height: 140)
+                    .textEditorStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .padding(8)
+            }
+            .background(AppColors.canvas, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("How did you feel?")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppColors.midnightNavy)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 8) {
+                    ForEach(emotionOptions, id: \.self) { option in
+                        Button {
+                            emotion = option
+                        } label: {
+                            Text(option)
+                                .font(.system(size: 26))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 44)
+                                .background(
+                                    emotion == option ? AppColors.mistBlue : AppColors.canvas,
+                                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                )
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .stroke(emotion == option ? AppColors.oceanBlue : .clear, lineWidth: 1.5)
+                                }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Select \(option)")
+                    }
+                }
+            }
         }
     }
     private var closeHeader: some View {
         HStack {
             Spacer()
             Button(action: { dismiss() }, label: {
-                HStack {Image(systemName: "chevron.left")}
-                .font(.system(size: 15, weight: .regular))
+                Image(systemName: "xmark")
+                    .font(.subheadline.weight(.medium))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
             })
-            .buttonStyle(.glass)
+            .foregroundStyle(AppColors.midnightNavy)
+            .background(AppColors.mistBlue.opacity(0.55), in: Capsule())
         }
-        .padding()
-        .foregroundStyle(Color(.label))
+        .padding(.horizontal)
+        .padding(.top, 4)
     }
-    private var textInputView: some View {
-        VStack {
-            ZStack {
-                if note.isEmpty {
-                    Text("I want to feel more focused, calm, and in control...")
-                        .foregroundColor(.secondary.opacity(0.6))
-                        .padding(.horizontal, 8)
-                }
-                TextEditor(text: $note)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(height: 120)
-                    .textEditorStyle(.plain)
-                    .offset(y: 20)
-            }
-            VStack(alignment: .leading) {
-                Text("Pick an emoji that best describes how you felt")
-                TextField("🙂", text: $emotion)
-                    .font(.system(size: 32))
-                    .multilineTextAlignment(.center)
-                    .onChange(of: emotion) { _, newValue in
-                        if let first = newValue.first {
-                            emotion = String(first)
-                        }
-                    }
-            }
-        }
-    }
+    
     private var visualInputSection: some View {
-        VStack {
-            Text("Want to add a photo?")
-                .font(.title2)
+        VStack(alignment: .center) {
+            Spacer()
+            Text("Do you have a picture or image about it?")
+                .font(.headline)
+                .fontWeight(.medium)
                 .frame(maxWidth: .infinity, alignment: .leading)
             preview
             VStack(spacing: 10) {
@@ -277,6 +247,7 @@ struct AddObservationView: View {
                     .frame(maxWidth: 200)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(AppColors.midnightNavy)
                 
                 PhotosPicker(
                     selection: $selectedPhoto,
@@ -290,21 +261,79 @@ struct AddObservationView: View {
                     .frame(maxWidth: 200)
                 }
                .buttonStyle(.bordered)
+               .tint(AppColors.oceanBlue)
             }
             .padding(10)
+            Spacer()
         }
+    }
+    private var isAnIncidentSection: some View {
+        VStack {
+            Text("Was this an incident?")
+                .font(.headline)
+                .fontWeight(.medium)
+            Button {
+                isAnIncident.toggle()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName:
+                        isAnIncident
+                        ? "checkmark.circle.fill"
+                        : "circle"
+                    )
+                    .font(.title3)
+
+                    Text("This was an incident")
+
+                    Spacer()
+                }
+                .foregroundStyle(isAnIncident ? AppColors.vermilion : AppColors.secondaryText)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(isAnIncident ? AppColors.vermilion.opacity(0.12) : AppColors.canvas)
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(isAnIncident ? AppColors.vermilion.opacity(0.5) : AppColors.divider, lineWidth: 1)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+    }
+    var reviewSection: some View {
+        VStack(spacing: 17) {
+            Text("Got it, is this correct?")
+                .font(.headline)
+                .fontWeight(.medium)
+            preview
+            Divider()
+            Text(note)
+                .font(.body)
+            Divider()
+            Text(emotion)
+                .font(.body)
+            if isAnIncident {
+                Divider()
+                incidentLabel
+            }
+            actions
+        }
+        .foregroundStyle(AppColors.midnightNavy)
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 20,
+                                     style: .continuous).fill(AppColors.surface))
     }
     private var actions: some View {
         Button(action: {
             dismiss()
         }, label: {
-            Image(systemName: "clear")
-                .font(.system(size: 15))
-            Text("Cancel")
+            Label("Cancel", systemImage: "xmark")
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 3)
         })
-        .padding(.vertical, 5)
-        .frame(maxWidth: .infinity)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 25))
+        .buttonStyle(.bordered)
+        .tint(AppColors.secondaryText)
     }
     private var preview: some View {
         ZStack {
@@ -313,9 +342,6 @@ struct AddObservationView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: 250)
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .symbolEffect(.pulse)
             }
         }
         .id("id\(self.imagePath ?? "")")
@@ -333,7 +359,6 @@ struct AddObservationView: View {
         onDismiss(newObservation)
         dismiss()
     }
-    //🥺
 }
 extension AddObservationView {
     
@@ -351,8 +376,10 @@ extension AddObservationView {
                         Text("Back")
                     }
                 })
-                .padding()
-                .glassEffect()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 11)
+                .foregroundStyle(AppColors.midnightNavy)
+                .background(AppColors.mistBlue.opacity(0.55), in: Capsule())
             }
             Spacer()
             Button(action: {
@@ -364,10 +391,11 @@ extension AddObservationView {
                         .font(Font.body)
                 }
             })
-            .padding()
-            .glassEffect()
+            .padding(.horizontal, 18)
+            .padding(.vertical, 11)
+            .foregroundStyle(AppColors.surface)
+            .background(AppColors.midnightNavy, in: Capsule())
         }
-        .tint(.green)
         .padding()
         .font(.body)
     }
@@ -424,13 +452,12 @@ struct ObservationFlow {
     ]
 }
 #Preview {
-    
     AddObservationView(activity: .init(name: "Gym",
                                        unitType: .count,
-                                       goalValue: 2), cameraManager: .init(), onDismiss: { new in
+                                       goalValue: 2),
+                       cameraManager: .init(),
+                       onDismiss: { new in
         print("dismissed")
         print("\(new?.note ?? "no note")")
-    }
-    )
+    })
 }
-//🤖🤖

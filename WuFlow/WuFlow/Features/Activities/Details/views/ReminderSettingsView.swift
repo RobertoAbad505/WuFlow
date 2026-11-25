@@ -15,6 +15,14 @@ struct ReminderSettingsView: View {
     @State var selectedPreset: ReminderPreset = .morning
     @State var selectedTime: Date
     
+    private var backgroundStyle: BackgroundStyle {
+        switch activity.type {
+        case .increase: return .growth
+        case .maintain: return .flow
+        case .decrease: return .reduce
+        }
+    }
+    
     init(activity: Activity) {
         
         self.activity = activity
@@ -30,39 +38,29 @@ struct ReminderSettingsView: View {
     
     var body: some View {
         ZStack {
-            AnimatedBackgroundView(style: .energy)
+            AnimatedBackgroundView(style: backgroundStyle)
             content
         }
     }
     
     var content: some View {
-        VStack(alignment: .center, spacing: 20) {
-            HStack(alignment: .center) {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Spacer()
                 Image(systemName: "bell.fill")
                     .font(Font.title2.monospacedDigit())
                     .symbolEffect(.wiggle.byLayer)
                 Text("Gentle Support")
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(.title3)
+                    .fontWeight(.medium)
+                Spacer()
             }
-            VStack {
+            VStack(alignment: .leading, spacing: 20) {
                 Text("Reminders can help your activity become part of your natural flow.")
-                    .font(Font.body.monospacedDigit())
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 30)
-                    .frame(maxWidth: .infinity)
-                    
-                
+                    .font(Font.body)
                 Text("When would support feel most helpful?")
-                    .font(Font.body.monospacedDigit())
+                    .font(Font.body)
             }
-            .padding()
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
-            .overlay {
-                RoundedRectangle(cornerRadius: 30)
-                    .stroke(.white, lineWidth: 3)
-            }
-            
             HStack {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 100)), count: 2)) {
                     ForEach(ReminderPreset.allCases, id: \.self) { reminderPreset in
@@ -70,7 +68,7 @@ struct ReminderSettingsView: View {
                             Text(reminderPreset.rawValue)
                                 .font(Font.body.monospacedDigit())
                         }
-                        .padding(30)
+                        .padding(25)
                         .background(.green.opacity(selectedPreset == reminderPreset ? 0.1 : 0))
                         .clipShape(RoundedRectangle(cornerRadius: 20))
                         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20))
@@ -109,10 +107,11 @@ struct ReminderSettingsView: View {
                     Image(systemName: "arrow.up.circle.badge.clock")
                     Text("Get support!")
                 }
+                .padding(.vertical, 5)
+                .frame(maxWidth: .infinity)
             })
-            .frame(maxWidth: .infinity)
-            .padding(10)
-            .glassEffect()
+            .buttonStyle(.borderedProminent)
+            .tint(AppColors.midnightNavy)
             Button(action: {
                 withAnimation {
                     dismiss()
@@ -122,12 +121,14 @@ struct ReminderSettingsView: View {
                     Image(systemName: "chevron.backward")
                     Text("Cancel")
                 }
+                .padding(.vertical, 5)
+                .frame(maxWidth: .infinity)
             })
-            .frame(maxWidth: .infinity)
-            .padding(10)
-            .glassEffect()
+            .buttonStyle(.bordered)
+            .tint(AppColors.secondaryText)
         }
         .padding()
+        .padding(.horizontal)
     }
     func save() {
 

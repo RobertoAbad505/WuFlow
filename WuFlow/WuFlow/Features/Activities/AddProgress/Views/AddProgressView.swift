@@ -93,7 +93,15 @@ struct AddActivityProgressView: View {
                     inputView
                 }
             }
-            .padding()
+            .padding(20)
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
+            .background(AppColors.surface.opacity(0.94), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(AppColors.divider.opacity(0.85), lineWidth: 1)
+            }
+            .padding(16)
             .animation(.easeInOut, value: step)
         }
     }
@@ -113,8 +121,8 @@ struct AddActivityProgressView: View {
             icon: selectedActivity?.iconName
         )
         .scaledToFill()
-        .frame(maxWidth: .infinity, maxHeight: 250)
-        .clipShape(RoundedRectangle(cornerRadius: 50))
+        .frame(maxWidth: .infinity, maxHeight: 230)
+        .clipShape(RoundedRectangle(cornerRadius: 28))
     }
     private var activityHeader: some View {
         Text(selectedActivity?.name ?? "")
@@ -124,6 +132,7 @@ struct AddActivityProgressView: View {
         VStack(spacing: 12) {
             if let activity = selectedActivity, let progress = progress {
                 ProgressView(value: progress.ratio)
+                    .tint(AppColors.oceanBlue)
                 Text(progress.description(activity.measurement))
                     .font(.headline)
 
@@ -136,7 +145,7 @@ struct AddActivityProgressView: View {
     private var inputSection: some View {
         VStack(spacing: 12) {
             Text(inputTitle)
-                .font(.headline)
+                .font(.system(.headline, design: .default, weight: .medium))
             TextField(
                 "0",
                 value: $value,
@@ -144,9 +153,13 @@ struct AddActivityProgressView: View {
             )
             .keyboardType(.decimalPad)
             .multilineTextAlignment(.center)
-            .font(.system(size: 30, weight: .bold))
-            .padding()
-            .glassEffect()
+            .font(.system(size: 25, weight: .bold))
+            .padding(10)
+            .background(AppColors.canvas, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(AppColors.divider, lineWidth: 1)
+            }
         }
     }
     private var inputTitle: String {
@@ -169,7 +182,6 @@ struct AddActivityProgressView: View {
         }
     }
     private var quickActions: some View {
-
         HStack(spacing: 12) {
             if let unit = selectedActivity?.unitType {
                 ForEach(
@@ -182,10 +194,11 @@ struct AddActivityProgressView: View {
                     } label: {
                         Text("+\(Int(amount))")
                             .font(.headline)
-                            .padding(.horizontal, 18)
+                            .padding(.horizontal, 14)
                             .padding(.vertical, 10)
                     }
-                    .glassEffect(.clear,in: Capsule())
+                    .foregroundStyle(AppColors.midnightNavy)
+                    .background(AppColors.mistBlue.opacity(0.55), in: Capsule())
                 }
             }
         }
@@ -203,11 +216,13 @@ struct AddActivityProgressView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .tint(AppColors.midnightNavy)
 
             if !entryFromSelectedActivity {
-                Button("Choose Another Activity") {
+                Button("Choose another activity") {
                     step = .selectActivity
                 }
+                .foregroundStyle(AppColors.oceanBlue)
             } else {
                 //Cancel add progress
                 Button {
@@ -220,8 +235,9 @@ struct AddActivityProgressView: View {
                     })
                     .frame(maxWidth: .infinity)
                 }
-                .tint(.secondary)
-                .buttonStyle(.borderedProminent)
+                .foregroundStyle(AppColors.midnightNavy)
+                .buttonStyle(.bordered)
+                .tint(AppColors.secondaryText)
             }
         }
     }

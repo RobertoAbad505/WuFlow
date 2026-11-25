@@ -355,9 +355,9 @@ struct ActivityDetailView: View {
             Button {
                 enableNotifications()
             } label: {
-                Image(systemName: "bell")
+                Image(systemName: activity.remindersEnabled ? "bell.fill":"bell")
                     .font(.system(size: 20))
-                    .tint(activity.remindersEnabled ? .green : .gray)
+//                    .tint( .green : .gray)
             }
             .buttonStyle(.glass)
         }
@@ -593,11 +593,10 @@ extension ActivityDetailView {
     }
     private var observationActionButton: some View {
         Button(action: {
-            print("\(activity.type == .decrease ? "Record observation" : "Add note")  clic")
             self.activeSheet = .createObservation
         }, label: {
             Label(
-                activity.type == .decrease ? "Record observation" : "Add note",
+                "Add observation",
                 systemImage: "plus.circle"
             )
             .font(.subheadline.weight(.medium))

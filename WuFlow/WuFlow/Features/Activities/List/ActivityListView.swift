@@ -141,6 +141,9 @@ struct ActivityListView: View {
         } message: {
             Text("This action cannot be undone.")
         }
+        .onAppear(perform: {
+            NotificationManager.shared.syncReminders(for: self.activities)
+        })
     }
 
     private var header: some View {
