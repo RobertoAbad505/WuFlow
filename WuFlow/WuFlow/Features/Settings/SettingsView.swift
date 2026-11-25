@@ -33,6 +33,9 @@ struct SettingsView: View {
                 NavigationLink(value: SettingsRoute.locations) {
                     Label("Location Settings", systemImage: "location")
                 }
+                NavigationLink(value: SettingsRoute.about) {
+                    Label("About WuFlow", systemImage: "info.circle")
+                }
             }
             
         }

@@ -60,6 +60,8 @@ final class Router: ObservableObject {
             settingsPath.append(route)
         case .locations:
             settingsPath.append(route)
+        case .about:
+            settingsPath.append(route)
         }
     }
     

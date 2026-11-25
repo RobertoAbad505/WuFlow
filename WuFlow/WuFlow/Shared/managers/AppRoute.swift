@@ -26,4 +26,5 @@ enum SettingsRoute: Hashable {
     case appearance
     case locations
     case healtKitSettings
+    case about
 }

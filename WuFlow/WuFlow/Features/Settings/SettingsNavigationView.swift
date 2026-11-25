@@ -26,6 +26,8 @@ struct SettingsNavigationView: View {
                         HealtKitSettingsView()
                     case .locations:
                         LocationSettings()
+                    case .about:
+                        AboutAppView()
                     }
                 }
         }
