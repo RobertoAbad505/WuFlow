@@ -7,7 +7,7 @@ import SwiftUI
 import SwiftData
 import UIKit
 
-private enum ActivityListFilter: String, CaseIterable, Identifiable {
+enum ActivityListFilter: String, CaseIterable, Identifiable {
     case all = "All"
     case inProgress = "In progress"
     case aboveGoal = "Above goal"
